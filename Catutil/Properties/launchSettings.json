@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Catutil": {
+      "commandName": "Project",
+      "commandLineArgs": "dump-text c:\\users\\dfusi\\desktop\\cat\\ *.xls"
+    }
+  }
+}

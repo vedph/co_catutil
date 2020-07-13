@@ -1,0 +1,20 @@
+﻿{
+  "EntryReader": {
+    "Id": "entry-reader.co-sql"
+  },
+  "EntryFilters": [
+    {
+      "Id": "entry-filter.escape",
+      "Options": {
+        "EscapeDecoders": [
+          {
+            "Id": "escape-decoder.entry-id"
+          }
+        ]
+      }
+    }
+  ],
+  "EntryRegionDetectors": [],
+  "EntryRegionFilters": [],
+  "EntryRegionParsers": []
+}

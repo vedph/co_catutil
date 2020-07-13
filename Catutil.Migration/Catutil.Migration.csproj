@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Daniele Fusi</Authors>
+    <Company>Fusi</Company>
+    <Product>Catutil</Product>
+    <Description>Catullus online data drop tool migration component.</Description>
+    <Copyright>By Daniele Fusi</Copyright>
+    <NeutralLanguage>en-US</NeutralLanguage>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\Schema.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\Schema.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fusi.Tools" Version="1.1.14" />
+    <PackageReference Include="Fusi.Tools.Config" Version="1.0.14" />
+    <PackageReference Include="MySql.Data" Version="8.0.21" />
+    <PackageReference Include="NPOI" Version="2.5.1" />
+    <PackageReference Include="Proteus.Core" Version="1.1.12" />
+    <PackageReference Include="Proteus.Entries" Version="1.1.25" />
+  </ItemGroup>
+
+</Project>

@@ -18,6 +18,7 @@ namespace Catutil.Commands
             // configure all the app commands here
             app.Command("dump-text", c => DumpTextCommand.Configure(c, options));
             app.Command("import-text", c => ImportTextCommand.Configure(c, options));
+            app.Command("parse-text", c => ParseTextCommand.Configure(c, options));
 
             app.OnExecute(() =>
             {

@@ -166,8 +166,9 @@ namespace Catutil.Migration.Entries
         /// <typeparam name="T">The type of the target object.</typeparam>
         /// <param name="set">The entries set.</param>
         /// <param name="target">The target object or null.</param>
+        /// <returns>The entry region set built.</returns>
         /// <exception cref="ArgumentNullException">set</exception>
-        public void Execute<T>(EntrySet set, T target) where T : class
+        public EntryRegionSet Execute<T>(EntrySet set, T target) where T : class
         {
             if (set is null) throw new ArgumentNullException(nameof(set));
 
@@ -188,6 +189,8 @@ namespace Catutil.Migration.Entries
                     _logger?.LogWarning($"Unhandled region at {i}: {regionSet.Regions[i]}");
                 }
             }
+
+            return regionSet;
         }
     }
 }

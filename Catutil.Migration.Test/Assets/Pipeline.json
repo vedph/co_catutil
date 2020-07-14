@@ -8,13 +8,20 @@
       "Options": {
         "EscapeDecoders": [
           {
-            "Id": "escape-decoder.entry-id"
+            "Id": "escape-decoder.co-entry-id"
+          },
+          {
+            "Id": "escape-decoder.co-italic"
           }
         ]
       }
     }
   ],
   "EntryRegionDetectors": [],
-  "EntryRegionFilters": [],
+  "EntryRegionFilters": [
+    {
+      "Id": "region-filter.unmapped"
+    }
+  ],
   "EntryRegionParsers": []
 }

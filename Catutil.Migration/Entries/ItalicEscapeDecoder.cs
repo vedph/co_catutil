@@ -3,22 +3,18 @@ using Microsoft.Extensions.Logging;
 using Proteus.Core.Entries;
 using Proteus.Core.Escapes;
 using System;
-using System.Text.RegularExpressions;
 
 namespace Catutil.Migration.Entries
 {
     /// <summary>
-    /// Entry ID escape decoder. This decoder the escape inserted by
-    /// <see cref="SqlEntryReader"/> when reading rows from the CO database.
-    /// This escape resolves into a <c>set-ids</c> command having 2 arguments,
-    /// <c>f</c>=fragment ID and <c>e</c>=entry ID.
-    /// <para>Tag: <c>escape-decoder.co-entry-id</c>.</para>
+    /// Italic escape decoder for CO apparatus text. The italic escape is just
+    /// an underscore, which toggles italic.
     /// </summary>
-    /// <seealso cref="Proteus.Core.Escapes.IEscapeDecoder" />
-    [Tag("escape-decoder.co-entry-id")]
-    public sealed class EntryIdEscapeDecoder : IEscapeDecoder
+    /// <seealso cref="IEscapeDecoder" />
+    [Tag("escape-decoder.co-italic")]
+    public sealed class ItalicEscapeDecoder : IEscapeDecoder
     {
-        private readonly Regex _idRegex;
+        private bool _italic;
 
         /// <summary>
         /// Gets or sets the logger.
@@ -26,19 +22,12 @@ namespace Catutil.Migration.Entries
         public ILogger Logger { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntryIdEscapeDecoder"/>
-        /// class.
-        /// </summary>
-        public EntryIdEscapeDecoder()
-        {
-            _idRegex = new Regex(@"^(\d+)\.(\d+)");
-        }
-
-        /// <summary>
-        /// Resets the internal state of this decoder, if any. This does nothing.
+        /// Resets the internal state of this decoder, if any. This should
+        /// be called before starting a new conversion.
         /// </summary>
         public void Reset()
         {
+            _italic = false;
         }
 
         /// <summary>
@@ -60,20 +49,15 @@ namespace Catutil.Migration.Entries
         {
             if (text is null) throw new ArgumentNullException(nameof(text));
 
-            if (text[index] == '«')
+            if (text[index] == '_')
             {
-                int end = text.IndexOf('»', index + 1);
-                if (end == -1) return null;
-
-                Match m = _idRegex.Match(text, index + 1, end - 1);
-                if (!m.Success) return null;
-
-                int len = end + 1 - index;
-                return Tuple.Create(new DecodedEntry[]
+                _italic = !_italic;
+                return Tuple.Create(
+                    new DecodedEntry[]
                     {
-                        new DecodedCommandEntry(index, len, "set-ids",
-                            "f", m.Groups[1].Value, "e", m.Groups[2].Value)
-                    }, len);
+                        new DecodedPropertyEntry(index, 1, CommonProps.ITALIC,
+                            _italic ? "1" : "0")
+                    }, index + 1);
             }
             return null;
         }

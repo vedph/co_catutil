@@ -120,8 +120,9 @@ namespace Catutil.Migration.Entries
             // dump
             int start = regions[regionIndex].Range.Start.Entry;
             int end = regions[regionIndex].Range.End.Entry;
+
             _dumper.DumpEntries(set.Context.Number, set.Entries, regions,
-                start, end + 1 - start);
+                start, end + 1 - start, regionIndex == 0);
             _entryCount += set.Entries.Count;
 
             return regionIndex + 1;

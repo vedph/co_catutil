@@ -20,7 +20,10 @@
   "EntryRegionDetectors": [],
   "EntryRegionFilters": [
     {
-      "Id": "region-filter.unmapped"
+      "Id": "region-filter.unmapped",
+      "Options": {
+        "UnmappedRegionTag": "x"
+      }
     }
   ],
   "EntryRegionParsers": [

@@ -31,7 +31,7 @@ namespace Catutil.Migration.Entries
         /// </summary>
         public EntryIdEscapeDecoder()
         {
-            _idRegex = new Regex(@"^(\d+)\.(\d+)");
+            _idRegex = new Regex(@"(\d+)\.(\d+)");
         }
 
         /// <summary>

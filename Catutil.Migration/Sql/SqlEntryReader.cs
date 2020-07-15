@@ -74,7 +74,7 @@ namespace Catutil.Migration.Sql
 
             return new DecodedTextEntry
             {
-                SourceIndex = id,
+                SourceIndex = 0,
                 SourceLength = value.Length,
                 Value = value
             };

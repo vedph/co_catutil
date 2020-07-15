@@ -50,14 +50,11 @@ namespace Catutil.Commands
             CommandArgument dbNameArgument = command.Argument("[db-name]",
                 "The target database name");
 
-            CommandOption sepOption = command.Option("-s|--separator",
-                "Separator string", CommandOptionType.MultipleValue);
             CommandOption dryOption = command.Option("-d|--dry",
                 "Dry run", CommandOptionType.NoValue);
 
             command.OnExecute(() =>
             {
-                // TODO: sepOption
                 options.Command = new ImportTextCommand(
                     options,
                     inputDirArgument.Value,
@@ -70,7 +67,7 @@ namespace Catutil.Commands
 
         public Task Run()
         {
-            Console.ForegroundColor = ConsoleColor.Red;
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("IMPORT TEXT\n");
             Console.ResetColor();
             Console.WriteLine(

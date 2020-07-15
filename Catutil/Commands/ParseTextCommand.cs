@@ -1,7 +1,6 @@
 ﻿using Catutil.Migration.Entries;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
-using NPOI.POIFS.FileSystem;
 using Proteus.Core.Entries;
 using Proteus.Core.Regions;
 using Proteus.Entries;
@@ -93,8 +92,7 @@ namespace Catutil.Commands
                 entries.Clear();
                 entries.Add(entry);
                 EntrySet set = new EntrySet(entries, context);
-                EntryRegionSet regionSet = pipeline.Execute<object>(set, null);
-                // TODO
+                pipeline.Execute<object>(set, null);
             }
             return Task.CompletedTask;
         }

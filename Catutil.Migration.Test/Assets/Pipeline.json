@@ -23,5 +23,13 @@
       "Id": "region-filter.unmapped"
     }
   ],
-  "EntryRegionParsers": []
+  "EntryRegionParsers": [
+    {
+      "Id": "entry-region-parser.excel-dump",
+      "Options": {
+        "MaxEntriesPerDumpFile": 10000,
+        "OutputDirectory": "c:\\users\\dfusi\\desktop\\codump\\"
+      }
+    }
+  ]
 }

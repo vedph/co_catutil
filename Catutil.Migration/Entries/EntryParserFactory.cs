@@ -1,4 +1,5 @@
-﻿using Fusi.Text.Unicode;
+﻿using Catutil.Migration.Sql;
+using Fusi.Text.Unicode;
 using Fusi.Tools.Config;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -128,7 +129,9 @@ namespace Catutil.Migration.Entries
             Assembly[] assemblies = new[]
             {
                 // Proteus.Entries
-                typeof(ExplicitRegionDetector).Assembly
+                typeof(ExplicitRegionDetector).Assembly,
+                // Catutil.Migration
+                typeof(SqlEntryReader).Assembly
             };
             if (additionalAssemblies?.Length > 0)
                 assemblies = assemblies.Concat(additionalAssemblies).ToArray();
@@ -136,6 +139,7 @@ namespace Catutil.Migration.Entries
             container.Collection.Register<IEntryReader>(assemblies);
 
             container.Collection.Register<IEntryFilter>(assemblies);
+            container.Collection.Register<IEscapeDecoder>(assemblies);
             container.Collection.Register<IEntryRegionDetector>(assemblies);
             container.Collection.Register<IEntryRegionFilter>(assemblies);
             container.Collection.Register<IEntryRegionParser>(assemblies);
@@ -170,28 +174,25 @@ namespace Catutil.Migration.Entries
                 ComponentFactoryConfigEntry.ReadComponentEntries(
                     Configuration, "EntryFilters");
 
-            // get the standard filters, having a null inserted at the
-            // index of each special filter
+            // get the standard filters
             IList<IEntryFilter> components = GetComponents<IEntryFilter>(entries,
                 true, true);
 
             // create the special filters
             for (int i = 0; i < components.Count; i++)
             {
-                if (components[i] != null) continue;
+                if (components[i] is EscapeEntryFilter filter)
+                {
+                    // add all the escape decoders
+                    string decodersKey =
+                        $"EntryFilters:{i}:Options:EscapeDecoders";
+                    var decoderEntries = ComponentFactoryConfigEntry.ReadComponentEntries(
+                        Configuration, decodersKey);
+                    var decoders = GetComponents<IEscapeDecoder>(decoderEntries,
+                        false, true);
 
-                // add all the escape decoders
-                string decodersKey =
-                    $"EntryFilters:{i}:Options:EscapeDecoders";
-                var decoderEntries = ComponentFactoryConfigEntry.ReadComponentEntries(
-                    Configuration, decodersKey);
-                var decoders = GetComponents<IEscapeDecoder>(decoderEntries,
-                    false, true);
-
-                // create the filter at its index
-                var escEntryFilter = new EscapeEntryFilter();
-                escEntryFilter.Initialize(decoders);
-                components[i] = escEntryFilter;
+                    filter.Initialize(decoders);
+                }
             }
 
             // assign logger if any

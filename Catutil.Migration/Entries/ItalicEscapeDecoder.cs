@@ -57,7 +57,7 @@ namespace Catutil.Migration.Entries
                     {
                         new DecodedPropertyEntry(index, 1, CommonProps.ITALIC,
                             _italic ? "1" : "0")
-                    }, index + 1);
+                    }, 1);
             }
             return null;
         }

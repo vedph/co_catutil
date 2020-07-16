@@ -41,7 +41,20 @@ where the content of `Dump.json` is:
       }
     }
   ],
-  "EntryRegionDetectors": [],
+  "EntryRegionDetectors": [
+    {
+       "Id": "region-detector.pattern",
+       "Options": {
+          "Tag": "wit",
+          "IsWholeRegionInA": true,
+          "PatternEntriesA": [
+            "prp italic=1",
+            "txt$^[OGR]+$",
+            "prp italic=0"
+		  ]
+	   }
+	}
+  ],
   "EntryRegionFilters": [
     {
       "Id": "region-filter.unmapped",

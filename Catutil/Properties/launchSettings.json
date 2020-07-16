@@ -2,7 +2,7 @@
   "profiles": {
     "Catutil": {
       "commandName": "Project",
-      "commandLineArgs": "parse-text catullus C:\\Users\\dfusi\\Desktop\\cat\\Pipeline.json"
+      "commandLineArgs": "parse-text catullus c:\\users\\dfusi\\desktop\\co\\Dump.json"
     }
   }
 }

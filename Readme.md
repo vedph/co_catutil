@@ -2,90 +2,58 @@
 
 Tools for Catullus data drop pattern analysis and migration.
 
-## Quick Start
+## Concept
 
-1. have the XLS files with text and apparatus.
-2. ensure your MySql server is available.
-3. import the XLS files into MySql, e.g. (the first pass with `-d` is just a dry run for test):
+The legacy CO (Catullus Online) edition by Daniel Kiss is based on a RDBMS database which in turn gets populated from a set of flat Excel files (legacy XLS format).
 
-```ps1
-.\Catutil.exe import-text c:\users\dfusi\desktop\co\ *.xls catullus -d
-.\Catutil.exe import-text c:\users\dfusi\desktop\co\ *.xls catullus
-```
+These files essentially have a very simple structure, where the atomic unit is the single line. Each line usually corresponds to a row in the spreadsheet document; this row has just 3 columns, including:
 
-4. dump the imported database into Proteus entries:
+- poem and line number;
+- line's text;
+- apparatus' text. This is the full text for all the apparatus entries referred to that line. This apparatus also includes italic and non italic text regions.
 
-```ps1
-.\Catutil.exe parse-text catullus c:\users\dfusi\desktop\co\Dump.json
-```
+Starting from this core resource (and other easy-to-port data like bibliography), we want to:
 
-where the content of `Dump.json` is:
+- **transform** the apparatus text into structured data, using a more abstract and granular model.
+- **edit** in a web-based, multiple-user context the resulting database, by adding new data and new data types, and fixing issues.
+- **generate** at least these outputs:
+  - a TEI-based, MQDQ-compliant output to insert the new edition of Catullus into MQDQ.
+  - legacy XLS files to feed the legacy CO software.
 
-```json
-{
-  "EntryReader": {
-    "Id": "entry-reader.co-sql"
-  },
-  "EntryFilters": [
-    {
-      "Id": "entry-filter.escape",
-      "Options": {
-        "EscapeDecoders": [
-          {
-            "Id": "escape-decoder.co-entry-id"
-          },
-          {
-            "Id": "escape-decoder.co-italic"
-          }
-        ]
-      }
-    }
-  ],
-  "EntryRegionDetectors": [
-    {
-       "Id": "region-detector.pattern",
-       "Options": {
-          "Tag": "wit",
-          "IsWholeRegionInA": true,
-          "PatternEntriesA": [
-            "prp italic=1",
-            "txt$^[OGR]+$",
-            "prp italic=0"
-		  ]
-	   }
-	}
-  ],
-  "EntryRegionFilters": [
-    {
-      "Id": "region-filter.unmapped",
-      "Options": {
-        "UnmappedRegionTag": "x"
-      }
-    }
-  ],
-  "EntryRegionParsers": [
-    {
-      "Id": "entry-region-parser.excel-dump",
-      "Options": {
-        "MaxEntriesPerDumpFile": 10000,
-        "OutputDirectory": "c:\\users\\dfusi\\desktop\\co\\dump\\"
-      }
-    }
-  ]
-}
-```
+To this end, the general plan is:
 
-## Excel Source Files Documentation
+- **refactor** the text from XLS files into a full-fledged, highly structured Cadmus database, ready for editing.
+- **edit** the database in Cadmus.
+- **export** data from the database into MQDQ TEI files (text and standoff apparatus).
+- **export** data from the database into CO XLS files, to feed the legacy software with up-to-date data.
 
-Text and apparatus are originated in a number of Excel files (XLS format).
+MQDQ is already following a similar flow: it imports TEI documents (text and standoff apparatus), and remodels data into a higher abstraction level structure; data is edited in Cadmus; finally, data is exported back into TEI. So, we are essentially going to use the same modeling for both MQDQ and CO.
 
-Each of these files has a single sheet each, including 3 columns for each line's ID, text, and apparatus text. Usually each row corresponds to a single line; but sometimes a line row is followed by other rows lacking the line's ID and text, and representing the continuation of the apparatus text. 
+The main issue here is posed by the low structuring level of the original (XLS-based) CO apparatus, which is just a typographically formatted text, and should rather be semantically remodeled, with higher granularity. We thus have to focus on importing CO data into a Cadmus-based database.
+
+### Importing CO Data
+
+As for text and apparatus, importing CO data happens in two main steps:
+
+1. read the original XLS files and remodel them into a simple RDBMS database (here **MySql**). This allows analyzing and searching data with ease, thus providing a tool for detecting patterns. This first step splits the apparatus into groups of entries (corresponding to Cadmus layer part fragments) and single entries (each corresponding to a fragment's entry). This can be done easily, as the apparatus follows some conventions (pipes and colons) for signaling text divisions. Also, the typographic formatting (italic vs non-italic) is read and rewritten into Markdown conventions (underscores wrapping italic text).
+
+2. read each apparatus entry, as split and rewritten by the previous step, and incrementally apply **parsing**, so that semantic roles can be inferred from a combination of typographic formatting, text content, and context.
+
+The parsing process is based on a bigger infrastructure (codenamed _Proteus_) I created for other projects, requiring to remodel heavily typographically marked texts into semantic structures. Proteus has been applied to real-world projects related to big bilingual or monolingual dictionaries, documental archives, and paper-based critical editions (see Fusi, TODO:). Its main purpose is providing a framework to compose an incrementally built parsing pipeline, especially fit to complex texts where scarce or no documentation is available. In these cases, one usually starts with a few hypotheses about the most evident semantic roles inside the original text, and then goes on by progressively refining and adding new detection rules. This allows to heuristically define a full parsing process, when you can examine the results at each single repetition pass, from the very beginning up to the end.
+
+The Proteus-based parsing pipeline includes any number of different types of modular software components; it is fully defined in a JSON file, where types, order and parameters of each component are specified.
+
+## XLS Source Files
+
+To start with, text and apparatus are originated in a number of Excel files (XLS format).
+
+Each of these files has a single sheet each, including 3 columns for each line's ID, text, and apparatus text. Usually each row corresponds to a single line; but sometimes a line row is followed by other rows lacking the line's ID and text, and representing the continuation of the apparatus text.
 
 As for the text patterns, these indications (slightly reworked for practical purposes) are from Daniel Kiss:
 
 - conjectures and manuscript readings are in plain type, while manuscript sigla, bibliographical references and editorial explanations and comments are in italics. One should note the use of inverse italics (i.e. plain type) for the titles of works quoted within an editorial note. Thus (in these samples I represent italic between underscores) 1.1 `Cui _OGR_` (i.e. this is the reading of manuscripts OGR); 6.13 `nec tu _damn. A. Guarinus 1521 (quod fort. ipse coniecerat_)`, with editorial comment in cursive; also 1.4 `nostras _male Plinio_ (N.H. _praef. 1_) _attribuit Marcilius 1604 5 et Vossius 1684_`, with the title `N.H.` in inverse italics (i.e. plain type).
-- different variant readings for the same passage are separated by ` : ` (see the 1.4 sample quoted above). Thus 1.4 `meas _OGR_ : nostras _male Plinio_ (N.H. _praef. 1_) _attribuit Marcilius 1604 5 et Vossius 1684_`.
-- variant readings on different passages are separated by ` | ` (two spaces on each side of the pipe in the Excel tables, which have become a single space on either side in Catullus Online). Thus 1.3 `Corneli? tibi codd. plerique teste Ellis 1867 | uolebas Pleitner 1876 100`.
+- different variant readings for the same passage are separated by `:` (see the 1.4 sample quoted above). Thus 1.4 `meas _OGR_ : nostras _male Plinio_ (N.H. _praef. 1_) _attribuit Marcilius 1604 5 et Vossius 1684_`.
+- variant readings on different passages are separated by `|` (two spaces on each side of the pipe in the Excel tables, which have become a single space on either side in Catullus Online). Thus 1.3 `Corneli? tibi codd. plerique teste Ellis 1867 | uolebas Pleitner 1876 100`.
 - variants that offer a minor modification to another variant are sometimes added within brackets. Thus 6.13 `non tam OGR (non? tam Spengel 1827 7)`.
 - each conjecture or variant is added, inevitably, besides one verse of Catullus. Those conjectures or variants that affect several verses are added at the start of the entry on the first of those verses, the longest passage coming first.
 
@@ -96,7 +64,110 @@ This configures a hierarchy which in terms of the Cadmus MQDQ apparatus model ca
 
 The `import-text` command can be used to create a MySql database filled with these entities.
 
-## Command import-text
+## Parsing Apparatus
+
+Parsing apparatus happens at the most atomic level we can attain from the input text, i.e. the single entry (in the meaning defined above) in an apparatus.
+
+A first pipeline is built to provide as its output a detailed dump of the text being analyzed, in the form of a number of Excel files (XLSX). The dump is split into several Excel files only to avoid making them too big; at about 10,000 lines a new file is created, yet taking care not to split the dump of a single entry.
+
+For more details I suggest to read my paper on Proteus cited above. In short, the text gets represented into a flat list of "entries", each representing either text, or formatting properties (e.g. italic), or some more complex metatextual data (in the form of commands with any number of arguments, e.g. the opening and closing of a coloured background section in a dictionary).
+
+Please notice that the term _entry_ here is used in two very different contexts: in the context of Cadmus layer models, an entry is the item of an array of models in a layer part's fragment; in turn, a fragment is a set of models referred to the same portion of the base text. In the context of Proteus transformations, an _entry_ is an atomic piece of data from a text, whether it's just a text, a formatting property, or a more complex command.
+
+Consider for instance this apparatus' entry:
+
+```txt
+Cui _OGR_, _Scholia Veronensia in Verg._ Ecl. _6.1_, _Caesius Bassus_ GL _6.261.21_, _Aphthonius_ GL _6.148.22, Terentianus Maurus_ De Metris _2562, Isid._ Orig. _6.12.3, Auson._ Ecl. _1.1_
+```
+
+This is the first entry of the group of entries in the apparatus text related to Catullus poem 1 line 1. Underscores here toggle italic, as per Markdown. This entry is the result of importing the XLS files into a RDBMS.
+
+The first Proteus entries got from the pipeline for the above sample text are like those:
+
+```txt
+cmd set-ids(f=1, e=1)
+txt Cui
+prp italic=1
+txt OGR
+prp italic=0
+txt ,
+prp italic=1
+txt Scholia Veronensia in Verg.
+prp italic=0
+...
+```
+
+Here we start with a command (`cmd`) which sets the IDs of this set (f=fragment ID, e=entry ID, both in the RDBMS). We then have an initial text (`Cui`) followed by the italic text `OGR` (wrapped in two properties -`prp`- entries, which set the italic property on and off); then a comma follows, and then another italic piece of text. As you can see, the input text is now represented by a list of Proteus entries (text, properties, and commands).
+
+In our workflow, a first, almost empty Proteus pipeline was set up to just spit out some Excel dumps, which list such entries. This pipeline contains these components (applied in this order):
+
+1. **entry reader**: a component which reads the imported RDBMS database entry by entry, and outputs a Proteus entry at a time. This is at the start of the pipeline, as each entry being output feeds the next modules in it.
+
+2. **entry filters**: a number of components used to filter the list of entries got from the entry reader (one at a time); in this case, we use a couple of escape filters to extract the database IDs (required to later provide the basis for a real data import) and convert Markdown underscores into property entries which toggle italic.
+
+3. **region detectors**: a number of components used to detect semantically marked regions inside the list of Proteus entries. For instance, to start with the easiest region, consider the text representing manuscript witnesses: it is italic, and it should contain only the letters of 1 or more manuscripts, which in our case are just `O`, `G`, and `R`. Thus, we can define this pattern for detecting it:
+
+- italic on;
+- text including only any letter from `OGR`;
+- italic off.
+
+This is right what is done by this fragment in the Proteus pipeline definition:
+
+```json
+  "EntryRegionDetectors": [
+    {
+       "Id": "region-detector.pattern",
+       "Options": {
+          "Tag": "wit",
+          "IsWholeRegionInA": true,
+          "PatternEntriesA": [
+            "prp italic=1",
+            "txt$^[OGR]+$",
+            "prp italic=0"
+          ]
+        }
+    }
+  ],
+```
+
+Here you can see that we are using a pattern-based region detector, which detects a region called "wit" (=witnesses) when the above pattern gets matched. The result is that any occurrence of these 3 Proteus entries get wrapped inside a `wit` region.
+
+The concept here is adding as many region detectors required to split the list of Proteus entries into semantically distinct subsets; later, a set of parser components will be able to parse each of these regions according to their nature and content, producing the data to be imported in Cadmus.
+
+4. **region filters**: a number of components used to refine the detected regions by filtering them. For instance, here we are filtering any subset of entries not wrapped into a region (in our sample, every entry except those under `wit`, which is the only region being detected) to wrap it into an "unknown" region named `x`. Here is the corresponding pipeline definition:
+
+```json
+  "EntryRegionFilters": [
+    {
+      "Id": "region-filter.unmapped",
+      "Options": {
+        "UnmappedRegionTag": "x"
+      }
+    }
+  ],
+```
+
+Thus, after this stage we expect that every Proteus entry either belongs to a `wit` or an `x` region.
+
+5. **region parsers**: a number of components used to parse each detected region, providing the adequate actions for extracting and remodeling data from it as required by the target format. In the sample pipeline, we are using a parser component which does not really do any parsing, and gets applied to any region. Its only purpose is dumping the entries into Excel files, so that users can look at them to empirically define patterns and check the outcome of the pipeline:
+
+```json
+  "EntryRegionParsers": [
+    {
+      "Id": "entry-region-parser.excel-dump",
+      "Options": {
+        "MaxEntriesPerDumpFile": 10000,
+        "OutputDirectory": "c:\\users\\dfusi\\desktop\\co\\dump\\"
+      }
+    }
+  ]
+```
+
+Thus, executing this Proteus pipeline produces a set of Excel dumps from a MySql database. These dumps are an extremely useful tool for defining patterns, and thus building a parser capable of deducing the semantic role of each portion of text, whatever its original form and content. Once the pipeline has been completed and tested, we can just replace the dump parser with the parsers required for our regions to effectively import structured apparatus data into a Cadmus database. This defines a way of transforming data which can easily be approached by non specialists, in a heuristic, progressively refined processing flow. Proteus provides a lot of prebuilt modules for the pipeline, but being a modular framework it allows you to add your own modules wherever required, thus covering any complex input text.
+
+## Tool Commands
+
+### Command import-text
 
 This command imports text and apparatus from the original Excel's (XLS) files into a MySql database, designed to just serve as a playground for pattern analysis targeted to automatic structuring in apparatus.
 
@@ -120,12 +191,14 @@ where:
 The target database has 3 tables:
 
 - `line`: each row is a line of text, with these properties:
+
   - `id`: the line ID.
   - `poem`: the poem number (alphanumeric, but 0-padded to 3 digits in its initial part), derived from the id.
   - `ordinal`: the line ordinal number in the poem. This is derived from the order of the rows in the Excel files.
   - `value`: the value of the text, here corresponding to a line.
 
 - `fragment`: each line is split into 1 or more fragments using the pipe separator. Each fragment has these properties:
+
   - `id`: an arbitrary numeric ID assigned by the database.
   - `lineId`: the ID of the line this fragment refers to.
   - `ordinal`: the ordinal number of the fragment in the line's apparatus.
@@ -223,7 +296,7 @@ Its corresponding apparatus fragments are 3 (I omit the `id` value as its meanin
 - `ordinal`: `3`
 - `value`: `meum _MS. 19 a. 1450 ca., MS 45 a. 1465 ca._`
 
-## Command parse-text
+### Command parse-text
 
 This command parses the text from each fragment entry in the Catullus database dump.
 
@@ -238,3 +311,72 @@ where:
 - `SourceDBName`: source MySql database name. This database is the one generated by importing XLS files using the `import-text` command.
 - `PipelineConfigPath`: the path to the parser pipeline configuration JSON file.
 - `OutputDir`: the output directory.
+
+## Procedure
+
+1. have the XLS files with text and apparatus.
+2. ensure your MySql server is available.
+3. import the XLS files into MySql, e.g. (the first pass with `-d` is just a dry run for test):
+
+```ps1
+.\Catutil.exe import-text c:\users\dfusi\desktop\co\ *.xls catullus -d
+.\Catutil.exe import-text c:\users\dfusi\desktop\co\ *.xls catullus
+```
+
+4. dump the imported database into Proteus entries:
+
+```ps1
+.\Catutil.exe parse-text catullus c:\users\dfusi\desktop\co\Dump.json
+```
+
+where the content of `Dump.json` is:
+
+```json
+{
+  "EntryReader": {
+    "Id": "entry-reader.co-sql"
+  },
+  "EntryFilters": [
+    {
+      "Id": "entry-filter.escape",
+      "Options": {
+        "EscapeDecoders": [
+          {
+            "Id": "escape-decoder.co-entry-id"
+          },
+          {
+            "Id": "escape-decoder.co-italic"
+          }
+        ]
+      }
+    }
+  ],
+  "EntryRegionDetectors": [
+    {
+      "Id": "region-detector.pattern",
+      "Options": {
+        "Tag": "wit",
+        "IsWholeRegionInA": true,
+        "PatternEntriesA": ["prp italic=1", "txt$^[OGR]+$", "prp italic=0"]
+      }
+    }
+  ],
+  "EntryRegionFilters": [
+    {
+      "Id": "region-filter.unmapped",
+      "Options": {
+        "UnmappedRegionTag": "x"
+      }
+    }
+  ],
+  "EntryRegionParsers": [
+    {
+      "Id": "entry-region-parser.excel-dump",
+      "Options": {
+        "MaxEntriesPerDumpFile": 10000,
+        "OutputDirectory": "c:\\users\\dfusi\\desktop\\co\\dump\\"
+      }
+    }
+  ]
+}
+```

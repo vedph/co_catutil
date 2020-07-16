@@ -31,7 +31,7 @@
       "Id": "entry-region-parser.excel-dump",
       "Options": {
         "MaxEntriesPerDumpFile": 10000,
-        "OutputDirectory": "c:\\users\\dfusi\\desktop\\codump\\"
+        "OutputDirectory": "c:\\users\\dfusi\\desktop\\co\\dump\\"
       }
     }
   ]

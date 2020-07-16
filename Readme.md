@@ -2,6 +2,66 @@
 
 Tools for Catullus data drop pattern analysis and migration.
 
+## Quick Start
+
+1. have the XLS files with text and apparatus.
+2. ensure your MySql server is available.
+3. import the XLS files into MySql, e.g. (the first pass with `-d` is just a dry run for test):
+
+```ps1
+.\Catutil.exe import-text c:\users\dfusi\desktop\co\ *.xls catullus -d
+.\Catutil.exe import-text c:\users\dfusi\desktop\co\ *.xls catullus
+```
+
+4. dump the imported database into Proteus entries:
+
+```ps1
+.\Catutil.exe parse-text catullus c:\users\dfusi\desktop\co\Dump.json
+```
+
+where the content of `Dump.json` is:
+
+```json
+{
+  "EntryReader": {
+    "Id": "entry-reader.co-sql"
+  },
+  "EntryFilters": [
+    {
+      "Id": "entry-filter.escape",
+      "Options": {
+        "EscapeDecoders": [
+          {
+            "Id": "escape-decoder.co-entry-id"
+          },
+          {
+            "Id": "escape-decoder.co-italic"
+          }
+        ]
+      }
+    }
+  ],
+  "EntryRegionDetectors": [],
+  "EntryRegionFilters": [
+    {
+      "Id": "region-filter.unmapped",
+      "Options": {
+        "UnmappedRegionTag": "x"
+      }
+    }
+  ],
+  "EntryRegionParsers": [
+    {
+      "Id": "entry-region-parser.excel-dump",
+      "Options": {
+        "MaxEntriesPerDumpFile": 10000,
+        "OutputDirectory": "c:\\users\\dfusi\\desktop\\co\\dump\\"
+      }
+    }
+  ]
+}
+```
+
 ## Excel Source Files Documentation
 
 Text and apparatus are originated in a number of Excel files (XLS format).

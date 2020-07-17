@@ -384,12 +384,30 @@ where the content of `Dump.json` is:
   ],
   "EntryRegionDetectors": [
     {
-      "Id": "region-detector.pattern",
-      "Options": {
-        "Tag": "wit",
-        "IsWholeRegionInA": true,
-        "PatternEntriesA": ["prp italic=1", "txt$^[OGR]+$", "prp italic=0"]
-      }
+       "Id": "region-detector.pattern",
+       "Options": {
+          "Tag": "wit",
+          "IsWholeRegionInA": true,
+          "PatternEntriesA": [
+            "prp italic=1",
+            "txt$^[OGR]+$",
+            "prp italic=0"
+          ]
+        }
+    },
+    {
+       "Id": "region-detector.pattern",
+       "Options": {
+          "Tag": "lem",
+          "IsAnchoredAtStart": true,
+          "IsWholeRegionInA": true,
+          "OffsetA": 1,
+          "PatternEntriesA": [
+            "cmd set-ids",
+            "?prp italic=0",
+            "txt$^[^0-9]+$"
+          ]
+        }
     }
   ],
   "EntryRegionFilters": [

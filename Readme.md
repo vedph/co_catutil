@@ -39,7 +39,7 @@ As for text and apparatus, importing CO data happens in two main steps:
 
 2. read each apparatus entry, as split and rewritten by the previous step, and incrementally apply **parsing**, so that semantic roles can be inferred from a combination of typographic formatting, text content, and context.
 
-The parsing process is based on a bigger infrastructure (codenamed _Proteus_) I created for other projects, requiring to remodel heavily typographically marked texts into semantic structures. Proteus has been applied to real-world projects related to big bilingual or monolingual dictionaries, documental archives, and paper-based critical editions (see Fusi, TODO:). Its main purpose is providing a framework to compose an incrementally built parsing pipeline, especially fit to complex texts where scarce or no documentation is available. In these cases, one usually starts with a few hypotheses about the most evident semantic roles inside the original text, and then goes on by progressively refining and adding new detection rules. This allows to heuristically define a full parsing process, when you can examine the results at each single repetition pass, from the very beginning up to the end.
+The parsing process is based on a bigger infrastructure (codenamed _Proteus_) I created for other projects, requiring to remodel heavily typographically marked texts into semantic structures. Proteus has been applied to real-world projects related to big bilingual or monolingual dictionaries, documental archives, and paper-based critical editions (see D. Fusi, *Recovering Legacy in the Digital World: Tales and Tools*, «Rationes Rerum» 12 (2018) 203-262). Its main purpose is providing a framework to compose an incrementally built parsing pipeline, especially fit to complex texts where scarce or no documentation is available. In these cases, one usually starts with a few hypotheses about the most evident semantic roles inside the original text, and then goes on by progressively refining and adding new detection rules, using a number of prebuilt or custom built modules which can chained at will. This allows to heuristically define a full parsing process, when you can examine the results at each single repetition pass, from the very beginning up to the end.
 
 The Proteus-based parsing pipeline includes any number of different types of modular software components; it is fully defined in a JSON file, where types, order and parameters of each component are specified.
 
@@ -132,7 +132,7 @@ This is right what is done by this fragment in the Proteus pipeline definition:
 
 Here you can see that we are using a pattern-based region detector, which detects a region called "wit" (=witnesses) when the above pattern gets matched. The result is that any occurrence of these 3 Proteus entries get wrapped inside a `wit` region.
 
-The concept here is adding as many region detectors required to split the list of Proteus entries into semantically distinct subsets; later, a set of parser components will be able to parse each of these regions according to their nature and content, producing the data to be imported in Cadmus.
+The concept here is adding as many region detectors required to split the list of Proteus entries into semantically distinct subsets; later, a set of parser components will be able to parse each of these regions according to their nature and content, producing the data to be imported in Cadmus. This could be thought similar to text markup, but here we are not changing the text in any way, and our regions can freely nest and even overlap. This is only a way of segmenting text to later apply context-specific parsing to each detected region.
 
 4. **region filters**: a number of components used to refine the detected regions by filtering them. For instance, here we are filtering any subset of entries not wrapped into a region (in our sample, every entry except those under `wit`, which is the only region being detected) to wrap it into an "unknown" region named `x`. Here is the corresponding pipeline definition:
 
@@ -147,7 +147,7 @@ The concept here is adding as many region detectors required to split the list o
   ],
 ```
 
-Thus, after this stage we expect that every Proteus entry either belongs to a `wit` or an `x` region.
+Thus, after this stage we expect that every Proteus entry either belongs to a `wit` or an `x` region. We do this because the region-based pipeline ends with a set of parsers targeting regions, so that any portion of text we want to take into account should be wrapped inside some region.
 
 5. **region parsers**: a number of components used to parse each detected region, providing the adequate actions for extracting and remodeling data from it as required by the target format. In the sample pipeline, we are using a parser component which does not really do any parsing, and gets applied to any region. Its only purpose is dumping the entries into Excel files, so that users can look at them to empirically define patterns and check the outcome of the pipeline:
 
@@ -298,7 +298,7 @@ Its corresponding apparatus fragments are 3 (I omit the `id` value as its meanin
 
 ### Command parse-text
 
-This command parses the text from each fragment entry in the Catullus database dump.
+This command parses the text from each fragment entry in the Catullus database dump, using a specified Proteus pipeline.
 
 Syntax:
 
@@ -313,6 +313,8 @@ where:
 - `OutputDir`: the output directory.
 
 ## Procedure
+
+The general procedure to port data into the Cadmus system is summarized here. Currently it just ends with dumping entries, as this is the first step in analyzing them.
 
 1. have the XLS files with text and apparatus.
 2. ensure your MySql server is available.

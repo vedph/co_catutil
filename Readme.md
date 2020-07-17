@@ -66,15 +66,36 @@ The `import-text` command can be used to create a MySql database filled with the
 
 ## Parsing Apparatus
 
-Parsing apparatus happens at the most atomic level we can attain from the input text, i.e. the single entry (in the meaning defined above) in an apparatus.
+### Introducing Proteus
+
+As for parsing, I tried to adopt a Proteus-based strategy, which has the advantage of leveraging a proven framework, built for scenarios like this.
+
+Essentially, Proteus reduces any source into a common model, represented by a flat list of "entries". A Proteus entry is either a piece of plain text, or a formatting property (e.g. italic), or more complex metadata conveyed by what I call "commands" with their arguments. You can imagine all this as the set of instructions to some rendering device, where you tell it to print some text (text), switch to italic (property), move to the next sheet (command), etc. So, there are just 3 types of entries: text, property, and command. Source data, whatever its format (word processor, spreadsheet, database, etc.) is reduced to a list of such entries.
+
+  Please notice that the term _entry_ here is used in two very different contexts: in the context of Cadmus layer models, an entry is the item of an array of models in a layer part's fragment; in turn, a fragment is a set of models referred to the same portion of the base text. In the context of Proteus transformations, an _entry_ is an atomic piece of data from a text, whether it's just a text, a formatting property, or a more complex command.
+
+The typical strategy here is looking at the list and defining *regions* inside it, i.e. sequences of entries belonging to the same semantic unit. For instance, a region might be the list of witnesses (manuscripts) like the italic "OGR"; another the lemma in a variant; another a comment; etc. We want to define all the regions required to build the target Cadmus models for the apparatus.
+
+Once we have these regions, we can take a specialized action for each of them, which allows the software to extract the data, remodel them, and store the result in the target database. That's the task of components named region *parsers*. Each region can be handled by a specific parser.
+
+We thus have a pipeline where several different components take their place: we start from reading a source entry by entry; we can then eventually filter these entries; then we detect regions; we can then filter these regions; and finally we parse the result.
+
+The concept is building this pipeline since the very beginning of our analysis, and then progressively enrich it by adding new components and refining their configuration. We can thus explore the data at the same time we are transforming it. To this end, the last component in the current pipeline is a dump parser, i.e. something which does not effectively remodel and store data, but just dumps the list of entries got from executing the pipeline up to that point. These dumps are in form of a set of Excel files.
+
+### The Proteus CO Pipeline
+
+Parsing apparatus starts at the most atomic level we can attain from the input text as imported in the MySql database, i.e. the single entry (in the meaning defined above) in an apparatus. Thus, the input for the pipeline is just the MySql database got from the previous step in our flow.
 
 A first pipeline is built to provide as its output a detailed dump of the text being analyzed, in the form of a number of Excel files (XLSX). The dump is split into several Excel files only to avoid making them too big; at about 10,000 lines a new file is created, yet taking care not to split the dump of a single entry.
 
-For more details I suggest to read my paper on Proteus cited above. In short, the text gets represented into a flat list of "entries", each representing either text, or formatting properties (e.g. italic), or some more complex metatextual data (in the form of commands with any number of arguments, e.g. the opening and closing of a coloured background section in a dictionary).
+If you open an Excel dump of these, you can see that each source text starts with a row with its ordinal number (#1, #2, etc.), in a yellow background.
 
-Please notice that the term _entry_ here is used in two very different contexts: in the context of Cadmus layer models, an entry is the item of an array of models in a layer part's fragment; in turn, a fragment is a set of models referred to the same portion of the base text. In the context of Proteus transformations, an _entry_ is an atomic piece of data from a text, whether it's just a text, a formatting property, or a more complex command.
+Inside each of these sets (each corresponding to a Cadmus entry), each Proteus entry is found in a row:
 
-Consider for instance this apparatus' entry:
+- the `type` column tells you the entry type (text, property, command); if it's a text, the `txt` column contains it. If it's a property, the `pn`/`pv` columns tell you the property name and value (e.g. `italic=1`). If it's a command, the `cmd` column contains it with its arguments
+- the `rgn` column tells the name(s) of all the regions including that entry.
+
+For instance, consider this apparatus' entry:
 
 ```txt
 Cui _OGR_, _Scholia Veronensia in Verg._ Ecl. _6.1_, _Caesius Bassus_ GL _6.261.21_, _Aphthonius_ GL _6.148.22, Terentianus Maurus_ De Metris _2562, Isid._ Orig. _6.12.3, Auson._ Ecl. _1.1_
@@ -97,7 +118,11 @@ prp italic=0
 ...
 ```
 
-Here we start with a command (`cmd`) which sets the IDs of this set (f=fragment ID, e=entry ID, both in the RDBMS). We then have an initial text (`Cui`) followed by the italic text `OGR` (wrapped in two properties -`prp`- entries, which set the italic property on and off); then a comma follows, and then another italic piece of text. As you can see, the input text is now represented by a list of Proteus entries (text, properties, and commands).
+Here we start with a command (`cmd`) which sets the IDs of this set (f=fragment ID, e=entry ID, both in the RDBMS).
+
+We then have an initial text (`Cui`) followed by the italic text `OGR` (wrapped in two properties -`prp`- entries, which set the italic property on and off); then a comma follows, and then another italic piece of text.
+
+As you can see, the input text is now represented by a list of Proteus entries (text, properties, and commands).
 
 In our workflow, a first, almost empty Proteus pipeline was set up to just spit out some Excel dumps, which list such entries. This pipeline contains these components (applied in this order):
 
@@ -163,7 +188,11 @@ Thus, after this stage we expect that every Proteus entry either belongs to a `w
   ]
 ```
 
-Thus, executing this Proteus pipeline produces a set of Excel dumps from a MySql database. These dumps are an extremely useful tool for defining patterns, and thus building a parser capable of deducing the semantic role of each portion of text, whatever its original form and content. Once the pipeline has been completed and tested, we can just replace the dump parser with the parsers required for our regions to effectively import structured apparatus data into a Cadmus database. This defines a way of transforming data which can easily be approached by non specialists, in a heuristic, progressively refined processing flow. Proteus provides a lot of prebuilt modules for the pipeline, but being a modular framework it allows you to add your own modules wherever required, thus covering any complex input text.
+Thus, executing this Proteus pipeline produces a set of Excel dumps from a MySql database. These dumps are an extremely useful tool for defining patterns, and thus building a parser capable of deducing the semantic role of each portion of text, whatever its original form and content.
+
+Once the pipeline has been completed and tested, we can just replace the dump parser with the parsers required for our regions to effectively import structured apparatus data into a Cadmus database.
+
+This defines a way of transforming data which can easily be approached by non specialists, in a heuristic, progressively refined processing flow. Proteus provides a lot of prebuilt modules for the pipeline, but being a modular framework it allows you to add your own modules wherever required, thus covering any complex input text. In most cases anyway you just end up defining the pipeline in a JSON file, and configuring its modules as needed.
 
 ## Tool Commands
 

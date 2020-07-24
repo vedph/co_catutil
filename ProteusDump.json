@@ -1,0 +1,115 @@
+{
+  "EntryReader": {
+    "Id": "entry-reader.co-sql"
+  },
+  "EntryFilters": [
+    {
+      "Id": "entry-filter.escape",
+      "Options": {
+        "EscapeDecoders": [
+          {
+            "Id": "escape-decoder.co-entry-id"
+          },
+          {
+            "Id": "escape-decoder.co-italic"
+          }
+        ]
+      }
+    }
+  ],
+  "EntryRegionDetectors": [
+    {
+       "Id": "region-detector.pattern",
+       "Options": {
+          "Tag": "ids",
+          "IsWholeRegionInA": true,
+          "IsAnchoredAtStart": true,
+          "PatternEntriesA": [
+            "cmd set-ids"
+          ]
+        }
+    },
+    {
+       "Id": "region-detector.pattern",
+       "Options": {
+          "Tag": "wit",
+          "IsWholeRegionInA": true,
+          "PatternEntriesA": [
+            "prp italic=1",
+            "txt$^[TOGR]+(,\\s*corr\\.\\s*[TOGR]+2?)?$",
+            "prp italic=0"
+          ]
+        }
+    },
+    {
+       "Id": "region-detector.pattern",
+       "Options": {
+          "Tag": "ms",
+          "IsWholeRegionInA": true,
+          "PatternEntriesA": [
+            "txt$^MS\\."
+          ]
+       }
+    },
+    {
+       "Id": "region-detector.pattern",
+       "Options": {
+          "Tag": "lem",
+          "IsAnchoredAtStart": true,
+          "IsWholeRegionInA": true,
+          "OffsetA": 2,
+          "PatternEntriesA": [
+            "cmd set-ids",
+            "prp italic=0",
+            "txt$^[^0-9]+$"
+          ]
+        }
+    },
+    {
+       "Id": "region-detector.pattern",
+       "Options": {
+          "Tag": "lem",
+          "IsAnchoredAtStart": true,
+          "IsWholeRegionInA": true,
+          "OffsetA": 1,
+          "PatternEntriesA": [
+            "cmd set-ids",
+            "txt$^[^0-9]+$"
+          ]
+        }
+    },
+    {
+       "Id": "region-detector.pattern",
+       "Options": {
+          "Tag": "auth",
+          "IsWholeRegionInA": true,
+          "OffsetA": 1,
+          "PatternEntriesA": [
+            "prp italic=1",
+            "txt$^[A-Z]",
+            "prp italic=0",
+            "txt$^[^0-9]",
+            "prp italic=1",
+            "txt$^\\s*[0-9]"
+          ]
+        }
+    }    
+  ],
+  "EntryRegionFilters": [
+    {
+      "Id": "region-filter.unmapped",
+      "Options": {
+        "UnmappedRegionTag": "x"
+      }
+    }
+  ],
+  "EntryRegionParsers": [
+    {
+      "Id": "entry-region-parser.excel-dump",
+      "Options": {
+        "MaxEntriesPerDumpFile": 10000,
+        "OutputDirectory": "c:\\users\\dfusi\\desktop\\co\\dump\\"
+      }
+    }
+  ]
+}

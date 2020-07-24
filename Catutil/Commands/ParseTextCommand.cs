@@ -86,9 +86,12 @@ namespace Catutil.Commands
             while ((entry = entryReader.Read()) != null)
             {
                 if (++count % 10 == 0) Console.Write('.');
+
                 entries.Clear();
                 entries.Add(entry);
                 EntrySet set = new EntrySet(entries, context);
+                context.Number++;
+
                 pipeline.Execute<object>(set, null);
             }
             Console.WriteLine($"\nEntries read: {count}");

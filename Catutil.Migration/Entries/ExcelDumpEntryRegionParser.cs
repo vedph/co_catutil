@@ -117,7 +117,6 @@ namespace Catutil.Migration.Entries
 
                 _dumper.WriteHead();
             }
-            set.Context.Number++;
 
             // dump
             int start = regions[regionIndex].Range.Start.Entry;

@@ -60,7 +60,7 @@ namespace Catutil.Migration.Sql
         public DecodedEntry Read()
         {
             if (_end) return null;
-            
+
             EnsureConnected();
             if (!_reader.Read())
             {

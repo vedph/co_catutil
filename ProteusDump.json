@@ -15,6 +15,30 @@
           }
         ]
       }
+    },
+    {
+      "Id": "entry-filter.txt-splitter",
+      "Options": {
+        "ContextPattern": [
+          "prp italic=1",
+          "txt$^[A-Z]",
+          "prp italic=0",
+          "txt$^[^0-9]",
+          "prp italic=1",
+          "txt$^\\s*[0-9][-.0-9a-z]*\\s*,\\s+[^\\s]"
+        ],
+        "ContextOffset": 5,
+        "IsTxtMergeEnabled": true,
+        "RepeatCount": -1,
+        "DividerPattern": ",\\s+",
+        "InsertedEntries": [
+          "txt , ",
+          "prp italic=1"
+        ]
+      }
+    },
+    {
+      "Id": "entry-filter.txt-merger"
     }
   ],
   "EntryRegionDetectors": [

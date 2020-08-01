@@ -25,6 +25,7 @@
     <PackageReference Include="NPOI" Version="2.5.1" />
     <PackageReference Include="Proteus.Core" Version="1.2.0" />
     <PackageReference Include="Proteus.Entries" Version="1.2.1" />
+    <PackageReference Include="System.Text.Json" Version="4.7.2" />
   </ItemGroup>
 
 </Project>

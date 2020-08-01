@@ -1,16 +1,12 @@
 ﻿using Fusi.Tools;
 using MySql.Data.MySqlClient;
-using NPOI.HSSF.UserModel;
-using NPOI.SS.UserModel;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace Catutil.Migration.Xls
@@ -101,16 +97,6 @@ namespace Catutil.Migration.Xls
             return cmd;
         }
 
-        private static IEnumerable<string> GetAppFragments(string text)
-        {
-            return Regex.Split(text, @"\s+\|\s+");
-        }
-
-        private static IEnumerable<string> GetAppEntries(string text)
-        {
-            return Regex.Split(text, @"\s+\:\s+");
-        }
-
         /// <summary>
         /// Imports text and apparatus entries from the specified file.
         /// </summary>
@@ -139,6 +125,8 @@ namespace Catutil.Migration.Xls
 
                 foreach (var item in reader.Read())
                 {
+                    if (progress != null) report.Count++;
+
                     switch (item.Level)
                     {
                         case 0:
@@ -174,6 +162,12 @@ namespace Catutil.Migration.Xls
                             break;
                     }
                     if (cancel.IsCancellationRequested) return;
+                    if (progress != null && report.Count % 10 == 0)
+                    {
+                        report.Message = report.Count.ToString(
+                            CultureInfo.InvariantCulture);
+                        progress.Report(report);
+                    }
                 }
             }
         }

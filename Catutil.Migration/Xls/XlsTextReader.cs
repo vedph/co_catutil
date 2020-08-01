@@ -137,12 +137,9 @@ namespace Catutil.Migration.Xls
         /// <summary>
         /// Imports text and apparatus entries from the specified file.
         /// </summary>
-        /// <param name="filePath">The file path.</param>
-        /// <param name="cancel">The cancellation token.</param>
-        /// <param name="progress">The optional progress reporter.</param>
         /// <exception cref="ArgumentNullException">filePath</exception>
         /// <exception cref="InvalidDataException">Invalid text line ID</exception>
-        public IEnumerable<XslTextReaderItem> Read()
+        public IEnumerable<XlsTextReaderItem> Read()
         {
             if (_rowIndex > _sheet.LastRowNum) yield break;
 
@@ -153,7 +150,7 @@ namespace Catutil.Migration.Xls
                 if (row == null)
                 {
                     _rowIndex++;
-                    continue;  
+                    continue;
                 }
 
                 // [0]=id: note that occasionally the cell's type is not
@@ -212,7 +209,7 @@ namespace Catutil.Migration.Xls
                     string text = row.Cells[1].StringCellValue.Trim();
 
                     // insert line
-                    XslTextReaderItem item0 = new XslTextReaderItem
+                    XlsTextReaderItem item0 = new XlsTextReaderItem
                     {
                         Level = 0
                     };
@@ -235,7 +232,7 @@ namespace Catutil.Migration.Xls
                     foreach (string frText in GetAppFragments(appText))
                     {
                         _frOrdinal++;
-                        XslTextReaderItem item1 = new XslTextReaderItem
+                        XlsTextReaderItem item1 = new XlsTextReaderItem
                         {
                             Level = 1
                         };
@@ -249,7 +246,7 @@ namespace Catutil.Migration.Xls
                         foreach (string entryText in GetAppEntries(frText))
                         {
                             entryOrdinal++;
-                            XslTextReaderItem item2 = new XslTextReaderItem
+                            XlsTextReaderItem item2 = new XlsTextReaderItem
                             {
                                 Level = 2
                             };
@@ -292,7 +289,7 @@ namespace Catutil.Migration.Xls
     /// <summary>
     /// An item read by <see cref="XslxTextReader"/>.
     /// </summary>
-    public sealed class XslTextReaderItem
+    public sealed class XlsTextReaderItem
     {
         /// <summary>
         /// Gets or sets the level: 0=line, 1=fragment, 2=entry.
@@ -305,9 +302,9 @@ namespace Catutil.Migration.Xls
         public Dictionary<string, object> Data { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="XslTextReaderItem"/> class.
+        /// Initializes a new instance of the <see cref="XlsTextReaderItem"/> class.
         /// </summary>
-        public XslTextReaderItem()
+        public XlsTextReaderItem()
         {
             Data = new Dictionary<string, object>();
         }

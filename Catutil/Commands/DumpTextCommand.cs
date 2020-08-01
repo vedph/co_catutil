@@ -66,7 +66,7 @@ namespace Catutil.Commands
 
                 using (XlsTextReader reader = new XlsTextReader(filePath))
                 {
-                    foreach (XslTextReaderItem item in reader.Read())
+                    foreach (XlsTextReaderItem item in reader.Read())
                     {
                         Console.WriteLine(item);
                         counts[item.Level]++;

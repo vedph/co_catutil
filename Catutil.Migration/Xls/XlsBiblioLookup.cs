@@ -6,8 +6,9 @@ using System.IO;
 using System.Collections.Generic;
 using Fusi.Tools.Data;
 using Catutil.Migration.Biblio;
-using Org.BouncyCastle.Asn1.Utilities;
 using System.Diagnostics;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using System.Linq;
 
 namespace Catutil.Migration.Xls
 {
@@ -181,6 +182,15 @@ namespace Catutil.Migration.Xls
         }
 
         /// <summary>
+        /// Gets the length of the shortest reference in this index.
+        /// </summary>
+        /// <returns>Min length.</returns>
+        public int GetMinReferenceLength()
+        {
+            return _trie.GetAll().Min(n => n.GetKey().Length);
+        }
+
+        /// <summary>
         /// Determines whether this lookup has the specified bibliographic
         /// reference.
         /// </summary>
@@ -201,6 +211,21 @@ namespace Catutil.Migration.Xls
 
             if (string.IsNullOrEmpty(reference)) return false;
             return _trie.Get(reference) != null;
+        }
+
+        /// <summary>
+        /// Finds all the references matching the specified prefix.
+        /// </summary>
+        /// <param name="prefix">The prefix.</param>
+        /// <returns>Keys.</returns>
+        /// <exception cref="ArgumentNullException">prefix</exception>
+        /// <exception cref="InvalidOperationException">index not loaded</exception>
+        public IEnumerable<string> FindAll(IEnumerable<char> prefix)
+        {
+            if (prefix == null) throw new ArgumentNullException(nameof(prefix));
+            if (!_loaded) throw new InvalidOperationException("Index not loaded");
+
+            foreach (var node in _trie.Find(prefix)) yield return node.GetKey();
         }
     }
 }

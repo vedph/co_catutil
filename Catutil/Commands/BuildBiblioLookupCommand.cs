@@ -2,6 +2,7 @@
 using Fusi.Tools;
 using Microsoft.Extensions.CommandLineUtils;
 using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -61,6 +62,9 @@ namespace Catutil.Commands
             Console.WriteLine(
                 $"XLS path: {_xlsFilePath}\n" +
                 $"output dir: {_outputDir}\n");
+
+            if (!Directory.Exists(_outputDir))
+                Directory.CreateDirectory(_outputDir);
 
             XlsBiblioLookup lookup = new XlsBiblioLookup();
             lookup.ExtractIndex(_xlsFilePath, _outputDir, CancellationToken.None,

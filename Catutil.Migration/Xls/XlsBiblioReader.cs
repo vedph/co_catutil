@@ -54,6 +54,12 @@ namespace Catutil.Migration.Xls
 
         private Author ParseSingleAuthor(string text)
         {
+            // corner case: avatar = identification, e.g.
+            // "Barthius, Casparus = Caspar von Barth (1587-1658)"
+            // just remove the identification
+            int i = text.IndexOf('=');
+            if (i > -1) text = text.Substring(0, i);
+
             Match m = _LastFirstRegex.Match(text);
             return m.Success ?
                 new Author

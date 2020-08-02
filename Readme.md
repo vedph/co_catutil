@@ -349,7 +349,7 @@ where:
 
 ### Command build-biblio
 
-This command builds a bibliography JSON lookup data file from the source XLS bibliography file.
+This command builds a bibliography JSON lookup data file from the source XLS bibliography file, and also dumps all the bibliographic references which can be built from that data. The JSON data file will be named `biblio-lookup.json`, the dump file will be named `biblio-lookup-dump.txt`.
 
 Syntax:
 

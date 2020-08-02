@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Fusi.Tools.Data;
 using Catutil.Migration.Biblio;
 using Org.BouncyCastle.Asn1.Utilities;
+using System.Diagnostics;
 
 namespace Catutil.Migration.Xls
 {
@@ -90,7 +91,10 @@ namespace Catutil.Migration.Xls
             // reference for each date
             if (items.Count == 1)
             {
-                _trie.Insert(authorRef);
+                _trie.Insert(authorRef, existingNode =>
+                {
+                    Debug.WriteLine($"Existing trie node: {existingNode}");
+                });
             }
             else
             {

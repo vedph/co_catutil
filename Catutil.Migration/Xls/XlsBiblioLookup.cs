@@ -48,16 +48,20 @@ namespace Catutil.Migration.Xls
                     });
 
                 writer.WriteStartArray();
-                foreach (XlsBiblioItem item in reader.Read())
+                foreach (XlsBiblioItem item in reader.Read(true))
                 {
                     JsonSerializer.Serialize(writer, item,
                         typeof(XlsBiblioItem));
 
                     if (cancel.IsCancellationRequested) break;
 
-                    if (progress != null && ++report.Count % 10 == 0)
+                    if (progress != null)
+                    {
+                        report.Message = item.GetReference(true);
                         progress.Report(report);
+                    }
                 }
+
                 writer.WriteEndArray();
                 writer.Flush();
             }

@@ -55,8 +55,8 @@ namespace Catutil.Migration.Xls
             return m.Success ?
                 new Author
                 {
-                    LastName = m.Groups["l"].Value,
-                    FirstName = m.Groups["f"].Value
+                    LastName = m.Groups["l"].Value.Trim(),
+                    FirstName = m.Groups["f"].Value.Trim()
                 } : null;
         }
 
@@ -122,7 +122,7 @@ namespace Catutil.Migration.Xls
             {
                 IRow row = _sheet.GetRow(_rowIndex);
                 // skip empty row
-                if (row == null)
+                if (row == null || string.IsNullOrEmpty(row.Cells[1].StringCellValue))
                 {
                     _rowIndex++;
                     continue;
@@ -130,6 +130,11 @@ namespace Catutil.Migration.Xls
 
                 // A=author
                 IList<Author> authors = ParseAuthors(row.Cells[0].StringCellValue);
+                if (authors == null)
+                {
+                    throw new InvalidDataException("Missing author(s) in row "
+                        + row.RowNum);
+                }
                 if (authors.Any(a => a == null))
                 {
                     throw new InvalidDataException("Invalid author(s) in "
@@ -156,6 +161,12 @@ namespace Catutil.Migration.Xls
             }
         }
 
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> to release both managed and
+        /// unmanaged resources; <c>false</c> to release only unmanaged
+        /// resources.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)
@@ -172,6 +183,10 @@ namespace Catutil.Migration.Xls
             }
         }
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing,
+        /// releasing, or resetting unmanaged resources.
+        /// </summary>
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method

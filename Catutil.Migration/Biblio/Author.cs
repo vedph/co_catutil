@@ -21,35 +21,9 @@ namespace Catutil.Migration.Biblio
         public string FirstName { get; set; }
 
         /// <summary>
-        /// Gets or sets the variants.
-        /// </summary>
-        public List<string> Variants { get; set; }
-
-        /// <summary>
         /// Gets or sets the note.
         /// </summary>
         public string Note { get; set; }
-
-        /// <summary>
-        /// Adds the specified variant to this author, unless already present.
-        /// </summary>
-        /// <param name="variant">The variant.</param>
-        /// <exception cref="ArgumentNullException">variant</exception>
-        public void AddVariant(string variant)
-        {
-            if (variant == null)
-                throw new ArgumentNullException(nameof(variant));
-
-            if (Variants == null)
-            {
-                Variants = new List<string> { variant };
-            }
-            else
-            {
-                if (!Variants.Contains(variant))
-                    Variants.Add(variant);
-            }
-        }
 
         /// <summary>
         /// Gets the full name, built from last name plus comma plus
@@ -75,9 +49,6 @@ namespace Catutil.Migration.Biblio
 
             if (!string.IsNullOrEmpty(Note))
                 sb.Append(" (").Append(Note).Append(')');
-
-            if (Variants?.Count > 0)
-                sb.Append(string.Join("; ", Variants));
 
             return sb.ToString();
         }

@@ -354,13 +354,13 @@ This command builds a bibliography JSON lookup data file from the source XLS bib
 Syntax:
 
 ```ps1
-.\Catutil.exe build-biblio InputXlsFilePath OutputJsonFilePath
+.\Catutil.exe build-biblio InputXlsFilePath OutputDirectory
 ```
 
 Example:
 
 ```ps1
-.\Catutil.exe build-biblio "c:\users\dfusi\desktop\co\4_1 Bibliography.xls" c:\users\dfusi\desktop\co\biblio-lookup.json
+.\Catutil.exe build-biblio "c:\users\dfusi\desktop\co\4_1 Bibliography.xls" c:\users\dfusi\desktop\co\
 ```
 
 ## Procedure

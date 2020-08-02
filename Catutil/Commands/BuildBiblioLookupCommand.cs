@@ -10,21 +10,22 @@ namespace Catutil.Commands
     public sealed class BuildBiblioLookupCommand : ICommand
     {
         private readonly string _xlsFilePath;
-        private readonly string _jsonFilePath;
+        private readonly string _outputDir;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BuildBiblioLookupCommand"/> class.
+        /// Initializes a new instance of the <see cref="BuildBiblioLookupCommand"/>
+        /// class.
         /// </summary>
         /// <param name="xlsFilePath">The XLS path.</param>
-        /// <param name="jsonFilePath">The JSON path.</param>
-        /// <exception cref="ArgumentNullException">xlsFilePath or
-        /// jsonFilePath</exception>
-        public BuildBiblioLookupCommand(string xlsFilePath, string jsonFilePath)
+        /// <param name="outputDir">The output directory.</param>
+        /// <exception cref="ArgumentNullException">xlsFilePath or outputDir
+        /// </exception>
+        public BuildBiblioLookupCommand(string xlsFilePath, string outputDir)
         {
             _xlsFilePath = xlsFilePath
                 ?? throw new ArgumentNullException(nameof(xlsFilePath));
-            _jsonFilePath = jsonFilePath
-                ?? throw new ArgumentNullException(nameof(jsonFilePath));
+            _outputDir = outputDir
+                ?? throw new ArgumentNullException(nameof(outputDir));
         }
 
         /// <summary>
@@ -40,14 +41,14 @@ namespace Catutil.Commands
 
             CommandArgument xlsPathArgument = command.Argument("[xls-path]",
                 "The source XLS file path");
-            CommandArgument jsonPathArgument = command.Argument("[json-path]",
-                "The output JSON file path");
+            CommandArgument outputDirArgument = command.Argument("[output-dir]",
+                "The output directory");
 
             command.OnExecute(() =>
             {
                 options.Command = new BuildBiblioLookupCommand(
                     xlsPathArgument.Value,
-                    jsonPathArgument.Value);
+                    outputDirArgument.Value);
                 return 0;
             });
         }
@@ -58,11 +59,11 @@ namespace Catutil.Commands
             Console.WriteLine("BUILD BIBLIOGRAPHY LOOKUP\n");
             Console.ResetColor();
             Console.WriteLine(
-                $"XLS path : {_xlsFilePath}\n" +
-                $"JSON path: {_jsonFilePath}\n");
+                $"XLS path: {_xlsFilePath}\n" +
+                $"output dir: {_outputDir}\n");
 
             XlsBiblioLookup lookup = new XlsBiblioLookup();
-            lookup.ExtractJson(_xlsFilePath, _jsonFilePath, CancellationToken.None,
+            lookup.ExtractIndex(_xlsFilePath, _outputDir, CancellationToken.None,
                 new Progress<ProgressReport>(r => Console.WriteLine(r.Message)));
 
             return Task.CompletedTask;

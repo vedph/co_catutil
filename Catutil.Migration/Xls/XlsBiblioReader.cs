@@ -25,6 +25,7 @@ namespace Catutil.Migration.Xls
         private readonly Regex _seeUnderRegex;
         private readonly Regex _LastFirstRegex;
         private readonly Regex _andRegex;
+        private readonly Regex _dateRegex;
 
         /// <summary>
         /// Gets or sets the name of the sheet to read.
@@ -47,6 +48,8 @@ namespace Catutil.Migration.Xls
             _seeUnderRegex = new Regex(@":\s+see\s+under\s+");
             _LastFirstRegex = new Regex(@"^(?<l>[^,(]+)(?:,\s*(?<f>[^(]+))?");
             _andRegex = new Regex(@"\s+(?:and|&)\s+");
+            _dateRegex = new Regex(
+                @"\((?<d>[12][0-9]{3}[a-z]*)\)(?:\s*\[(?<e>[12][0-9]{3})\])?");
         }
 
         private Author ParseSingleAuthor(string text)
@@ -60,61 +63,72 @@ namespace Catutil.Migration.Xls
                 } : null;
         }
 
-        private IList<Author> ParseAuthors(string text)
+        private void ParseDate(string dateText, BiblioItem item)
         {
-            if (string.IsNullOrEmpty(text)) return null;
+            Match m = _dateRegex.Match(dateText);
+            if (!m.Success) return;
 
-            // is it a link?
-            Match m = _seeUnderRegex.Match(text);
+            if (m.Groups["d"].Length > 0) item.Date = m.Groups["d"].Value;
+            if (m.Groups["e"].Length > 0) item.EditorDate = m.Groups["e"].Value;
+        }
 
-            // yes: parse source and target names and return the target
-            // with the source as its variant. It is assumed that a link
+        private void ParseAuthors(string authorsText, string workText,
+            BiblioItem item)
+        {
+            if (string.IsNullOrEmpty(authorsText)) return;
+
+            // is it an alias (with empty BC)?
+            Match m = _seeUnderRegex.Match(authorsText);
+
+            // yes: parse source and target names. It is assumed that a link
             // always refers to a single author.
             if (m.Success)
             {
-                IList<Author> srcAuthors =
-                    ParseAuthors(text.Substring(0, m.Index));
-                if (srcAuthors.Count != 1)
-                {
-                    throw new InvalidDataException(
-                        "Link has no single source author: " + text);
-                }
+                item.Authors.Add(ParseSingleAuthor(authorsText.Substring(0, m.Index)));
+                Author dstAuthor = ParseSingleAuthor(authorsText.Substring(m.Index + m.Length));
+                item.TargetRef = dstAuthor.GetFullName();
+                return;
+            } // alias
 
-                IList<Author> dstAuthors =
-                    ParseAuthors(text.Substring(m.Index + m.Length));
-                if (dstAuthors.Count != 1)
-                {
-                    throw new InvalidDataException(
-                        "Link has no single target author: " + text);
-                }
-
-                dstAuthors[0].AddVariant(srcAuthors[0].GetFullName());
-                return dstAuthors;
-            } // link
-
-            List<Author> authors = new List<Author>();
-
-            // split at " and " or " & "
-            if (_andRegex.IsMatch(text))
+            // is it an alias (with non-empty BC)?
+            // yes: parse the target author and set as reference its full name
+            // followed by space and date
+            if (workText?.StartsWith("see ") == true)
             {
-                foreach (string name in _andRegex.Split(text))
-                    authors.Add(ParseSingleAuthor(name));
-                return authors;
+                int i = workText.LastIndexOf('(');
+                string targetAuthText = i > -1 ?
+                    workText.Substring(4, i - 4) : workText.Substring(4);
+                item.TargetRef = ParseSingleAuthor(targetAuthText).GetFullName();
+                if (i > -1) item.TargetRef += $" {workText.Substring(i)}";
             }
 
-            // process author
-            authors.Add(ParseSingleAuthor(text));
-            return authors;
+            // if multiple authors, split at " and " or " & "
+            if (_andRegex.IsMatch(authorsText))
+            {
+                foreach (string name in _andRegex.Split(authorsText))
+                    item.Authors.Add(ParseSingleAuthor(name));
+            }
+            else
+            {
+                // else single author
+                item.Authors.Add(ParseSingleAuthor(authorsText));
+            }
         }
 
+        // TODO: full Read method
+
         /// <summary>
-        /// Imports bibiliography records from the specified file.
+        /// Read bibliographic items for collecting references only. Note that
+        /// when reading for references it makes no difference whether each item
+        /// being read is an alias or not, as we are only interested in collecting
+        /// the components for building the text of a bibliographic reference.
+        /// At any rate, probably aliases will never be found as references in CO
+        /// text, as by their nature an alias implies that the form chosen as the
+        /// normal one is rather its target.
         /// </summary>
-        /// <param name="refOnly">True to read only those data used for
-        /// bibliographic references, i.e. authors and date.</param>
         /// <exception cref="ArgumentNullException">filePath</exception>
         /// <exception cref="InvalidDataException">Invalid text line ID</exception>
-        public IEnumerable<XlsBiblioItem> Read(bool refOnly = false)
+        public IEnumerable<BiblioItem> ReadForReference()
         {
             if (_rowIndex > _sheet.LastRowNum) yield break;
 
@@ -128,33 +142,31 @@ namespace Catutil.Migration.Xls
                     continue;
                 }
 
-                // A=author
-                IList<Author> authors = ParseAuthors(row.Cells[0].StringCellValue);
-                if (authors == null)
+                BiblioItem item = new BiblioItem();
+
+                // B=date
+                ParseDate(row.Cells[1].StringCellValue, item);
+
+                // A=author(s)
+                ParseAuthors(
+                    row.Cells[0].StringCellValue,
+                    row.Cells[2].StringCellValue,
+                    item);
+
+                if (item.Authors.Count == 0)
                 {
                     throw new InvalidDataException("Missing author(s) in row "
                         + row.RowNum);
                 }
-                if (authors.Any(a => a == null))
+                if (item.Authors.Any(a => a == null))
                 {
                     throw new InvalidDataException("Invalid author(s) in "
                         + row.Cells[0].StringCellValue);
                 }
 
-                // B=date
-                string date = row.Cells[1].StringCellValue?.Trim();
+                // C=work: we are not interested in it when dealing
+                // with references only
 
-                // C=work
-                if (!refOnly)
-                {
-                    // TODO: parse title
-                }
-
-                XlsBiblioItem item = new XlsBiblioItem
-                {
-                    Authors = authors,
-                    Date = date
-                };
                 yield return item;
 
                 _rowIndex++;

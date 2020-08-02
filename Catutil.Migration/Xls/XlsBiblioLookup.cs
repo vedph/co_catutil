@@ -5,6 +5,8 @@ using System.Text.Json;
 using System.IO;
 using System.Collections.Generic;
 using Fusi.Tools.Data;
+using Catutil.Migration.Biblio;
+using Org.BouncyCastle.Asn1.Utilities;
 
 namespace Catutil.Migration.Xls
 {
@@ -19,23 +21,27 @@ namespace Catutil.Migration.Xls
         private bool _loaded;
 
         /// <summary>
-        /// Extract JSON-based lookup data from the specified XLS file.
+        /// Extract JSON-based lookup data for this lookup index from the
+        /// specified XLS file, dumping the index keys once completed.
         /// </summary>
         /// <param name="xlsFilePath">The file path.</param>
-        /// <param name="jsonFilePath">The output file path.</param>
+        /// <param name="outputDir">The output directory.</param>
         /// <param name="cancel">The cancellation token.</param>
         /// <param name="progress">The optional progress reporter.</param>
         /// <exception cref="ArgumentNullException">filePath</exception>
-        public void ExtractJson(string xlsFilePath, string jsonFilePath,
+        public void ExtractIndex(string xlsFilePath, string outputDir,
             CancellationToken cancel, IProgress<ProgressReport> progress = null)
         {
             if (xlsFilePath == null)
                 throw new ArgumentNullException(nameof(xlsFilePath));
-            if (jsonFilePath == null)
-                throw new ArgumentNullException(nameof(jsonFilePath));
+            if (outputDir == null)
+                throw new ArgumentNullException(nameof(outputDir));
 
             ProgressReport report =
                 progress != null ? new ProgressReport() : null;
+
+            string jsonFilePath = Path.Combine(outputDir, "biblio-lookup.json");
+            string dumpFilePath = Path.Combine(outputDir, "biblio-lookup-dump.txt");
 
             using (Stream output = new FileStream(jsonFilePath, FileMode.Create,
                 FileAccess.Write, FileShare.Read))
@@ -48,10 +54,10 @@ namespace Catutil.Migration.Xls
                     });
 
                 writer.WriteStartArray();
-                foreach (XlsBiblioItem item in reader.Read(true))
+                foreach (BiblioItem item in reader.ReadForReference())
                 {
                     JsonSerializer.Serialize(writer, item,
-                        typeof(XlsBiblioItem));
+                        typeof(BiblioItem));
 
                     if (cancel.IsCancellationRequested) break;
 
@@ -65,9 +71,19 @@ namespace Catutil.Migration.Xls
                 writer.WriteEndArray();
                 writer.Flush();
             }
+
+            // dump
+            LoadIndex(jsonFilePath);
+            using (StreamWriter writer = new StreamWriter(
+                new FileStream(dumpFilePath, FileMode.Create, FileAccess.Write,
+                FileShare.Read)))
+            {
+                DumpIndex(writer);
+                writer.Flush();
+            }
         }
 
-        private void IndexItems(string authorRef, IList<XlsBiblioItem> items)
+        private void IndexItems(string authorRef, IList<BiblioItem> items)
         {
             // process the items group: if it's a single item we
             // want a reference without the date; else we want one
@@ -78,7 +94,7 @@ namespace Catutil.Migration.Xls
             }
             else
             {
-                foreach (XlsBiblioItem i in items)
+                foreach (BiblioItem i in items)
                 {
                     string datedRef = i.GetReference(true);
                     _trie.Insert(datedRef);
@@ -87,11 +103,12 @@ namespace Catutil.Migration.Xls
         }
 
         /// <summary>
-        /// Loads the bibliographic lookup data from the specified JSON file.
+        /// Loads the bibliographic lookup index from the specified JSON file.
         /// </summary>
         /// <param name="jsonFilePath">The JSON file path.</param>
+        /// <param name="noAlias">True to exclude loading alias items.</param>
         /// <exception cref="ArgumentNullException">jsonFilePath</exception>
-        public void Load(string jsonFilePath)
+        public void LoadIndex(string jsonFilePath, bool noAlias = true)
         {
             if (jsonFilePath is null)
                 throw new ArgumentNullException(nameof(jsonFilePath));
@@ -105,15 +122,18 @@ namespace Catutil.Migration.Xls
             {
                 JsonDocument doc = JsonDocument.Parse(stream);
                 string prevAuthors = null;
-                List<XlsBiblioItem> items = new List<XlsBiblioItem>();
+                List<BiblioItem> items = new List<BiblioItem>();
 
                 // for each item
                 foreach (var itemElem in doc.RootElement.EnumerateArray())
                 {
                     // read it
-                    XlsBiblioItem item =
-                        JsonSerializer.Deserialize<XlsBiblioItem>
+                    BiblioItem item =
+                        JsonSerializer.Deserialize<BiblioItem>
                         (itemElem.GetRawText());
+
+                    // exclude alias items if requested
+                    if (noAlias && item.IsAlias()) continue;
 
                     // if it's the first item, or it has the same author(s)
                     // of the previously read one, just add it to the items list
@@ -139,6 +159,21 @@ namespace Catutil.Migration.Xls
             }
 
             _loaded = true;
+        }
+
+        /// <summary>
+        /// Dumps the index keys into the specified text writer.
+        /// </summary>
+        /// <param name="writer">The writer.</param>
+        /// <exception cref="ArgumentNullException">writer</exception>
+        public void DumpIndex(TextWriter writer)
+        {
+            if (writer == null)
+                throw new ArgumentNullException(nameof(writer));
+            if (!_loaded) return;
+
+            foreach (var node in _trie.GetAll())
+                writer.WriteLine(node.GetKey());
         }
 
         /// <summary>

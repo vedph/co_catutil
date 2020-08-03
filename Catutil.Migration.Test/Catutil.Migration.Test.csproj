@@ -7,10 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\BiblioLookup.json" />
     <None Remove="Assets\Pipeline.json" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Assets\BiblioLookup.json" />
     <EmbeddedResource Include="Assets\Pipeline.json" />
   </ItemGroup>
 

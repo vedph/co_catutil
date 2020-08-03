@@ -32,7 +32,9 @@ namespace Catutil.Migration.Biblio
                 if (text[index + minLen + i] != key[minLen + i])
                     return false;
             }
-            return true;
+
+            int limit = index + key.Length;
+            return limit == text.Length || !char.IsLetterOrDigit(text[limit]);
         }
 
         /// <summary>

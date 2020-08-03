@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using Fusi.Tools.Data;
 using Catutil.Migration.Biblio;
 using System.Diagnostics;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using System.Linq;
 
 namespace Catutil.Migration.Xls
@@ -110,60 +109,72 @@ namespace Catutil.Migration.Xls
         /// <summary>
         /// Loads the bibliographic lookup index from the specified JSON file.
         /// </summary>
-        /// <param name="jsonFilePath">The JSON file path.</param>
+        /// <param name="input">The input JSON stream.</param>
         /// <param name="noAlias">True to exclude loading alias items.</param>
         /// <exception cref="ArgumentNullException">jsonFilePath</exception>
-        public void LoadIndex(string jsonFilePath, bool noAlias = true)
+        public void LoadIndex(Stream input, bool noAlias = true)
         {
-            if (jsonFilePath is null)
-                throw new ArgumentNullException(nameof(jsonFilePath));
+            if (input is null)
+                throw new ArgumentNullException(nameof(input));
 
             // init the index
             if (_trie == null) _trie = new Trie();
             else _trie.Clear();
 
+            JsonDocument doc = JsonDocument.Parse(input);
+            string prevAuthors = null;
+            List<BiblioItem> items = new List<BiblioItem>();
+
+            // for each item
+            foreach (var itemElem in doc.RootElement.EnumerateArray())
+            {
+                // read it
+                BiblioItem item =
+                    JsonSerializer.Deserialize<BiblioItem>
+                    (itemElem.GetRawText());
+
+                // exclude alias items if requested
+                if (noAlias && item.IsAlias()) continue;
+
+                // if it's the first item, or it has the same author(s)
+                // of the previously read one, just add it to the items list
+                // and continue; else, process that list
+                string currentAuthors = item.GetReference(false);
+                if (currentAuthors == prevAuthors || prevAuthors == null)
+                {
+                    items.Add(item);
+                    prevAuthors = currentAuthors;
+                    continue;
+                }
+
+                // add group to index
+                IndexItems(prevAuthors, items);
+
+                // reset the group adding to it the newly read item
+                items.Clear();
+                items.Add(item);
+                prevAuthors = currentAuthors;
+            } //for
+
+            // last group if any
+            if (items.Count > 0) IndexItems(prevAuthors, items);
+
+            _loaded = true;
+        }
+
+        /// <summary>
+        /// Loads the bibliographic lookup index from the specified JSON file.
+        /// </summary>
+        /// <param name="jsonFilePath">The JSON file path.</param>
+        /// <param name="noAlias">True to exclude loading alias items.</param>
+        /// <exception cref="ArgumentNullException">jsonFilePath</exception>
+        public void LoadIndex(string jsonFilePath, bool noAlias = true)
+        {
             using (Stream stream = new FileStream(jsonFilePath, FileMode.Open,
                 FileAccess.Read, FileShare.Read))
             {
-                JsonDocument doc = JsonDocument.Parse(stream);
-                string prevAuthors = null;
-                List<BiblioItem> items = new List<BiblioItem>();
-
-                // for each item
-                foreach (var itemElem in doc.RootElement.EnumerateArray())
-                {
-                    // read it
-                    BiblioItem item =
-                        JsonSerializer.Deserialize<BiblioItem>
-                        (itemElem.GetRawText());
-
-                    // exclude alias items if requested
-                    if (noAlias && item.IsAlias()) continue;
-
-                    // if it's the first item, or it has the same author(s)
-                    // of the previously read one, just add it to the items list
-                    // and continue; else, process that list
-                    string currentAuthors = item.GetReference(false);
-                    if (currentAuthors == prevAuthors || prevAuthors == null)
-                    {
-                        items.Add(item);
-                        continue;
-                    }
-
-                    // add group to index
-                    IndexItems(prevAuthors, items);
-
-                    // reset the group adding to it the newly read item
-                    items.Clear();
-                    items.Add(item);
-                    prevAuthors = item.GetReference(false);
-                } //for
-
-                // last group if any
-                if (items.Count > 0) IndexItems(prevAuthors, items);
+                LoadIndex(stream, noAlias);
             }
-
-            _loaded = true;
         }
 
         /// <summary>

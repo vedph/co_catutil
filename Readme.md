@@ -379,75 +379,7 @@ The general procedure to port data into the Cadmus system is summarized here. Cu
 4. dump the imported database into Proteus entries:
 
 ```ps1
-.\Catutil.exe parse-text catullus c:\users\dfusi\desktop\co\Dump.json
+.\Catutil.exe parse-text catullus c:\users\dfusi\desktop\co\ProteusDump.json
 ```
 
-where the content of `Dump.json` is:
-
-```json
-{
-  "EntryReader": {
-    "Id": "entry-reader.co-sql"
-  },
-  "EntryFilters": [
-    {
-      "Id": "entry-filter.escape",
-      "Options": {
-        "EscapeDecoders": [
-          {
-            "Id": "escape-decoder.co-entry-id"
-          },
-          {
-            "Id": "escape-decoder.co-italic"
-          }
-        ]
-      }
-    }
-  ],
-  "EntryRegionDetectors": [
-    {
-       "Id": "region-detector.pattern",
-       "Options": {
-          "Tag": "wit",
-          "IsWholeRegionInA": true,
-          "PatternEntriesA": [
-            "prp italic=1",
-            "txt$^[OGR]+$",
-            "prp italic=0"
-          ]
-        }
-    },
-    {
-       "Id": "region-detector.pattern",
-       "Options": {
-          "Tag": "lem",
-          "IsAnchoredAtStart": true,
-          "IsWholeRegionInA": true,
-          "OffsetA": 1,
-          "PatternEntriesA": [
-            "cmd set-ids",
-            "?prp italic=0",
-            "txt$^[^0-9]+$"
-          ]
-        }
-    }
-  ],
-  "EntryRegionFilters": [
-    {
-      "Id": "region-filter.unmapped",
-      "Options": {
-        "UnmappedRegionTag": "x"
-      }
-    }
-  ],
-  "EntryRegionParsers": [
-    {
-      "Id": "entry-region-parser.excel-dump",
-      "Options": {
-        "MaxEntriesPerDumpFile": 10000,
-        "OutputDirectory": "c:\\users\\dfusi\\desktop\\co\\dump\\"
-      }
-    }
-  ]
-}
-```
+Refer to this solution for that JSON file.

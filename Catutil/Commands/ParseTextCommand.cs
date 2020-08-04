@@ -10,6 +10,7 @@ using Catutil.Migration.Sql;
 using Cadmus.Core;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Catutil.Migration;
 
 namespace Catutil.Commands
 {
@@ -89,7 +90,8 @@ namespace Catutil.Commands
             string csTemplate = _config.GetConnectionString(_dbName);
             string cs = string.Format(csTemplate, _dbName);
 
-            SqlTextParser parser = new SqlTextParser(cs)
+            SqlTextParser parser = new SqlTextParser(cs,
+                new StandardPartitioner())
             {
                 Logger = loggerFactory.CreateLogger("parse-sql-text")
             };

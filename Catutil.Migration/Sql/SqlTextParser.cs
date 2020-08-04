@@ -27,14 +27,13 @@ namespace Catutil.Migration.Sql
         private readonly Regex _breakRegex;
         private readonly Regex _titleTailRegex;
         private readonly string _cs;
+        private readonly IPartitioner _partitioner;
         private readonly Queue<IItem> _itemQueue;
         private DbConnection _connection;
         private DbCommand _cmd;
         private bool _end;
         private List<string> _poems;
         private int _poemIndex;
-        private int _minTreshold;
-        private int _maxTreshold;
 
         #region Properties
         /// <summary>
@@ -69,56 +68,27 @@ namespace Catutil.Migration.Sql
                     ?? throw new ArgumentNullException(nameof(value));
             }
         }
-
-        /// <summary>
-        /// Gets or sets the minimum treshold.
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">value</exception>
-        public int MinTreshold
-        {
-            get { return _minTreshold; }
-            set
-            {
-                if (value < 1 || value > 100)
-                    throw new ArgumentOutOfRangeException(nameof(value));
-                _minTreshold = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the maximum treshold.
-        /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">value</exception>
-        public int MaxTreshold
-        {
-            get { return _maxTreshold; }
-            set
-            {
-                if (value < 1 || value > 1000)
-                    throw new ArgumentOutOfRangeException(nameof(value));
-                _maxTreshold = value;
-            }
-        }
         #endregion
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SqlTextParser" /> class.
         /// </summary>
         /// <param name="connectionString">The connection string.</param>
-        /// <exception cref="ArgumentNullException">connectionString</exception>
-        public SqlTextParser(string connectionString)
+        /// <param name="partitioner">The partitioner to be used.</param>
+        /// <exception cref="ArgumentNullException">connectionString or
+        /// partitioner</exception>
+        public SqlTextParser(string connectionString, IPartitioner partitioner)
         {
             _cs = connectionString
                 ?? throw new ArgumentNullException(nameof(connectionString));
-
+            _partitioner = partitioner
+                ?? throw new ArgumentNullException(nameof(partitioner));
             _facetId = "default";
             _userId = "zeus";
             _sortKeyBuilder = new StandardItemSortKeyBuilder();
             _tileSepChars = new[] { ' ', '\t' };
             _breakRegex = new Regex(@"[\u037e.?!][^\p{L}]*$");
             _titleTailRegex = new Regex(@"\s*[,.;]\s*$");
-            _minTreshold = 20;
-            _maxTreshold = 50;
             _itemQueue = new Queue<IItem>();
         }
 
@@ -139,7 +109,7 @@ namespace Catutil.Migration.Sql
 
             using (var reader = cmd.ExecuteReader())
             {
-                poems.Add(reader.GetString(0));
+                while (reader.Read()) poems.Add(reader.GetString(0));
             }
             return poems;
         }
@@ -181,46 +151,12 @@ namespace Catutil.Migration.Sql
             return rows;
         }
 
-        private bool IsBreakPoint(TextTileRow row, int ordinal)
+        private bool IsBreakPoint(TextTileRow row)
         {
             if (row.Tiles.Count == 0) return false;
 
             TextTile lastTile = row.Tiles[row.Tiles.Count - 1];
-            if (_breakRegex.IsMatch(lastTile.Data[TextTileRow.TEXT_DATA_NAME])
-                && ordinal >= _minTreshold)
-            {
-                return true;
-            }
-
-            if (ordinal < _maxTreshold) return false;
-
-            double excessRatio = ordinal / _maxTreshold;
-            return excessRatio > 1.1;
-        }
-
-        private IList<Tuple<int, int>> GetRowPartitions(IList<TextTileRow> rows)
-        {
-            List<Tuple<int, int>> ranges = new List<Tuple<int, int>>();
-
-            if (rows.Count <= MaxTreshold)
-            {
-                ranges.Add(Tuple.Create(0, rows.Count));
-            }
-
-            int start = 0;
-
-            for (int i = 0; i < rows.Count; i++)
-            {
-                if (IsBreakPoint(rows[i], i + 1))
-                {
-                    ranges.Add(Tuple.Create(start, i + 1));
-                    start = i + 1;
-                }
-            }
-            if (start < rows.Count)
-                ranges.Add(Tuple.Create(start, rows.Count - start));
-
-            return ranges;
+            return _breakRegex.IsMatch(lastTile.Data[TextTileRow.TEXT_DATA_NAME]);
         }
 
         private IItem CreateItem(string poem, int partition, string title)
@@ -290,19 +226,19 @@ namespace Catutil.Migration.Sql
             string title = FilterTitle(rows[0].GetText());
 
             // apply partitioning if required
-            IList<Tuple<int, int>> ranges = GetRowPartitions(rows);
+            IList<Tuple<int, int>> ranges = _partitioner.Partition(rows.Count,
+                i => IsBreakPoint(rows[i]));
             IItem retItem = null;
 
             for (int i = 0; i < ranges.Count; i++)
             {
-                // item
-                IItem item = CreateItem(_poems[_poemIndex], i + 1, title);
-
-                // tiled text part
                 int start = ranges[i].Item1;
                 int len = ranges[i].Item2;
                 string firstRowId = rows[start].Data["_id"];
                 string lastRowId = rows[start + len - 1].Data["_id"];
+
+                IItem item = CreateItem(_poems[_poemIndex], i + 1, title +
+                    $" {firstRowId}-{lastRowId}");
 
                 TiledTextPart part = new TiledTextPart
                 {

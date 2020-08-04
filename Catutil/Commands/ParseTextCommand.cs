@@ -97,7 +97,7 @@ namespace Catutil.Commands
             };
 
             int itemCount = 0;
-            int outputFileCount = 0;
+            int fileItemCount = 0, fileNr = 0;
             TextWriter writer = null;
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings
             {
@@ -114,20 +114,23 @@ namespace Catutil.Commands
             while ((item = parser.Read()) != null)
             {
                 itemCount++;
+                fileItemCount++;
                 Console.WriteLine(item.Title);
 
                 // create new output file if required
                 if (writer == null
-                    || (_maxItemPerFile > 0 && itemCount > _maxItemPerFile))
+                    || (_maxItemPerFile > 0 && fileItemCount > _maxItemPerFile))
                 {
                     if (writer != null) CloseOutputFile(writer);
                     string path = Path.Combine(_outputDir,
-                        $"{_dbName}_{++outputFileCount:00000}.json");
+                        $"{_dbName}_{++fileNr:00000}.json");
 
                     writer = new StreamWriter(new FileStream(path,
                         FileMode.Create, FileAccess.Write, FileShare.Read),
                         Encoding.UTF8);
                     writer.WriteLine("[");
+
+                    fileItemCount = 0;
                 }
 
                 // dump item into it

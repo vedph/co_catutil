@@ -135,10 +135,10 @@ namespace Catutil.Migration.Sql
                     rows.Add(row);
 
                     // tiles in row
+                    int x = 0;
                     foreach (string token in line.Split(_tileSepChars,
                         StringSplitOptions.RemoveEmptyEntries))
                     {
-                        int x = 0;
                         var tile = new TextTile
                         {
                             X = ++x,

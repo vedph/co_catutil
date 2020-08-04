@@ -1,12 +1,15 @@
-﻿using Catutil.Migration.Entries;
-using Microsoft.Extensions.CommandLineUtils;
+﻿using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
-using Proteus.Core.Entries;
-using Proteus.Entries;
-using SimpleInjector;
+using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
+using Serilog;
+using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using Catutil.Migration.Sql;
+using Cadmus.Core;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Catutil.Commands
 {
@@ -14,88 +17,128 @@ namespace Catutil.Commands
     {
         private readonly IConfiguration _config;
         private readonly string _dbName;
-        private readonly string _pipelineCfgPath;
+        private readonly string _outputDir;
+        private readonly int _maxItemPerFile;
 
         public ParseTextCommand(AppOptions options, string dbName,
-            string pipelineCfgPath)
+            string outputDir, int maxItemPerFile)
         {
             _config = options?.Configuration ??
                 throw new ArgumentNullException(nameof(options));
             _dbName = dbName ?? throw new ArgumentNullException(nameof(dbName));
-            _pipelineCfgPath = pipelineCfgPath ??
-                throw new ArgumentNullException(nameof(pipelineCfgPath));
+            _outputDir = outputDir
+                ?? throw new ArgumentNullException(nameof(outputDir));
+            _maxItemPerFile = maxItemPerFile;
         }
 
         public static void Configure(CommandLineApplication command,
             AppOptions options)
         {
-            command.Description = "Parse CO text.";
+            if (command == null)
+                throw new ArgumentNullException(nameof(command));
+            command.Description = "Parse text lines from MySql database into JSON files";
             command.HelpOption("-?|-h|--help");
 
             CommandArgument dbNameArgument = command.Argument("[db-name]",
-                "The database name");
-            CommandArgument pipelineCfgArgument = command.Argument("[pipeline-cfg]",
-                "The pipeline configuration path");
+                "The source database name");
+            CommandArgument outputDirArgument = command.Argument("[output-dir]",
+                "The output directory");
+            CommandOption maxItemPerFileOption = command.Option("-m|--max",
+                "Max number of items per output file",
+                CommandOptionType.SingleValue);
 
             command.OnExecute(() =>
             {
+                int max = 100;
+                if (maxItemPerFileOption.HasValue()
+                    && int.TryParse(maxItemPerFileOption.Value(), out int n))
+                {
+                    max = n;
+                }
                 options.Command = new ParseTextCommand(
                     options,
                     dbNameArgument.Value,
-                    pipelineCfgArgument.Value);
+                    outputDirArgument.Value,
+                    max);
                 return 0;
             });
+        }
+
+        private static void CloseOutputFile(TextWriter writer)
+        {
+            writer.WriteLine("]");
+            writer.Flush();
+            writer.Close();
         }
 
         public Task Run()
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("PARSE TEXT\n");
+            Console.WriteLine("PARSE SQL TEXT\n");
             Console.ResetColor();
             Console.WriteLine(
-                $"DB name: {_dbName}\n" +
-                $"Pipeline config: {_pipelineCfgPath}\n");
+                $"Database name: {_dbName}\n" +
+                $"Output dir: {_outputDir}\n" +
+                $"Max items per file: {_maxItemPerFile}\n");
+
+            ILoggerFactory loggerFactory = new LoggerFactory();
+            loggerFactory.AddSerilog(Log.Logger);
+            Log.Logger.Information("PARSE SQL TEXT");
 
             // get the connection string
-            string csTemplate = _config.GetConnectionString("Catullus");
+            string csTemplate = _config.GetConnectionString(_dbName);
             string cs = string.Format(csTemplate, _dbName);
 
-            // load the pipeline configuration
-            Console.WriteLine("Building the pipeline...");
-            ConfigurationBuilder builder = new ConfigurationBuilder();
-            builder.AddJsonFile(_pipelineCfgPath);
-            IConfiguration pipelineCfg = builder.Build();
-
-            // create the pipeline
-            EntryPipeline pipeline = new EntryPipeline();
-            Container container = new Container();
-            EntryParserFactory.ConfigureServices(container);
-            EntryParserFactory factory = new EntryParserFactory(container, pipelineCfg)
+            SqlTextParser parser = new SqlTextParser(cs)
             {
-                ConnectionString = cs
+                Logger = loggerFactory.CreateLogger("parse-sql-text")
             };
-            pipeline.Configure(factory);
 
-            IEntryReader entryReader = factory.GetEntryReader();
-            List<DecodedEntry> entries = new List<DecodedEntry>();
-            EntrySetReaderContext context = new EntrySetReaderContext();
-            DecodedEntry entry;
-            int count = 0;
-
-            Console.WriteLine("Reading entries: ");
-            while ((entry = entryReader.Read()) != null)
+            int itemCount = 0;
+            int outputFileCount = 0;
+            TextWriter writer = null;
+            JsonSerializerSettings jsonSettings = new JsonSerializerSettings
             {
-                if (++count % 10 == 0) Console.Write('.');
+                ContractResolver = new DefaultContractResolver
+                {
+                    NamingStrategy = new CamelCaseNamingStrategy()
+                },
+                Formatting = Formatting.Indented
+            };
+            IItem item;
 
-                entries.Clear();
-                entries.Add(entry);
-                EntrySet set = new EntrySet(entries, context);
-                context.Number++;
+            if (!Directory.Exists(_outputDir)) Directory.CreateDirectory(_outputDir);
 
-                pipeline.Execute<object>(set, null);
+            while ((item = parser.Read()) != null)
+            {
+                itemCount++;
+                Console.WriteLine(item.Title);
+
+                // create new output file if required
+                if (writer == null
+                    || (_maxItemPerFile > 0 && itemCount > _maxItemPerFile))
+                {
+                    if (writer != null) CloseOutputFile(writer);
+                    string path = Path.Combine(_outputDir,
+                        $"{_dbName}_{++outputFileCount:00000}.json");
+
+                    writer = new StreamWriter(new FileStream(path,
+                        FileMode.Create, FileAccess.Write, FileShare.Read),
+                        Encoding.UTF8);
+                    writer.WriteLine("[");
+                }
+
+                // dump item into it
+                string json = JsonConvert.SerializeObject(
+                    item, jsonSettings);
+                // string json = JsonSerializer.Serialize(item, typeof(object), options);
+                // this will output a , also for the last JSON array item,
+                // but we don't care about it -- that's just a dump, and
+                // it's easy to ignore/remove it if needed.
+                writer.WriteLine(json + ",");
             }
-            Console.WriteLine($"\nEntries read: {count}");
 
+            Console.WriteLine($"Output items: {itemCount}");
             return Task.CompletedTask;
         }
     }

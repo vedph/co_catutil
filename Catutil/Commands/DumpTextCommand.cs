@@ -49,7 +49,7 @@ namespace Catutil.Commands
         public Task Run()
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("DUMP TEXT\n");
+            Console.WriteLine("DUMP CO TEXT\n");
             Console.ResetColor();
             Console.WriteLine(
                 $"Input dir: {_inputDir}\n" +

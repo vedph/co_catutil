@@ -39,7 +39,7 @@ As for text and apparatus, importing CO data happens in two main steps:
 
 2. read each apparatus entry, as split and rewritten by the previous step, and incrementally apply **parsing**, so that semantic roles can be inferred from a combination of typographic formatting, text content, and context.
 
-The parsing process is based on a bigger infrastructure (codenamed _Proteus_) I created for other projects, requiring to remodel heavily typographically marked texts into semantic structures. Proteus has been applied to real-world projects related to big bilingual or monolingual dictionaries, documental archives, and paper-based critical editions (see D. Fusi, *Recovering Legacy in the Digital World: Tales and Tools*, «Rationes Rerum» 12 (2018) 203-262). Its main purpose is providing a framework to compose an incrementally built parsing pipeline, especially fit to complex texts where scarce or no documentation is available. In these cases, one usually starts with a few hypotheses about the most evident semantic roles inside the original text, and then goes on by progressively refining and adding new detection rules, using a number of prebuilt or custom built modules which can chained at will. This allows to heuristically define a full parsing process, when you can examine the results at each single repetition pass, from the very beginning up to the end.
+The parsing process is based on a bigger infrastructure (codenamed _Proteus_) I created for other projects, requiring to remodel heavily typographically marked texts into semantic structures. Proteus has been applied to real-world projects related to big bilingual or monolingual dictionaries, documental archives, and paper-based critical editions (see D. Fusi, *Recovering Legacy in the Digital World: Tales and Tools*, «Rationes Rerum» 12 (2018) 203-262). Its main purpose is providing a framework to compose an incrementally built parsing pipeline, especially fit to complex texts where scarce or no documentation is available. In these cases, one usually starts with a few hypotheses about the most evident semantic roles inside the original text; then, he goes on by progressively refining and adding new detection rules, using a number of prebuilt or custom built modules which can chained at will. This allows to heuristically define a full parsing process, when you can examine the results at each single repetition pass, from the very beginning up to the end.
 
 The Proteus-based parsing pipeline includes any number of different types of modular software components; it is fully defined in a JSON file, where types, order and parameters of each component are specified.
 
@@ -74,7 +74,7 @@ Essentially, Proteus reduces any source into a common model, represented by a fl
 
   Please notice that the term _entry_ here is used in two very different contexts: in the context of Cadmus layer models, an entry is the item of an array of models in a layer part's fragment; in turn, a fragment is a set of models referred to the same portion of the base text. In the context of Proteus transformations, an _entry_ is an atomic piece of data from a text, whether it's just a text, a formatting property, or a more complex command.
 
-The typical strategy here is looking at the list and defining *regions* inside it, i.e. sequences of entries belonging to the same semantic unit. For instance, a region might be the list of witnesses (manuscripts) like the italic "OGR"; another the lemma in a variant; another a comment; etc. We want to define all the regions required to build the target Cadmus models for the apparatus.
+The typical strategy is looking at the list and defining *regions* inside it, i.e. sequences of entries belonging to the same semantic unit. For instance, a region might be the list of witnesses (manuscripts) like the italic "OGR"; another the lemma in a variant; another a comment; etc. We want to define all the regions required to build the target Cadmus models for the apparatus.
 
 Once we have these regions, we can take a specialized action for each of them, which allows the software to extract the data, remodel them, and store the result in the target database. That's the task of components named region *parsers*. Each region can be handled by a specific parser.
 
@@ -220,7 +220,7 @@ where:
 Example:
 
 ```ps1
-parse-text catullus c:\users\dfusi\desktop\co\Dump.json
+parse-xls-text catullus c:\users\dfusi\desktop\co\Dump.json
 ```
 
 The target database has 3 tables:
@@ -331,14 +331,30 @@ Its corresponding apparatus fragments are 3 (I omit the `id` value as its meanin
 - `ordinal`: `3`
 - `value`: `meum _MS. 19 a. 1450 ca., MS 45 a. 1465 ca._`
 
-### Command parse-text
+### Command dump-text
 
-This command parses the text from each fragment entry in the Catullus database dump, using a specified Proteus pipeline.
+This command dumps Excel texts into the console. It is a diagnostic command to quickly inspect the Excel reading capabilities.
 
 Syntax:
 
 ```ps1
-.\Catutil.exe parse-text SourceDBName PipelineConfigPath OutputDir
+.\Catutil.exe dump-text InputDirectory ExcelFilesMask
+```
+
+Example:
+
+```ps1
+.\Catutil.exe dump-text c:\users\dfusi\desktop\co\ *Repertory*.xls
+```
+
+### Command parse-app
+
+This command parses the apparatus text from each fragment entry in the Catullus database, using a specified Proteus pipeline.
+
+Syntax:
+
+```ps1
+.\Catutil.exe parse-app SourceDBName PipelineConfigPath OutputDir
 ```
 
 where:
@@ -347,9 +363,37 @@ where:
 - `PipelineConfigPath`: the path to the parser pipeline configuration JSON file.
 - `OutputDir`: the output directory.
 
+Example:
+
+```ps1
+.\Catutil.exe parse-app catullus c:\users\dfusi\desktop\co\ProteusDump.json c:\users\dfusi\desktop\co\dump\
+```
+
+### Command parse-txt
+
+This command parses poems text lines from the MySql database into a set of dump JSON files, including an array of Cadmus items, each with its tiled text part.
+
+Syntax:
+
+```ps1
+.\Catutil.exe parse-txt SourceDatabaseName OutputDirectory [-m MaxItemPerFile]
+```
+
+where:
+
+- `SourceDatabaseName`: the source database name.
+- `OutputDirectory: the output directory.
+- `MaxItemPerFile`: maximum count of items per output file. Default is 100.
+
+Example:
+
+```ps1
+.\Catutil.exe parse-txt catullus c:\users\dfusi\desktop\co\items\
+```
+
 ### Command build-biblio
 
-This command builds a bibliography JSON lookup data file from the source XLS bibliography file, and also dumps all the bibliographic references which can be built from that data. The JSON data file will be named `biblio-lookup.json`, the dump file will be named `biblio-lookup-dump.txt`.
+This command builds a bibliography JSON lookup data file from the source XLS bibliography file, and also dumps all the bibliographic references which can be built from that data. The JSON data file will be named `biblio-lookup.json`; the dump file will be named `biblio-lookup-dump.txt`.
 
 Syntax:
 
@@ -362,24 +406,3 @@ Example:
 ```ps1
 .\Catutil.exe build-biblio "c:\users\dfusi\desktop\co\4_1 Bibliography.xls" c:\users\dfusi\desktop\co\
 ```
-
-## Procedure
-
-The general procedure to port data into the Cadmus system is summarized here. Currently it just ends with dumping entries, as this is the first step in analyzing them.
-
-1. have the XLS files with text and apparatus.
-2. ensure your MySql server is available.
-3. import the XLS files into MySql, e.g. (the first pass with `-d` is just a dry run for test):
-
-```ps1
-.\Catutil.exe import-text c:\users\dfusi\desktop\co\ *.xls catullus -d
-.\Catutil.exe import-text c:\users\dfusi\desktop\co\ *.xls catullus
-```
-
-4. dump the imported database into Proteus entries:
-
-```ps1
-.\Catutil.exe parse-text catullus c:\users\dfusi\desktop\co\ProteusDump.json
-```
-
-Refer to this solution for that JSON file.

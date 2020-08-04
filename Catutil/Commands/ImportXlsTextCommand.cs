@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Catutil.Commands
 {
-    public sealed class ImportTextCommand : ICommand
+    public sealed class ImportXlsTextCommand : ICommand
     {
         private readonly IConfiguration _config;
         private readonly string _inputDir;
@@ -20,7 +20,7 @@ namespace Catutil.Commands
         private readonly string _dbName;
         private readonly bool _dry;
 
-        public ImportTextCommand(AppOptions options, string inputDir,
+        public ImportXlsTextCommand(AppOptions options, string inputDir,
             string fileMask, string dbName, bool dry)
         {
             if (options == null)
@@ -40,7 +40,7 @@ namespace Catutil.Commands
         public static void Configure(CommandLineApplication command,
             AppOptions options)
         {
-            command.Description = "Import Excel texts into a MySql DB.";
+            command.Description = "Import CO Excel texts into a MySql DB.";
             command.HelpOption("-?|-h|--help");
 
             CommandArgument inputDirArgument = command.Argument("[input-dir]",
@@ -55,7 +55,7 @@ namespace Catutil.Commands
 
             command.OnExecute(() =>
             {
-                options.Command = new ImportTextCommand(
+                options.Command = new ImportXlsTextCommand(
                     options,
                     inputDirArgument.Value,
                     fileMaskArgument.Value,

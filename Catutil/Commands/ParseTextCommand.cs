@@ -134,9 +134,9 @@ namespace Catutil.Commands
                 }
 
                 // dump item into it
-                string json = JsonConvert.SerializeObject(
-                    item, jsonSettings);
+                string json = JsonConvert.SerializeObject(item, jsonSettings);
                 // string json = JsonSerializer.Serialize(item, typeof(object), options);
+
                 // this will output a , also for the last JSON array item,
                 // but we don't care about it -- that's just a dump, and
                 // it's easy to ignore/remove it if needed.

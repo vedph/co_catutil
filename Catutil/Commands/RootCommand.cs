@@ -21,6 +21,7 @@ namespace Catutil.Commands
             app.Command("parse-app", c => ParseApparatusCommand.Configure(c, options));
             app.Command("parse-txt", c => ParseTextCommand.Configure(c, options));
             app.Command("build-biblio", c => BuildBiblioLookupCommand.Configure(c, options));
+            app.Command("import-json", c => ImportJsonCommand.Configure(c, options));
 
             app.OnExecute(() =>
             {

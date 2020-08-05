@@ -159,7 +159,8 @@ namespace Catutil.Migration.Sql
             return _breakRegex.IsMatch(lastTile.Data[TextTileRow.TEXT_DATA_NAME]);
         }
 
-        private IItem CreateItem(string poem, int partition, string title)
+        private IItem CreateItem(string poem, int partition, string title,
+            string citation)
         {
             IItem item = new Item
             {
@@ -167,7 +168,8 @@ namespace Catutil.Migration.Sql
                 CreatorId = _userId,
                 UserId = _userId,
                 GroupId = poem,
-                Title = $"{poem} {partition:00} {title}"
+                Title = $"{poem} {partition:00} {title}",
+                Description = citation
             };
             item.SortKey = _sortKeyBuilder.BuildKey(item, null);
             return item;
@@ -237,15 +239,15 @@ namespace Catutil.Migration.Sql
                 string firstRowId = rows[start].Data["_id"];
                 string lastRowId = rows[start + len - 1].Data["_id"];
 
-                IItem item = CreateItem(_poems[_poemIndex], i + 1, title +
-                    $" {firstRowId}-{lastRowId}");
+                IItem item = CreateItem(_poems[_poemIndex], i + 1, title,
+                    $"{firstRowId}-{lastRowId}");
 
                 TiledTextPart part = new TiledTextPart
                 {
                     ItemId = item.Id,
                     CreatorId = _userId,
                     UserId = _userId,
-                    Citation = $"{_poems[_poemIndex]}.{firstRowId}-{lastRowId}",
+                    Citation = $"{firstRowId}-{lastRowId}",
                     Rows = rows.Skip(start).Take(len).ToList()
                 };
                 item.Parts.Add(part);

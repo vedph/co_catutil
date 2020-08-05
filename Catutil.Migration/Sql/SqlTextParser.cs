@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -30,7 +31,8 @@ namespace Catutil.Migration.Sql
         private readonly IPartitioner _partitioner;
         private readonly Queue<IItem> _itemQueue;
         private DbConnection _connection;
-        private DbCommand _cmd;
+        private DbCommand _cmdGetPoemLines;
+        private DbCommand _cmdSetItemId;
         private bool _end;
         private List<string> _poems;
         private int _poemIndex;
@@ -68,6 +70,13 @@ namespace Catutil.Migration.Sql
                     ?? throw new ArgumentNullException(nameof(value));
             }
         }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this parser should update
+        /// the source database by mapping each line to its item ID. Default
+        /// value is true.
+        /// </summary>
+        public bool IsItemIdMappingEnabled { get; set; }
         #endregion
 
         /// <summary>
@@ -90,6 +99,7 @@ namespace Catutil.Migration.Sql
             _breakRegex = new Regex(@"[\u037e.?!][^\p{L}]*$");
             _titleTailRegex = new Regex(@"\s*[,.;]\s*$");
             _itemQueue = new Queue<IItem>();
+            IsItemIdMappingEnabled = true;
         }
 
         private void EnsureConnected()
@@ -117,9 +127,9 @@ namespace Catutil.Migration.Sql
         private IList<TextTileRow> GetPoemRows(string poem)
         {
             List<TextTileRow> rows = new List<TextTileRow>();
-            _cmd.Parameters[0].Value = poem;
+            _cmdGetPoemLines.Parameters[0].Value = poem;
 
-            using (var reader = _cmd.ExecuteReader())
+            using (var reader = _cmdGetPoemLines.ExecuteReader())
             {
                 int y = 0;
                 while (reader.Read())
@@ -132,6 +142,10 @@ namespace Catutil.Migration.Sql
                         Y = ++y
                     };
                     row.Data["_id"] = id;
+                    // store the ordinal for later use when updating item IDs
+                    // in the source database
+                    row.Data["_ord"] = reader.GetInt32(2)
+                        .ToString(CultureInfo.InvariantCulture);
                     rows.Add(row);
 
                     // tiles in row
@@ -178,6 +192,59 @@ namespace Catutil.Migration.Sql
         private string FilterTitle(string title) =>
             _titleTailRegex.Replace(title, "").Trim();
 
+        private void CreateGetPoemLinesCommand()
+        {
+            _cmdGetPoemLines = _connection.CreateCommand();
+            _cmdGetPoemLines.CommandText =
+                "SELECT `id`,`value`,`ordinal` FROM `line` " +
+                "WHERE `poem`=@poem ORDER BY `ordinal`";
+            DbParameter p = _cmdGetPoemLines.CreateParameter();
+            p.ParameterName = "@poem";
+            p.DbType = DbType.String;
+            p.Direction = ParameterDirection.Input;
+            _cmdGetPoemLines.Parameters.Add(p);
+        }
+
+        private void CreateSetItemIdCommand()
+        {
+            _cmdSetItemId = _connection.CreateCommand();
+            _cmdSetItemId.CommandText =
+                "UPDATE `line` SET `itemId`=@itemId\n" +
+                "WHERE `poem`=@poem\n" +
+                "AND `ordinal`>=@firstOrdinal AND `ordinal`<=@lastOrdinal";
+
+            DbParameter itemIdParam = _cmdSetItemId.CreateParameter();
+            itemIdParam.ParameterName = "@itemId";
+            itemIdParam.DbType = DbType.String;
+            itemIdParam.Direction = ParameterDirection.Input;
+            _cmdSetItemId.Parameters.Add(itemIdParam);
+
+            DbParameter poemParam = _cmdSetItemId.CreateParameter();
+            poemParam.ParameterName = "@poem";
+            poemParam.DbType = DbType.String;
+            poemParam.Direction = ParameterDirection.Input;
+            _cmdSetItemId.Parameters.Add(poemParam);
+
+            DbParameter firstOrdinalParam = _cmdSetItemId.CreateParameter();
+            firstOrdinalParam.ParameterName = "@firstOrdinal";
+            firstOrdinalParam.DbType = DbType.Int32;
+            firstOrdinalParam.Direction = ParameterDirection.Input;
+            _cmdSetItemId.Parameters.Add(firstOrdinalParam);
+
+            DbParameter lastOrdinalParam = _cmdSetItemId.CreateParameter();
+            lastOrdinalParam.ParameterName = "@lastOrdinal";
+            lastOrdinalParam.DbType = DbType.Int32;
+            lastOrdinalParam.Direction = ParameterDirection.Input;
+            _cmdSetItemId.Parameters.Add(lastOrdinalParam);
+        }
+
+        private void ClearItemIds()
+        {
+            DbCommand cmd = _connection.CreateCommand();
+            cmd.CommandText = "UPDATE `line` SET `itemId`=NULL";
+            cmd.ExecuteNonQuery();
+        }
+
         private bool Init()
         {
             // collect poems
@@ -192,14 +259,13 @@ namespace Catutil.Migration.Sql
             }
 
             // create the poem's lines query command
-            _cmd = _connection.CreateCommand();
-            _cmd.CommandText = "SELECT `id`,`value` FROM `line` " +
-                "WHERE `poem`=@poem ORDER BY `ordinal`";
-            var p = _cmd.CreateParameter();
-            p.ParameterName = "@poem";
-            p.DbType = DbType.String;
-            p.Direction = ParameterDirection.Input;
-            _cmd.Parameters.Add(p);
+            CreateGetPoemLinesCommand();
+
+            // create the item ID setter command
+            CreateSetItemIdCommand();
+
+            // clear all the item IDs if required
+            if (IsItemIdMappingEnabled) ClearItemIds();
 
             _itemQueue.Clear();
 
@@ -254,6 +320,25 @@ namespace Catutil.Migration.Sql
 
                 if (i == 0) retItem = item;
                 else _itemQueue.Enqueue(item);
+            }
+
+            // update the item ID for the current item if requested
+            if (IsItemIdMappingEnabled)
+            {
+                _cmdSetItemId.Parameters["@itemId"].Value = retItem.Id;
+                _cmdSetItemId.Parameters["@poem"].Value = _poems[_poemIndex];
+
+                TiledTextPart textPart = (TiledTextPart)retItem.Parts[0];
+
+                _cmdSetItemId.Parameters["@firstOrdinal"].Value =
+                    int.Parse(textPart.Rows[0].Data["_ord"],
+                    CultureInfo.InvariantCulture);
+
+                _cmdSetItemId.Parameters["@lastOrdinal"].Value =
+                    int.Parse(textPart.Rows[textPart.Rows.Count - 1].Data["_ord"],
+                    CultureInfo.InvariantCulture);
+
+                _cmdSetItemId.ExecuteNonQuery();
             }
 
             // this poem was completed, move forward for the next Read

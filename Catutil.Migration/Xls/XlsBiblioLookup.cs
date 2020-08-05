@@ -178,6 +178,19 @@ namespace Catutil.Migration.Xls
         }
 
         /// <summary>
+        /// Adds the specified key to the index, if not already present.
+        /// </summary>
+        /// <param name="key">The key to add.</param>
+        /// <exception cref="ArgumentNullException">key</exception>
+        public void AddToIndex(string key)
+        {
+            if (key == null) throw new ArgumentNullException(nameof(key));
+
+            if (_trie == null) _trie = new Trie();
+            _trie.Insert(key, _ => { });
+        }
+
+        /// <summary>
         /// Dumps the index keys into the specified text writer.
         /// </summary>
         /// <param name="writer">The writer.</param>

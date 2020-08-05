@@ -371,12 +371,12 @@ Example:
 
 ### Command parse-txt
 
-This command parses poems text lines from the MySql database into a set of dump JSON files, including an array of Cadmus items, each with its tiled text part.
+This command parses poems text lines from the MySql database into a set of dump JSON files, including an array of Cadmus items, each with its tiled text part. Also, the `itemId` column in the `line` table of the source database is updated so that it reflects the mapping between lines and their Cadmus items.
 
 Syntax:
 
 ```ps1
-.\Catutil.exe parse-txt SourceDatabaseName OutputDirectory [-m MaxItemPerFile]
+.\Catutil.exe parse-txt SourceDatabaseName OutputDirectory [-m MaxItemPerFile] [-n]
 ```
 
 where:
@@ -384,6 +384,7 @@ where:
 - `SourceDatabaseName`: the source database name.
 - `OutputDirectory: the output directory.
 - `MaxItemPerFile`: maximum count of items per output file. Default is 100.
+- `-n`: add this option to avoid updating the `itemId` column.
 
 Example:
 

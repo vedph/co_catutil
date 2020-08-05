@@ -6,6 +6,7 @@ CREATE TABLE `line` (
   `poem` varchar(10) NOT NULL,
   `ordinal` int NOT NULL,
   `value` varchar(300) NOT NULL,
+  `itemId` char(36) NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

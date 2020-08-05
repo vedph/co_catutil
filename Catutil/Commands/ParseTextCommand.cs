@@ -20,9 +20,10 @@ namespace Catutil.Commands
         private readonly string _dbName;
         private readonly string _outputDir;
         private readonly int _maxItemPerFile;
+        private readonly bool _noItemIdUpdate;
 
         public ParseTextCommand(AppOptions options, string dbName,
-            string outputDir, int maxItemPerFile)
+            string outputDir, int maxItemPerFile, bool noItemIdUpdate)
         {
             _config = options?.Configuration ??
                 throw new ArgumentNullException(nameof(options));
@@ -30,6 +31,7 @@ namespace Catutil.Commands
             _outputDir = outputDir
                 ?? throw new ArgumentNullException(nameof(outputDir));
             _maxItemPerFile = maxItemPerFile;
+            _noItemIdUpdate = noItemIdUpdate;
         }
 
         public static void Configure(CommandLineApplication command,
@@ -47,6 +49,9 @@ namespace Catutil.Commands
             CommandOption maxItemPerFileOption = command.Option("-m|--max",
                 "Max number of items per output file",
                 CommandOptionType.SingleValue);
+            CommandOption noItemIdUpdateOption = command.Option("-n|--noItemId",
+                "Do not update itemId column in line table",
+                CommandOptionType.NoValue);
 
             command.OnExecute(() =>
             {
@@ -60,7 +65,8 @@ namespace Catutil.Commands
                     options,
                     dbNameArgument.Value,
                     outputDirArgument.Value,
-                    max);
+                    max,
+                    noItemIdUpdateOption.HasValue());
                 return 0;
             });
         }
@@ -80,7 +86,8 @@ namespace Catutil.Commands
             Console.WriteLine(
                 $"Database name: {_dbName}\n" +
                 $"Output dir: {_outputDir}\n" +
-                $"Max items per file: {_maxItemPerFile}\n");
+                $"Max items per file: {_maxItemPerFile}\n" +
+                $"Item ID update: {!_noItemIdUpdate}\n");
 
             ILoggerFactory loggerFactory = new LoggerFactory();
             loggerFactory.AddSerilog(Log.Logger);
@@ -93,7 +100,8 @@ namespace Catutil.Commands
             SqlTextParser parser = new SqlTextParser(cs,
                 new StandardPartitioner())
             {
-                Logger = loggerFactory.CreateLogger("parse-sql-text")
+                Logger = loggerFactory.CreateLogger("parse-sql-text"),
+                IsItemIdMappingEnabled = !_noItemIdUpdate
             };
 
             int itemCount = 0;

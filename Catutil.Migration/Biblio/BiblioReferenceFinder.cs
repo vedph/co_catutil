@@ -1,6 +1,7 @@
 ﻿using Catutil.Migration.Xls;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Catutil.Migration.Biblio
@@ -27,8 +28,10 @@ namespace Catutil.Migration.Biblio
             int index, int minLen)
         {
             int n = key.Length - minLen;
+            Debug.Assert(n >= 0);
             for (int i = 0; i < n; i++)
             {
+                if (index + minLen + i >= text.Length) return false;
                 if (text[index + minLen + i] != key[minLen + i])
                     return false;
             }

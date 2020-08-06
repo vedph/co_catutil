@@ -51,7 +51,7 @@ namespace Catutil.Commands
         public Task Run()
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("PARSE XLS TEXT\n");
+            Console.WriteLine("PARSE APPARATUS\n");
             Console.ResetColor();
             Console.WriteLine(
                 $"DB name: {_dbName}\n" +

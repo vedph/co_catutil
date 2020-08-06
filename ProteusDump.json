@@ -68,16 +68,6 @@
     {
       "Id": "region-detector.pattern",
       "Options": {
-        "Tag": "ms",
-        "IsWholeRegionInA": true,
-        "PatternEntriesA": [
-          "txt$^MS\\."
-        ]
-      }
-    },
-    {
-      "Id": "region-detector.pattern",
-      "Options": {
         "Tag": "lem",
         "IsAnchoredAtStart": true,
         "IsWholeRegionInA": true,
@@ -191,16 +181,25 @@
           "txt$^\\s*[0-9]"
         ]
       }
-    }
-  ],
-  "EntryRegionFilters": [
+    },
     {
-      "Id": "region-filter.unmapped",
+      "Id": "region-detector.unmapped",
       "Options": {
-        "UnmappedRegionTag": "x"
+        "UnmappedRegionTag": "x",
+        "IsExcludePartialEnabled": true
+      }
+    },
+    {
+      "Id": "region-detector.co-ms-ref"
+    },
+    {
+      "Id": "region-detector.co-biblio-ref",
+      "Options": {
+        "LookupFilePath": "c:\\users\\dfusi\\desktop\\co\\biblio-lookup.json"
       }
     }
   ],
+  "EntryRegionFilters": [],
   "EntryRegionParsers": [
     {
       "Id": "entry-region-parser.excel-dump",

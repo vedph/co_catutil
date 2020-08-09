@@ -30,15 +30,14 @@ namespace Catutil.Migration.Entries
         /// Parses the region of entries at <paramref name="regionIndex" />
         /// in the specified <paramref name="regions" />.
         /// </summary>
-        /// <typeparam name="T">The type of the target object.</typeparam>
         /// <param name="set">The entries set.</param>
         /// <param name="regions">The regions.</param>
         /// <param name="regionIndex">Index of the region in the set.</param>
-        /// <param name="target">The target.</param>
+        /// <param name="target">The target object.</param>
         /// <returns>
         /// The index to the next region to be parsed.
         /// </returns>
-        int Parse<T>(EntrySet set, IReadOnlyList<EntryRegion> regions,
-            int regionIndex, T target) where T : class;
+        int Parse(EntrySet set, IReadOnlyList<EntryRegion> regions,
+            int regionIndex, object target);
     }
 }

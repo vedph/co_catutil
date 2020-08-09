@@ -81,13 +81,13 @@ namespace Catutil.Migration.Entries
         /// <param name="set">The entries set.</param>
         /// <param name="regions">The regions.</param>
         /// <param name="regionIndex">Index of the region in the set.</param>
-        /// <param name="target">The target.</param>
+        /// <param name="target">The target object.</param>
         /// <returns>
         /// The index to the next region to be parsed.
         /// </returns>
         /// <exception cref="ArgumentNullException">set or regions</exception>
-        public int Parse<T>(EntrySet set, IReadOnlyList<EntryRegion> regions,
-            int regionIndex, T target) where T : class
+        public int Parse(EntrySet set, IReadOnlyList<EntryRegion> regions,
+            int regionIndex, object target)
         {
             if (set is null) throw new ArgumentNullException(nameof(set));
             if (regions is null) throw new ArgumentNullException(nameof(regions));

@@ -10,11 +10,11 @@ namespace Catutil.Migration.Entries
     /// <summary>
     /// Entry ID escape decoder. This decoder the escape inserted by
     /// <see cref="SqlEntryReader"/> when reading rows from the CO database.
-    /// This escape resolves into a <c>set-ids</c> command having 2 arguments,
-    /// <c>f</c>=fragment ID and <c>e</c>=entry ID.
+    /// This escape resolves into a <c>set-ids</c> command having 3 arguments,
+    /// <c>i</c>=item ID, <c>f</c>=fragment ID, and <c>e</c>=entry ID.
     /// <para>Tag: <c>escape-decoder.co-entry-id</c>.</para>
     /// </summary>
-    /// <seealso cref="Proteus.Core.Escapes.IEscapeDecoder" />
+    /// <seealso cref="IEscapeDecoder" />
     [Tag("escape-decoder.co-entry-id")]
     public sealed class EntryIdEscapeDecoder : IEscapeDecoder
     {
@@ -31,7 +31,7 @@ namespace Catutil.Migration.Entries
         /// </summary>
         public EntryIdEscapeDecoder()
         {
-            _idRegex = new Regex(@"(\d+)\.(\d+)");
+            _idRegex = new Regex(@"([-0-9a-f]{36})\.(\d+)\.(\d+)");
         }
 
         /// <summary>
@@ -72,7 +72,9 @@ namespace Catutil.Migration.Entries
                 return Tuple.Create(new DecodedEntry[]
                     {
                         new DecodedCommandEntry(index, len, "set-ids",
-                            "f", m.Groups[1].Value, "e", m.Groups[2].Value)
+                            "i", m.Groups[1].Value,
+                            "f", m.Groups[2].Value,
+                            "e", m.Groups[3].Value)
                     }, len);
             }
             return null;

@@ -1,4 +1,5 @@
-﻿using Fusi.Tools.Config;
+﻿using Cadmus.Philology.Parts.Layers;
+using Fusi.Tools.Config;
 using Microsoft.Extensions.Logging;
 using Proteus.Core.Entries;
 using Proteus.Core.Regions;
@@ -12,8 +13,9 @@ namespace Catutil.Migration.Entries
     /// <summary>
     /// Parser for CO <c>ids</c> region.
     /// This parser assumes that the <c>ids</c> region just contains a single
-    /// command entry, with arguments <c>f</c>=fragment ID and <c>e</c>=entry
-    /// ID. It then reads these IDs and updates the target object accordingly.
+    /// command entry, with arguments <c>i</c>=item ID, <c>f</c>=fragment ID
+    /// and <c>e</c>=entry ID. It then reads these IDs and updates the target
+    /// object accordingly.
     /// </summary>
     /// <seealso cref="IEntryRegionParser" />
     [Tag("entry-region-parser.co-ids")]
@@ -77,6 +79,10 @@ namespace Catutil.Migration.Entries
                     CultureInfo.InvariantCulture);
                 t.EntryId = int.Parse(cmd.GetArgument("e"),
                     CultureInfo.InvariantCulture);
+                string itemId = cmd.GetArgument("i");
+
+                // add a new entry
+                t.AddEntry(itemId, new ApparatusEntry());
             }
             else Logger?.LogError("Unexpected entry type in ids region " +
                 $"at {regionIndex}: \"{entry}\"");

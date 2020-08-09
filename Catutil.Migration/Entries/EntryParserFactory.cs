@@ -249,6 +249,18 @@ namespace Catutil.Migration.Entries
         }
 
         /// <summary>
+        /// Gets the optional parser context from <c>ParserContext</c>.
+        /// </summary>
+        /// <returns>Parser context or null.</returns>
+        public IParserContext GetParserContext()
+        {
+            return GetComponent<IParserContext>(
+                Configuration["ParserContext:Id"],
+                "ParserContext:Options",
+                false);
+        }
+
+        /// <summary>
         /// Gets the region parsers (from <c>/EntryRegionParsers</c>).
         /// </summary>
         /// <returns>parsers</returns>

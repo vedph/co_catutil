@@ -79,21 +79,31 @@ namespace Catutil.Commands
 
             IEntryReader entryReader = factory.GetEntryReader();
             List<DecodedEntry> entries = new List<DecodedEntry>();
-            EntrySetReaderContext context = new EntrySetReaderContext();
+            EntrySetReaderContext readerContext = new EntrySetReaderContext();
             DecodedEntry entry;
             int count = 0;
 
             Console.WriteLine("Reading entries: ");
-            while ((entry = entryReader.Read()) != null)
+            IParserContext parserContext = factory.GetParserContext();
+            parserContext.Start();
+
+            try
             {
-                if (++count % 10 == 0) Console.Write('.');
+                while ((entry = entryReader.Read()) != null)
+                {
+                    if (++count % 10 == 0) Console.Write('.');
 
-                entries.Clear();
-                entries.Add(entry);
-                EntrySet set = new EntrySet(entries, context);
-                context.Number++;
+                    entries.Clear();
+                    entries.Add(entry);
+                    EntrySet set = new EntrySet(entries, readerContext);
+                    readerContext.Number++;
 
-                pipeline.Execute<object>(set, null);
+                    pipeline.Execute<object>(set, parserContext);
+                }
+            }
+            finally
+            {
+                parserContext.End();
             }
             Console.WriteLine($"\nEntries read: {count}");
 

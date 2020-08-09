@@ -18,7 +18,7 @@ namespace Catutil.Migration.Sql
     /// database, and for each poem outputs 1 or more items, each having a
     /// <see cref="TiledTextPart"/> with the corresponding lines of text.
     /// </summary>
-    /// <seealso cref="Proteus.Core.IHasLogger" />
+    /// <seealso cref="IHasLogger" />
     public sealed class SqlTextParser : IHasLogger
     {
         private string _facetId;

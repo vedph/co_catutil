@@ -50,7 +50,7 @@ namespace Catutil.Migration.Entries
         /// <param name="set">The entries set.</param>
         /// <param name="regions">The regions.</param>
         /// <param name="regionIndex">Index of the region in the set.</param>
-        /// <param name="target">The target object.</param>
+        /// <param name="context">The context object.</param>
         /// <returns>
         /// The index to the next region to be parsed.
         /// </returns>
@@ -58,21 +58,25 @@ namespace Catutil.Migration.Entries
         /// </exception>
         public int Parse(EntrySet set,
             IReadOnlyList<EntryRegion> regions, int regionIndex,
-            object target)
+            object context)
         {
             if (set == null)
                 throw new ArgumentNullException(nameof(set));
             if (regions == null)
                 throw new ArgumentNullException(nameof(regions));
-            if (target == null)
-                throw new ArgumentNullException(nameof(target));
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
 
-            DecodedEntry entry = set.Entries[regions[regionIndex].Range.Start.Entry];
+            DecodedEntry entry =
+                set.Entries[regions[regionIndex].Range.Start.Entry];
+
             if (entry is DecodedCommandEntry cmd)
             {
-                CadmusParserContext t = target as CadmusParserContext;
-                t.FragmentId = int.Parse(cmd.GetArgument("f"), CultureInfo.InvariantCulture);
-                t.EntryId = int.Parse(cmd.GetArgument("e"), CultureInfo.InvariantCulture);
+                ApparatusParserContext t = context as ApparatusParserContext;
+                t.FragmentId = int.Parse(cmd.GetArgument("f"),
+                    CultureInfo.InvariantCulture);
+                t.EntryId = int.Parse(cmd.GetArgument("e"),
+                    CultureInfo.InvariantCulture);
             }
             else Logger?.LogError("Unexpected entry type in ids region " +
                 $"at {regionIndex}: \"{entry}\"");

@@ -160,15 +160,15 @@ namespace Catutil.Migration.Entries
 
         /// <summary>
         /// Executes this pipeline on the specified set of entries, using
-        /// <paramref name="target"/> as the target object which will get
+        /// <paramref name="context"/> as the target object which will get
         /// the results of this execution.
         /// </summary>
         /// <typeparam name="T">The type of the target object.</typeparam>
         /// <param name="set">The entries set.</param>
-        /// <param name="target">The target object or null.</param>
+        /// <param name="context">The context object or null.</param>
         /// <returns>The entry region set built.</returns>
         /// <exception cref="ArgumentNullException">set</exception>
-        public EntryRegionSet Execute<T>(EntrySet set, T target) where T : class
+        public EntryRegionSet Execute<T>(EntrySet set, T context) where T : class
         {
             if (set is null) throw new ArgumentNullException(nameof(set));
 
@@ -182,11 +182,12 @@ namespace Catutil.Migration.Entries
                     p => p.IsApplicable(set, regionSet.Regions, i));
                 if (parser != null)
                 {
-                    parser.Parse(set, regionSet.Regions, i, target);
+                    parser.Parse(set, regionSet.Regions, i, context);
                 }
                 else
                 {
-                    _logger?.LogWarning($"Unhandled region at {i}: {regionSet.Regions[i]}");
+                    _logger?.LogWarning(
+                        $"Unhandled region at {i}: {regionSet.Regions[i]}");
                 }
             }
 

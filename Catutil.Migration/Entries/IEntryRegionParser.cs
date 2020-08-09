@@ -33,11 +33,13 @@ namespace Catutil.Migration.Entries
         /// <param name="set">The entries set.</param>
         /// <param name="regions">The regions.</param>
         /// <param name="regionIndex">Index of the region in the set.</param>
-        /// <param name="target">The target object.</param>
+        /// <param name="context">The context object; usually this contains
+        /// a target object which gets filled by the parser, together with
+        /// any required context data.</param>
         /// <returns>
         /// The index to the next region to be parsed.
         /// </returns>
         int Parse(EntrySet set, IReadOnlyList<EntryRegion> regions,
-            int regionIndex, object target);
+            int regionIndex, object context);
     }
 }

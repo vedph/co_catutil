@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1D560F5C-A344-4703-A7CD-0D9A0504DAB1}"
 	ProjectSection(SolutionItems) = preProject
 		ProteusDump.json = ProteusDump.json
+		ProteusSave.json = ProteusSave.json
 		Readme.md = Readme.md
 	EndProjectSection
 EndProject

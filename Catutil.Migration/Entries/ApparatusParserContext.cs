@@ -13,7 +13,9 @@ namespace Catutil.Migration.Entries
     /// <summary>
     /// Context for CO apparatus parsers targeting Cadmus parts to be written
     /// into a set of JSON files.
+    /// <para>Tag: <c>parser-context.co-apparatus</c>.</para>
     /// </summary>
+    [Tag("parser-context.co-apparatus")]
     public class ApparatusParserContext : IParserContext,
         IConfigurable<CadmusParserContextOptions>
     {
@@ -101,6 +103,7 @@ namespace Catutil.Migration.Entries
                 throw new ArgumentNullException(nameof(options));
 
             _outputDir = options.OutputDirectory;
+            _maxPartsPerFile = options.MaxPartsPerFile;
         }
 
         private void SavePart()

@@ -1,0 +1,212 @@
+{
+  "EntryReader": {
+    "Id": "entry-reader.co-sql"
+  },
+  "EntryFilters": [
+    {
+      "Id": "entry-filter.escape",
+      "Options": {
+        "EscapeDecoders": [
+          {
+            "Id": "escape-decoder.co-entry-id"
+          },
+          {
+            "Id": "escape-decoder.co-italic"
+          }
+        ]
+      }
+    },
+    {
+      "Id": "entry-filter.txt-splitter",
+      "Options": {
+        "ContextPattern": [
+          "prp italic=1",
+          "txt$^[A-Z]",
+          "prp italic=0",
+          "txt$^[^0-9]",
+          "prp italic=1",
+          "txt$^\\s*[0-9][-.0-9a-z]*\\s*,\\s+[^\\s]"
+        ],
+        "ContextOffset": 5,
+        "IsTxtMergeEnabled": true,
+        "RepeatCount": -1,
+        "DividerPattern": ",\\s+",
+        "InsertedEntries": [
+          "txt , ",
+          "prp italic=1"
+        ]
+      }
+    },
+    {
+      "Id": "entry-filter.txt-merger"
+    }
+  ],
+  "EntryRegionDetectors": [
+    {
+      "Id": "region-detector.pattern",
+      "Options": {
+        "Tag": "ids",
+        "IsWholeRegionInA": true,
+        "IsAnchoredAtStart": true,
+        "PatternEntriesA": [
+          "cmd set-ids"
+        ]
+      }
+    },
+    {
+      "Id": "region-detector.pattern",
+      "Options": {
+        "Tag": "wit",
+        "IsWholeRegionInA": true,
+        "PatternEntriesA": [
+          "prp italic=1",
+          "txt$^[TOGRm2]+(,\\s*corr\\.\\s*[TOGRm2]?)?$",
+          "prp italic=0"
+        ]
+      }
+    },
+    {
+      "Id": "region-detector.pattern",
+      "Options": {
+        "Tag": "lem",
+        "IsAnchoredAtStart": true,
+        "IsWholeRegionInA": true,
+        "OffsetA": 2,
+        "PatternEntriesA": [
+          "cmd set-ids",
+          "prp italic=0",
+          "txt$^[^0-9]+$"
+        ]
+      }
+    },
+    {
+      "Id": "region-detector.pattern",
+      "Options": {
+        "Tag": "lem",
+        "IsAnchoredAtStart": true,
+        "IsWholeRegionInA": true,
+        "OffsetA": 1,
+        "PatternEntriesA": [
+          "cmd set-ids",
+          "txt$^[^0-9]+$"
+        ]
+      }
+    },
+    {
+      "Id": "region-detector.pattern",
+      "Options": {
+        "Tag": "del-lem",
+        "IsAnchoredAtStart": true,
+        "IsWholeRegionInA": true,
+        "OffsetA": 3,
+        "PatternEntriesA": [
+          "cmd set-ids",
+          "txt$^[^0-9]+$",
+          "prp italic=0",
+          "txt$^del\\.\\s+"
+        ]
+      }
+    },
+    {
+      "Id": "region-detector.pattern",
+      "Options": {
+        "Tag": "del-txt-rng",
+        "IsAnchoredAtStart": true,
+        "IsWholeRegionInA": true,
+        "OffsetA": 1,
+        "PatternEntriesA": [
+          "cmd set-ids",
+          "prp italic=1",
+          "txt$[0-9]-[0-9]+$",
+          "prp italic=0",
+          "txt$[^-]+-[^-]",
+          "prp italic=1",
+          "txt$^del\\.\\s+"
+        ]
+      }
+    },
+    {
+      "Id": "region-detector.pattern",
+      "Options": {
+        "Tag": "del-rng",
+        "IsAnchoredAtStart": true,
+        "IsWholeRegionInA": true,
+        "OffsetA": 2,
+        "PatternEntriesA": [
+          "cmd set-ids",
+          "prp italic=0",
+          "txt$^\\d+\\.\\d+-\\d+\\s+del\\.\\s+"
+        ]
+      }
+    },
+    {
+      "Id": "region-detector.pattern",
+      "Options": {
+        "Tag": "del-ln",
+        "IsAnchoredAtStart": true,
+        "IsWholeRegionInA": true,
+        "OffsetA": 2,
+        "PatternEntriesA": [
+          "cmd set-ids",
+          "prp italic=1",
+          "txt$^hunc\\s+uersum\\s+del\\."
+        ]
+      }
+    },
+    {
+      "Id": "region-detector.pattern",
+      "Options": {
+        "Tag": "del-ln",
+        "IsAnchoredAtStart": true,
+        "IsWholeRegionInA": true,
+        "OffsetA": 1,
+        "PatternEntriesA": [
+          "cmd set-ids",
+          "txt$^hunc\\s+uersum\\s+del\\."
+        ]
+      }
+    },
+    {
+      "Id": "region-detector.pattern",
+      "Options": {
+        "Tag": "auth",
+        "IsWholeRegionInA": true,
+        "OffsetA": 1,
+        "PatternEntriesA": [
+          "prp italic=1",
+          "txt$^[A-Z]",
+          "prp italic=0",
+          "txt$^[^0-9]",
+          "prp italic=1",
+          "txt$^\\s*[0-9]"
+        ]
+      }
+    },
+    {
+      "Id": "region-detector.unmapped",
+      "Options": {
+        "UnmappedRegionTag": "x",
+        "IsExcludePartialEnabled": true
+      }
+    },
+    {
+      "Id": "region-detector.co-ms-ref"
+    },
+    {
+      "Id": "region-detector.co-biblio-ref",
+      "Options": {
+        "LookupFilePath": "c:\\users\\dfusi\\desktop\\co\\biblio-lookup.json"
+      }
+    }
+  ],
+  "EntryRegionFilters": [],
+  "ParserContext": {
+    "Id": "parser-context.co-apparatus",
+    "Options": {
+      "OutputDirectory": "c:\\users\\dfusi\\desktop\\co\\app\\",
+      "MaxPartsPerFile": 100
+    }
+  },
+  "EntryRegionParsers": [
+  ]
+}

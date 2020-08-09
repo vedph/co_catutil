@@ -142,6 +142,7 @@ namespace Catutil.Migration.Entries
             container.Collection.Register<IEscapeDecoder>(assemblies);
             container.Collection.Register<IEntryRegionDetector>(assemblies);
             container.Collection.Register<IEntryRegionFilter>(assemblies);
+            container.Collection.Register<IParserContext>(assemblies);
             container.Collection.Register<IEntryRegionParser>(assemblies);
 
             // required for injection

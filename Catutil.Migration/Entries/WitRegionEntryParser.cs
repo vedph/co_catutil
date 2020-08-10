@@ -34,7 +34,7 @@ namespace Catutil.Migration.Entries
         /// </summary>
         public WitRegionEntryParser()
         {
-            _msRegex = new Regex("[TOGRm]2?");
+            _msRegex = new Regex(@"[TOGRm][12]?\??");
         }
 
         /// <summary>

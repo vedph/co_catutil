@@ -12,7 +12,11 @@ namespace Catutil.Migration.Entries
 {
     /// <summary>
     /// Context for CO apparatus parsers targeting Cadmus parts to be written
-    /// into a set of JSON files.
+    /// into a set of JSON files. This context accumulates the fragments and
+    /// entries of an apparatus part until its item ID changes. Then, it
+    /// saves the whole part in JSON format, using as output a set of files
+    /// so that no more than <see cref="CadmusParserContextOptions.MaxPartsPerFile"/>
+    /// parts are found in each file.
     /// <para>Tag: <c>parser-context.co-apparatus</c>.</para>
     /// </summary>
     [Tag("parser-context.co-apparatus")]

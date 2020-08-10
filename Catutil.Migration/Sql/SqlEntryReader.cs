@@ -74,7 +74,7 @@ namespace Catutil.Migration.Sql
 
             int id = _reader.GetInt32(0);
             int fragmentId = _reader.GetInt32(1);
-            string itemId = _reader.GetString(3);
+            string itemId = _reader.IsDBNull(3)? null : _reader.GetString(3);
             string value = BuildEntryPrefix(id, fragmentId, itemId)
                 + _reader.GetString(2);
 

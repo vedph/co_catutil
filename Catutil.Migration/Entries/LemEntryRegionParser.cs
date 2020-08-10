@@ -1,25 +1,15 @@
-﻿using Cadmus.Philology.Parts.Layers;
-using Fusi.Tools.Config;
+﻿using Fusi.Tools.Config;
 using Microsoft.Extensions.Logging;
 using Proteus.Core.Entries;
 using Proteus.Core.Regions;
 using Proteus.Entries;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 
 namespace Catutil.Migration.Entries
 {
-    /// <summary>
-    /// Parser for CO <c>ids</c> region.
-    /// This parser assumes that the <c>ids</c> region just contains a single
-    /// command entry, with arguments <c>i</c>=item ID, <c>f</c>=fragment ID
-    /// and <c>e</c>=entry ID. It then reads these IDs and updates the target
-    /// object accordingly.
-    /// </summary>
-    /// <seealso cref="IEntryRegionParser" />
-    [Tag("entry-region-parser.co-ids")]
-    public sealed class IdsRegionEntryParser : IEntryRegionParser
+    [Tag("entry-region-parser.co-lem")]
+    public sealed class LemEntryRegionParser : IEntryRegionParser
     {
         /// <summary>
         /// Gets or sets the logger.
@@ -45,7 +35,7 @@ namespace Catutil.Migration.Entries
             if (regions == null)
                 throw new ArgumentNullException(nameof(regions));
 
-            return regions[regionIndex].Tag == "ids";
+            return regions[regionIndex].Tag == "lem";
         }
 
         /// <summary>
@@ -72,23 +62,19 @@ namespace Catutil.Migration.Entries
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            DecodedEntry entry =
-                set.Entries[regions[regionIndex].Range.Start.Entry];
-
-            if (entry is DecodedCommandEntry cmd)
+            DecodedTextEntry entry =
+                set.Entries[regions[regionIndex].Range.Start.Entry] as DecodedTextEntry;
+            if (entry == null)
             {
-                ApparatusParserContext ctx = context as ApparatusParserContext;
-                ctx.FragmentId = int.Parse(cmd.GetArgument("f"),
-                    CultureInfo.InvariantCulture);
-                ctx.EntryId = int.Parse(cmd.GetArgument("e"),
-                    CultureInfo.InvariantCulture);
-                string itemId = cmd.GetArgument("i");
-
-                // add a new entry
-                ctx.AddEntry(itemId, new ApparatusEntry());
+                Logger?.LogError("Expected text entry in lem region at " +
+                    $"{regionIndex} not found");
             }
-            else Logger?.LogError("Unexpected entry type in ids region " +
-                $"at {regionIndex}: \"{entry}\"");
+            else
+            {
+                // set the current entry's value
+                ApparatusParserContext ctx = (ApparatusParserContext)context;
+                ctx.CurrentEntry.Value = entry.Value;
+            }
 
             return regionIndex + 1;
         }

@@ -272,6 +272,24 @@ namespace Catutil.Migration.Sql
             return true;
         }
 
+        private void UpdateItemId(IItem item)
+        {
+            _cmdSetItemId.Parameters["@itemId"].Value = item.Id;
+            _cmdSetItemId.Parameters["@poem"].Value = _poems[_poemIndex];
+
+            TiledTextPart textPart = (TiledTextPart)item.Parts[0];
+
+            _cmdSetItemId.Parameters["@firstOrdinal"].Value =
+                int.Parse(textPart.Rows[0].Data["_ord"],
+                CultureInfo.InvariantCulture);
+
+            _cmdSetItemId.Parameters["@lastOrdinal"].Value =
+                int.Parse(textPart.Rows[textPart.Rows.Count - 1].Data["_ord"],
+                CultureInfo.InvariantCulture);
+
+            _cmdSetItemId.ExecuteNonQuery();
+        }
+
         /// <summary>
         /// Reads the next item if any.
         /// </summary>
@@ -284,7 +302,14 @@ namespace Catutil.Migration.Sql
             // if any queued item, just dequeue and return the first one.
             // The queue is used when partitioning a poem, so that each
             // item contains a single portion of the text.
-            if (_itemQueue.Count > 0) return _itemQueue.Dequeue();
+            if (_itemQueue.Count > 0)
+            {
+                IItem item = _itemQueue.Dequeue();
+                if (IsItemIdMappingEnabled) UpdateItemId(item);
+                if (_itemQueue.Count == 0 && ++_poemIndex >= _poems.Count)
+                    _end = true;
+                return item;
+            }
 
             // the first time read the list of poems with their lines count
             if (_poems == null && !Init()) return null;
@@ -294,8 +319,8 @@ namespace Catutil.Migration.Sql
             string title = FilterTitle(rows[0].GetText());
 
             // apply partitioning if required
-            IList<Tuple<int, int>> ranges = _partitioner.Partition(rows.Count,
-                i => IsBreakPoint(rows[i]));
+            IList<Tuple<int, int>> ranges =
+                _partitioner.Partition(rows.Count, i => IsBreakPoint(rows[i]));
             IItem retItem = null;
 
             for (int i = 0; i < ranges.Count; i++)
@@ -323,26 +348,12 @@ namespace Catutil.Migration.Sql
             }
 
             // update the item ID for the current item if requested
-            if (IsItemIdMappingEnabled)
-            {
-                _cmdSetItemId.Parameters["@itemId"].Value = retItem.Id;
-                _cmdSetItemId.Parameters["@poem"].Value = _poems[_poemIndex];
+            if (IsItemIdMappingEnabled) UpdateItemId(retItem);
 
-                TiledTextPart textPart = (TiledTextPart)retItem.Parts[0];
-
-                _cmdSetItemId.Parameters["@firstOrdinal"].Value =
-                    int.Parse(textPart.Rows[0].Data["_ord"],
-                    CultureInfo.InvariantCulture);
-
-                _cmdSetItemId.Parameters["@lastOrdinal"].Value =
-                    int.Parse(textPart.Rows[textPart.Rows.Count - 1].Data["_ord"],
-                    CultureInfo.InvariantCulture);
-
-                _cmdSetItemId.ExecuteNonQuery();
-            }
-
-            // this poem was completed, move forward for the next Read
-            if (++_poemIndex >= _poems.Count) _end = true;
+            // unless queued items are present, this poem was completed,
+            // so move forward for the next Read
+            if (_itemQueue.Count == 0 && ++_poemIndex >= _poems.Count)
+                _end = true;
 
             return retItem;
         }

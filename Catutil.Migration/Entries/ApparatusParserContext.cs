@@ -117,6 +117,8 @@ namespace Catutil.Migration.Entries
 
         private void SavePart()
         {
+            // TODO: try detecting true fragments locations or fallback to whole line
+
             // create new output file if required
             if (_writer == null
                 || (_maxPartsPerFile > 0 && ++_filePartCount > _maxPartsPerFile))
@@ -212,8 +214,9 @@ namespace Catutil.Migration.Entries
             {
                 fr = new ApparatusLayerFragment
                 {
-                    // just assign a fake location;
-                    // the true location will be set by later analysis
+                    // just assign a fake location, ensuring it's unique
+                    // for each added fragment. The true location will be set
+                    // by later analysis when saving the complete part
                     Location = $"1.{ApparatusPart.Fragments.Count + 1}",
                     // keep the source fragment ID + spc + line ID in its tag
                     Tag = $"{_fidPrefix} {lineId}"

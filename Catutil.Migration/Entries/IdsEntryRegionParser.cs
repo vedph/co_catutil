@@ -6,36 +6,25 @@ using Proteus.Core.Regions;
 using Proteus.Entries;
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace Catutil.Migration.Entries
 {
     /// <summary>
-    /// Parser for the <c>wit</c> (witnesses) entries region. This extracts
-    /// all the references to the main manuscripts from each text entry inside
-    /// the region, adding them to the <see cref="ApparatusEntry.Witnesses"/> of
-    /// the current target entry.
-    /// <para>Tag: <c>entry-region-parser.co-wit</c>.</para>
+    /// Parser for CO <c>ids</c> region.
+    /// This parser assumes that the <c>ids</c> region just contains a single
+    /// command entry, with arguments <c>i</c>=item ID, <c>l</c>=line ID,
+    /// <c>f</c>=fragment ID and <c>e</c>=entry ID. It then reads these IDs
+    /// and updates the target object accordingly.
     /// </summary>
     /// <seealso cref="IEntryRegionParser" />
-    [Tag("entry-region-parser.co-wit")]
-    public sealed class WitRegionEntryParser : IEntryRegionParser
+    [Tag("entry-region-parser.co-ids")]
+    public sealed class IdsEntryRegionParser : IEntryRegionParser
     {
-        private readonly Regex _msRegex;
-
         /// <summary>
         /// Gets or sets the logger.
         /// </summary>
         public ILogger Logger { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WitRegionEntryParser"/>
-        /// class.
-        /// </summary>
-        public WitRegionEntryParser()
-        {
-            _msRegex = new Regex(@"[TOGRm][12]?\??");
-        }
 
         /// <summary>
         /// Determines whether this parser is applicable to the specified
@@ -56,7 +45,7 @@ namespace Catutil.Migration.Entries
             if (regions == null)
                 throw new ArgumentNullException(nameof(regions));
 
-            return regions[regionIndex].Tag == "wit";
+            return regions[regionIndex].Tag == "ids";
         }
 
         /// <summary>
@@ -72,8 +61,9 @@ namespace Catutil.Migration.Entries
         /// </returns>
         /// <exception cref="ArgumentNullException">set or regions or target
         /// </exception>
-        public int Parse(EntrySet set, IReadOnlyList<EntryRegion> regions,
-            int regionIndex, object context)
+        public int Parse(EntrySet set,
+            IReadOnlyList<EntryRegion> regions, int regionIndex,
+            object context)
         {
             if (set == null)
                 throw new ArgumentNullException(nameof(set));
@@ -82,23 +72,24 @@ namespace Catutil.Migration.Entries
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            ApparatusEntry appEntry =
-                ((ApparatusParserContext)context).CurrentEntry;
+            DecodedEntry entry =
+                set.Entries[regions[regionIndex].Range.Start.Entry];
 
-            for (int i = regions[regionIndex].Range.Start.Entry;
-                     i <= regions[regionIndex].Range.End.Entry; i++)
+            if (entry is DecodedCommandEntry cmd)
             {
-                if (set.Entries[i] is DecodedTextEntry txt)
-                {
-                    foreach (Match m in _msRegex.Matches(txt.Value))
-                    {
-                        appEntry.Witnesses.Add(new ApparatusAnnotatedValue
-                        {
-                            Value = m.Value
-                        });
-                    }
-                }
+                ApparatusParserContext ctx = context as ApparatusParserContext;
+                ctx.FragmentId = int.Parse(cmd.GetArgument("f"),
+                    CultureInfo.InvariantCulture);
+                ctx.EntryId = int.Parse(cmd.GetArgument("e"),
+                    CultureInfo.InvariantCulture);
+                string itemId = cmd.GetArgument("i");
+                string lineId = cmd.GetArgument("l");
+
+                // add a new entry
+                ctx.AddEntry(itemId, lineId, new ApparatusEntry());
             }
+            else Logger?.LogError("Unexpected entry type in ids region " +
+                $"at {regionIndex}: \"{entry}\"");
 
             return regionIndex + 1;
         }

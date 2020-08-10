@@ -13,9 +13,9 @@ namespace Catutil.Migration.Entries
     /// <summary>
     /// Parser for CO <c>ids</c> region.
     /// This parser assumes that the <c>ids</c> region just contains a single
-    /// command entry, with arguments <c>i</c>=item ID, <c>f</c>=fragment ID
-    /// and <c>e</c>=entry ID. It then reads these IDs and updates the target
-    /// object accordingly.
+    /// command entry, with arguments <c>i</c>=item ID, <c>l</c>=line ID,
+    /// <c>f</c>=fragment ID and <c>e</c>=entry ID. It then reads these IDs
+    /// and updates the target object accordingly.
     /// </summary>
     /// <seealso cref="IEntryRegionParser" />
     [Tag("entry-region-parser.co-ids")]
@@ -83,9 +83,10 @@ namespace Catutil.Migration.Entries
                 ctx.EntryId = int.Parse(cmd.GetArgument("e"),
                     CultureInfo.InvariantCulture);
                 string itemId = cmd.GetArgument("i");
+                string lineId = cmd.GetArgument("l");
 
                 // add a new entry
-                ctx.AddEntry(itemId, new ApparatusEntry());
+                ctx.AddEntry(itemId, lineId, new ApparatusEntry());
             }
             else Logger?.LogError("Unexpected entry type in ids region " +
                 $"at {regionIndex}: \"{entry}\"");

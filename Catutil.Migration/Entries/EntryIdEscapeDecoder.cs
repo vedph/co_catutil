@@ -10,8 +10,9 @@ namespace Catutil.Migration.Entries
     /// <summary>
     /// Entry ID escape decoder. This decoder the escape inserted by
     /// <see cref="SqlEntryReader"/> when reading rows from the CO database.
-    /// This escape resolves into a <c>set-ids</c> command having 3 arguments,
-    /// <c>i</c>=item ID, <c>f</c>=fragment ID, and <c>e</c>=entry ID.
+    /// This escape resolves into a <c>set-ids</c> command having 4 arguments:
+    /// <c>i</c>=item ID, <c>l</c>=line ID, <c>f</c>=fragment ID, and
+    /// <c>e</c>=entry ID.
     /// <para>Tag: <c>escape-decoder.co-entry-id</c>.</para>
     /// </summary>
     /// <seealso cref="IEscapeDecoder" />
@@ -31,7 +32,8 @@ namespace Catutil.Migration.Entries
         /// </summary>
         public EntryIdEscapeDecoder()
         {
-            _idRegex = new Regex(@"([-0-9a-f]{36})\.(\d+)\.(\d+)");
+            _idRegex = new Regex(
+                @"(?<i>[-0-9a-f]{36})\.(?<f>[^.]+)\.(?<e>\d+)\|(?<l>.+)");
         }
 
         /// <summary>
@@ -72,9 +74,10 @@ namespace Catutil.Migration.Entries
                 return Tuple.Create(new DecodedEntry[]
                     {
                         new DecodedCommandEntry(index, len, "set-ids",
-                            "i", m.Groups[1].Value,
-                            "f", m.Groups[2].Value,
-                            "e", m.Groups[3].Value)
+                            "i", m.Groups["i"].Value,
+                            "l", m.Groups["l"].Value,
+                            "f", m.Groups["f"].Value,
+                            "e", m.Groups["e"].Value)
                     }, len);
             }
             return null;

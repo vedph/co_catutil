@@ -25,7 +25,7 @@ namespace Catutil.Migration.Entries
     {
         private readonly JsonSerializerSettings _jsonSettings;
         private int _fragmentId;
-        private string _fid;
+        private string _fidPrefix;
 
         private int _entryId;
         private string _eid;
@@ -47,7 +47,7 @@ namespace Catutil.Migration.Entries
             {
                 if (_fragmentId == value) return;
                 _fragmentId = value;
-                _fid = value.ToString(CultureInfo.InvariantCulture);
+                _fidPrefix = value.ToString(CultureInfo.InvariantCulture) + " ";
             }
         }
 
@@ -180,11 +180,14 @@ namespace Catutil.Migration.Entries
         /// container fragment will be created as needed.
         /// </summary>
         /// <param name="itemId">The item identifier.</param>
+        /// <param name="lineId">The line indentifier.</param>
         /// <param name="entry">The apparatus entry.</param>
         /// <exception cref="ArgumentNullException">itemId or entry</exception>
-        public void AddEntry(string itemId, ApparatusEntry entry)
+        public void AddEntry(string itemId, string lineId, ApparatusEntry entry)
         {
             if (itemId == null) throw new ArgumentNullException(nameof(itemId));
+            if (lineId == null)
+                throw new ArgumentNullException(nameof(lineId));
             if (entry == null) throw new ArgumentNullException(nameof(entry));
 
             // ensure there is the item's part
@@ -204,13 +207,16 @@ namespace Catutil.Migration.Entries
 
             // ensure there is the container fragment
             ApparatusLayerFragment fr =
-                ApparatusPart.Fragments.Find(f => f.Tag == _fid);
+                ApparatusPart.Fragments.Find(f => f.Tag.StartsWith(_fidPrefix));
             if (fr == null)
             {
                 fr = new ApparatusLayerFragment
                 {
-                    // keep the source fragment ID in its tag
-                    Tag = _fid
+                    // just assign a fake location;
+                    // the true location will be set by later analysis
+                    Location = $"1.{ApparatusPart.Fragments.Count + 1}",
+                    // keep the source fragment ID + spc + line ID in its tag
+                    Tag = $"{_fidPrefix} {lineId}"
                 };
                 ApparatusPart.AddFragment(fr);
             }

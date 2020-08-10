@@ -73,7 +73,8 @@ namespace Catutil.Migration.Entries
             {
                 // set the current entry's value
                 ApparatusParserContext ctx = (ApparatusParserContext)context;
-                ctx.CurrentEntry.Value = entry.Value;
+                ctx.CurrentEntry.Value = entry.Value.Trim();
+                // TODO: normalized form?
             }
 
             return regionIndex + 1;

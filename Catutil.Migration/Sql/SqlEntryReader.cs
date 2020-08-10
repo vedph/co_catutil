@@ -40,7 +40,7 @@ namespace Catutil.Migration.Sql
             _connection.Open();
             DbCommand cmd = _connection.CreateCommand();
             cmd.CommandText = "SELECT entry.id,entry.fragmentId,entry.value," +
-                "line.itemId " +
+                "line.itemId,fragment.lineId " +
                 "FROM entry " +
                 "INNER JOIN fragment ON entry.fragmentId=fragment.id " +
                 "INNER JOIN line ON fragment.lineId=line.id " +
@@ -48,8 +48,9 @@ namespace Catutil.Migration.Sql
             _reader = cmd.ExecuteReader();
         }
 
-        private static string BuildEntryPrefix(int id, int fragmentId, string itemId) =>
-            $"«#{itemId}.{fragmentId}.{id}»";
+        private static string BuildEntryPrefix(int id, int fragmentId,
+            string itemId, string lineId) =>
+            $"«#{itemId}.{fragmentId}.{id}|{lineId}»";
 
         /// <summary>
         /// Reads the next entry if any.
@@ -75,7 +76,8 @@ namespace Catutil.Migration.Sql
             int id = _reader.GetInt32(0);
             int fragmentId = _reader.GetInt32(1);
             string itemId = _reader.IsDBNull(3)? null : _reader.GetString(3);
-            string value = BuildEntryPrefix(id, fragmentId, itemId)
+            string lineId = _reader.GetString(4);
+            string value = BuildEntryPrefix(id, fragmentId, itemId, lineId)
                 + _reader.GetString(2);
 
             return new DecodedTextEntry

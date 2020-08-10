@@ -85,7 +85,7 @@ namespace Catutil.Commands
 
             Console.WriteLine("Reading entries: ");
             IParserContext parserContext = factory.GetParserContext();
-            parserContext.Start();
+            parserContext?.Start();
 
             try
             {
@@ -103,7 +103,7 @@ namespace Catutil.Commands
             }
             finally
             {
-                parserContext.End();
+                parserContext?.End();
             }
             Console.WriteLine($"\nEntries read: {count}");
 

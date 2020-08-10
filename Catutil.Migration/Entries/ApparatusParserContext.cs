@@ -72,6 +72,11 @@ namespace Catutil.Migration.Entries
         /// </summary>
         public TiledTextLayerPart<ApparatusLayerFragment> ApparatusPart
             { get; private set; }
+
+        /// <summary>
+        /// Gets the current entry.
+        /// </summary>
+        public ApparatusEntry CurrentEntry { get; private set; }
         #endregion
 
         /// <summary>
@@ -213,6 +218,9 @@ namespace Catutil.Migration.Entries
             // keep the source entry ID in its tag
             entry.Tag = _eid;
             fr.Entries.Add(entry);
+
+            // update the current entry
+            CurrentEntry = entry;
         }
     }
 

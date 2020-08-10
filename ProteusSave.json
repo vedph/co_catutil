@@ -208,5 +208,8 @@
     }
   },
   "EntryRegionParsers": [
+    {
+      "Id": "entry-region-parser.co-ids"
+    }
   ]
 }

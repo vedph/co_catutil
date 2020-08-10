@@ -255,10 +255,12 @@ namespace Catutil.Migration.Entries
         /// <returns>Parser context or null.</returns>
         public IParserContext GetParserContext()
         {
+            if (Configuration["ParserContext:Id"] == null) return null;
+
             return GetComponent<IParserContext>(
                 Configuration["ParserContext:Id"],
                 "ParserContext:Options",
-                false);
+                true);
         }
 
         /// <summary>

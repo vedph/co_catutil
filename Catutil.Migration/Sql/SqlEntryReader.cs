@@ -44,7 +44,7 @@ namespace Catutil.Migration.Sql
                 "FROM entry " +
                 "INNER JOIN fragment ON entry.fragmentId=fragment.id " +
                 "INNER JOIN line ON fragment.lineId=line.id " +
-                "ORDER BY fragmentId,ordinal;";
+                "ORDER BY entry.fragmentId,entry.ordinal;";
             _reader = cmd.ExecuteReader();
         }
 

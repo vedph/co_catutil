@@ -8,6 +8,12 @@ using System.Collections.Generic;
 
 namespace Catutil.Migration.Entries
 {
+    /// <summary>
+    /// Parser for the <c>lem</c> region. This sets the current entry value
+    /// and normalized value, drawing it from the text entry representing
+    /// that region. The value is normalized using <see cref="LemmaFilter"/>.
+    /// </summary>
+    /// <seealso cref="IEntryRegionParser" />
     [Tag("entry-region-parser.co-lem")]
     public sealed class LemEntryRegionParser : IEntryRegionParser
     {
@@ -71,10 +77,10 @@ namespace Catutil.Migration.Entries
             }
             else
             {
-                // set the current entry's value
+                // set the current entry's value and normalized value
                 ApparatusParserContext ctx = (ApparatusParserContext)context;
                 ctx.CurrentEntry.Value = entry.Value.Trim();
-                // TODO: normalized form?
+                ctx.CurrentEntry.NormValue = LemmaFilter.Apply(ctx.CurrentEntry.Value);
             }
 
             return regionIndex + 1;

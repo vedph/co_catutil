@@ -27,6 +27,7 @@ namespace Catutil.Migration.Sql
         private readonly char[] _tileSepChars;
         private readonly Regex _breakRegex;
         private readonly Regex _titleTailRegex;
+        private readonly Regex _wsRegex;
         private readonly string _cs;
         private readonly IPartitioner _partitioner;
         private readonly Queue<IItem> _itemQueue;
@@ -98,6 +99,7 @@ namespace Catutil.Migration.Sql
             _tileSepChars = new[] { ' ', '\t' };
             _breakRegex = new Regex(@"[\u037e.?!][^\p{L}]*$");
             _titleTailRegex = new Regex(@"\s*[,.;]\s*$");
+            _wsRegex = new Regex(@"\s+");
             _itemQueue = new Queue<IItem>();
             IsItemIdMappingEnabled = true;
         }
@@ -135,7 +137,7 @@ namespace Catutil.Migration.Sql
                 while (reader.Read())
                 {
                     string id = reader.GetString(0);
-                    string line = reader.GetString(1);
+                    string line = _wsRegex.Replace(reader.GetString(1), " ").Trim();
 
                     TextTileRow row = new TextTileRow
                     {

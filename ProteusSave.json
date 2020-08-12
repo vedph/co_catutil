@@ -216,6 +216,12 @@
     },
     {
       "Id": "entry-region-parser.co-wit"
+    },
+    {
+      "Id": "entry-region-parser.co-ms"
+    },
+    {
+      "Id": "entry-region-parser.co-br"
     }
   ]
 }

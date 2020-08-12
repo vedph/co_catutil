@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using Proteus.Core;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Catutil.Migration.Entries
@@ -10,13 +9,22 @@ namespace Catutil.Migration.Entries
     /// <summary>
     /// Lemma locator.
     /// </summary>
-    /// <seealso cref="Proteus.Core.IHasLogger" />
+    /// <seealso cref="IHasLogger" />
     public sealed class LemmaLocator : IHasLogger
     {
         private double _treshold;
 
+        /// <summary>
+        /// Gets or sets the logger.
+        /// </summary>
         public ILogger Logger { get; set; }
 
+        /// <summary>
+        /// Gets or sets the minimum treshold to have a match in a fuzzy
+        /// comparison. The default value is 0.8.
+        /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">value less than 0
+        /// or greater than 1</exception>
         public double Treshold
         {
             get { return _treshold; }
@@ -28,6 +36,9 @@ namespace Catutil.Migration.Entries
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LemmaLocator"/> class.
+        /// </summary>
         public LemmaLocator()
         {
             _treshold = 0.8;
@@ -44,7 +55,7 @@ namespace Catutil.Migration.Entries
             return x;
         }
 
-        private bool LocateExact(ApparatusLayerFragment fr, int y,
+        private string LocateExact(ApparatusLayerFragment fr, int y,
             string normLine)
         {
             foreach (ApparatusEntry entry in fr.Entries.Where(
@@ -54,16 +65,15 @@ namespace Catutil.Migration.Entries
                 if (i > -1)
                 {
                     int x = GetX(normLine, i);
-                    fr.Location = $"{y}.{x}";
                     Logger?.LogInformation(
                         $"Location {fr.Location} got from entry {entry} on {normLine}");
-                    return true;
+                    return $"{y}.{x}";
                 }
             }
-            return false;
+            return null;
         }
 
-        private bool LocateFuzzy(ApparatusLayerFragment fr, int y,
+        private string LocateFuzzy(ApparatusLayerFragment fr, int y,
             string normLine)
         {
             // brute force fuzzy matching, no special need to optimize,
@@ -92,43 +102,40 @@ namespace Catutil.Migration.Entries
             if (bestIndex > -1)
             {
                 int x = GetX(normLine, bestIndex);
-                fr.Location = $"{y}.{x}";
                 Logger?.LogInformation(
                     $"Location {fr.Location} got from entry {matchedEntry} on {normLine}");
-                return true;
+                return $"{y}.{x}";
             }
-            return false;
+            return null;
         }
 
         /// <summary>
-        /// Locates the specified fragments in <paramref name="line"/>.
+        /// Locates the specified fragment in the specified normalized line.
         /// </summary>
-        /// <param name="fragments">The fragments.</param>
+        /// <param name="fragment">The fragment to locate.</param>
         /// <param name="y">The Y value for <paramref name="line"/>.</param>
-        /// <param name="line">The line.</param>
+        /// <param name="line">The normalized line.</param>
+        /// <returns>The fragment's location or null.</returns>
         /// <exception cref="ArgumentNullException">fragments or line</exception>
-        public void Locate(IList<ApparatusLayerFragment> fragments, int y,
-            string line)
+        public string Locate(ApparatusLayerFragment fragment, int y, string line)
         {
-            if (fragments == null) throw new ArgumentNullException(nameof(fragments));
+            if (fragment == null) throw new ArgumentNullException(nameof(fragment));
             if (line == null) throw new ArgumentNullException(nameof(line));
 
-            string normLine = LemmaFilter.Apply(line);
-
-            foreach (ApparatusLayerFragment fr in fragments)
+            string loc = null;
+            foreach (ApparatusEntry entry in fragment.Entries.Where(
+                e => !string.IsNullOrEmpty(e.NormValue)))
             {
-                foreach (ApparatusEntry entry in fr.Entries.Where(
-                    e => !string.IsNullOrEmpty(e.NormValue)))
-                {
-                    if (LocateExact(fr, y, normLine)) break;
-                }
-
-                if (fr.Location == null && !LocateFuzzy(fr, y, normLine))
-                {
-                    Logger?.LogWarning("Unable to locate fragment " +
-                        $"at line {y} index {fragments.IndexOf(fr)}");
-                }
+                loc = LocateExact(fragment, y, line);
+                if (loc != null) return loc;
             }
+
+            if ((loc = LocateFuzzy(fragment, y, line)) == null)
+            {
+                Logger?.LogWarning($"Unable to locate fragment at line {y}");
+                return null;
+            }
+            return loc;
         }
     }
 }

@@ -1,9 +1,14 @@
 ﻿using Cadmus.Parts.Layers;
 using Cadmus.Philology.Parts.Layers;
 using Fusi.Tools.Config;
+using Microsoft.Extensions.Logging;
+using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Common;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -24,6 +29,7 @@ namespace Catutil.Migration.Entries
         IConfigurable<CadmusParserContextOptions>
     {
         private readonly JsonSerializerSettings _jsonSettings;
+        private readonly LemmaLocator _locator;
         private int _fragmentId;
         private string _fidPrefix;
 
@@ -35,8 +41,22 @@ namespace Catutil.Migration.Entries
         private int _filePartCount;
         private int _fileNr;
         private TextWriter _writer;
+        private DbConnection _connection;
+        private DbCommand _cmdGetLine;
 
-        #region Properties
+        #region Properties        
+        /// <summary>
+        /// Gets or sets the logger.
+        /// </summary>
+        public ILogger Logger { get; set; }
+
+        /// <summary>
+        /// Gets or sets the connection string to the source database.
+        /// This is used to fetch lines text and detecting apparatus fragments
+        /// locations.
+        /// </summary>
+        public string ConnectionString { get; set; }
+
         /// <summary>
         /// Gets or sets the current fragment identifier in the source database.
         /// </summary>
@@ -64,6 +84,11 @@ namespace Catutil.Migration.Entries
                 _eid = value.ToString(CultureInfo.InvariantCulture);
             }
         }
+
+        /// <summary>
+        /// Gets or sets the current Y (line ordinal in poem) value.
+        /// </summary>
+        public int Y { get; set; }
 
         /// <summary>
         /// Gets or sets the user identifier to assign to parsed parts.
@@ -99,6 +124,7 @@ namespace Catutil.Migration.Entries
                 },
                 Formatting = Formatting.Indented
             };
+            _locator = new LemmaLocator();
         }
 
         /// <summary>
@@ -113,11 +139,67 @@ namespace Catutil.Migration.Entries
 
             _outputDir = options.OutputDirectory;
             _maxPartsPerFile = options.MaxPartsPerFile;
+
+            _connection?.Close();
+            _connection = new MySqlConnection(ConnectionString);
+            _cmdGetLine = _connection.CreateCommand();
+
+            _cmdGetLine.CommandText = "SELECT `value` FROM `line` WHERE `id`=@id";
+            DbParameter p = _cmdGetLine.CreateParameter();
+            p.ParameterName = "@id";
+            p.DbType = DbType.String;
+            p.Direction = ParameterDirection.Input;
+            _cmdGetLine.Parameters.Add(p);
+        }
+
+        private string GetLine(string id)
+        {
+            if (_connection == null)
+                throw new InvalidOperationException("Connection not configured");
+
+            if (_connection.State != ConnectionState.Open) _connection.Open();
+            _cmdGetLine.Parameters[0].Value = id;
+            using (DbDataReader reader = _cmdGetLine.ExecuteReader())
+            {
+                if (!reader.Read()) return null;
+                return reader.GetString(0);
+            }
+        }
+
+        private void DetectFragmentLocations()
+        {
+            if (ApparatusPart == null) return;
+
+            Dictionary<string, int> locations = new Dictionary<string, int>();
+            string normLine = null, currentLineId = null;
+
+            for (int i = 0; i < ApparatusPart.Fragments.Count; i++)
+            {
+                ApparatusLayerFragment fr = ApparatusPart.Fragments[i];
+
+                // y is in the fake location
+                int y = int.Parse(fr.Location.Substring(0, fr.Location.IndexOf('.')),
+                    CultureInfo.InvariantCulture);
+
+                // line ID is in the tag after a space
+                string lineId = fr.Tag.Substring(fr.Tag.LastIndexOf(' ') + 1);
+                if (currentLineId != lineId)
+                {
+                    normLine = LemmaFilter.Apply(GetLine(lineId));
+                    currentLineId = lineId;
+                }
+
+                string loc = _locator.Locate(fr, y, normLine);
+                if (loc != null)
+                {
+                    // TODO: check overlaps and add
+                }
+            }
         }
 
         private void SavePart()
         {
-            // TODO: try detecting true fragments locations or fallback to whole line
+            DetectFragmentLocations();
 
             // create new output file if required
             if (_writer == null
@@ -183,9 +265,10 @@ namespace Catutil.Migration.Entries
         /// </summary>
         /// <param name="itemId">The item identifier.</param>
         /// <param name="lineId">The line indentifier.</param>
+        /// <param name="y">The line ordinal number in the poem.</param>
         /// <param name="entry">The apparatus entry.</param>
         /// <exception cref="ArgumentNullException">itemId or entry</exception>
-        public void AddEntry(string itemId, string lineId, ApparatusEntry entry)
+        public void AddEntry(string itemId, string lineId, int y, ApparatusEntry entry)
         {
             if (itemId == null) throw new ArgumentNullException(nameof(itemId));
             if (lineId == null)
@@ -217,9 +300,9 @@ namespace Catutil.Migration.Entries
                     // just assign a fake location, ensuring it's unique
                     // for each added fragment. The true location will be set
                     // by later analysis when saving the complete part
-                    Location = $"1.{ApparatusPart.Fragments.Count + 1}",
+                    Location = $"{y}.{1000 + ApparatusPart.Fragments.Count + 1}",
                     // keep the source fragment ID + spc + line ID in its tag
-                    Tag = $"{_fidPrefix} {lineId}"
+                    Tag = _fidPrefix + lineId
                 };
                 ApparatusPart.AddFragment(fr);
             }
@@ -234,6 +317,7 @@ namespace Catutil.Migration.Entries
 
             // update the current entry
             CurrentEntry = entry;
+            Y = y;
         }
     }
 

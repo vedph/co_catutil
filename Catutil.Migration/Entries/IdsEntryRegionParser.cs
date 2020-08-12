@@ -84,9 +84,10 @@ namespace Catutil.Migration.Entries
                     CultureInfo.InvariantCulture);
                 string itemId = cmd.GetArgument("i");
                 string lineId = cmd.GetArgument("l");
+                int y = int.Parse(cmd.GetArgument("y"), CultureInfo.InvariantCulture);
 
                 // add a new entry
-                ctx.AddEntry(itemId, lineId, new ApparatusEntry());
+                ctx.AddEntry(itemId, lineId, y, new ApparatusEntry());
             }
             else Logger?.LogError("Unexpected entry type in ids region " +
                 $"at {regionIndex}: \"{entry}\"");

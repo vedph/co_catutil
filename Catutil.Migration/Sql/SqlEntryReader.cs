@@ -1,5 +1,6 @@
 ﻿using Fusi.Tools.Config;
 using MySql.Data.MySqlClient;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 using Proteus.Core.Entries;
 using System.Data.Common;
 
@@ -40,7 +41,7 @@ namespace Catutil.Migration.Sql
             _connection.Open();
             DbCommand cmd = _connection.CreateCommand();
             cmd.CommandText = "SELECT entry.id,entry.fragmentId,entry.value," +
-                "line.itemId,fragment.lineId " +
+                "line.itemId,line.ordinal,fragment.lineId " +
                 "FROM entry " +
                 "INNER JOIN fragment ON entry.fragmentId=fragment.id " +
                 "INNER JOIN line ON fragment.lineId=line.id " +
@@ -49,8 +50,8 @@ namespace Catutil.Migration.Sql
         }
 
         private static string BuildEntryPrefix(int id, int fragmentId,
-            string itemId, string lineId) =>
-            $"«#{itemId}.{fragmentId}.{id}|{lineId}»";
+            string itemId, string lineId, int y) =>
+            $"«#{itemId}.{fragmentId}.{id}|{lineId} {y}»";
 
         /// <summary>
         /// Reads the next entry if any.
@@ -58,9 +59,8 @@ namespace Catutil.Migration.Sql
         /// <returns>
         /// next entry, or null if no more entries. The entry is a
         /// <see cref="DecodedTextEntry"/> with a single text equal to the text
-        /// of the CO apparatus entry, preceded by an escape with syntax
-        /// <c>«#FRID.ID»</c>, where <c>FRID</c>=entry fragment's ID in source
-        /// database, and <c>ID</c>-entry's ID in source database.
+        /// of the CO apparatus entry, preceded by an escape with several
+        /// IDs.
         /// </returns>
         public DecodedEntry Read()
         {
@@ -76,8 +76,9 @@ namespace Catutil.Migration.Sql
             int id = _reader.GetInt32(0);
             int fragmentId = _reader.GetInt32(1);
             string itemId = _reader.IsDBNull(3)? null : _reader.GetString(3);
-            string lineId = _reader.GetString(4);
-            string value = BuildEntryPrefix(id, fragmentId, itemId, lineId)
+            int y = _reader.GetInt32(4);
+            string lineId = _reader.GetString(5);
+            string value = BuildEntryPrefix(id, fragmentId, itemId, lineId, y)
                 + _reader.GetString(2);
 
             return new DecodedTextEntry

@@ -2,6 +2,9 @@
 
 namespace Catutil.Migration.Xls
 {
+    /// <summary>
+    /// Markdown helper for apparatus text.
+    /// </summary>
     public static class AppTextMdHelper
     {
         private static int LocateRightmostSpace(string text, int index)
@@ -24,6 +27,11 @@ namespace Catutil.Migration.Xls
             return index + 1;
         }
 
+        /// <summary>
+        /// Adjusts the spaces connected to italic markers.
+        /// </summary>
+        /// <param name="text">The text.</param>
+        /// <returns>Adjusted text.</returns>
         public static string AdjustItalicSpaces(string text)
         {
             if (string.IsNullOrEmpty(text)) return text;

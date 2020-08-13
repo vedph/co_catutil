@@ -6,18 +6,25 @@ namespace Catutil.Migration.Test.Entries
 {
     public sealed class LemmaLocatorTest
     {
-        private static LemmaLocator GetLocator(double treshold = 0.8)
+        private static FragmentLocator GetLocator(double treshold = 0.8)
         {
-            return new LemmaLocator
+            return new FragmentLocator(id =>
+            {
+                return id switch
+                {
+                    "1" => "cui dono lepidum nouom libellum",
+                    _ => null,
+                };
+            })
             {
                 Treshold = treshold
             };
         }
 
         [Fact]
-        public void Locate_NoMatch_0()
+        public void LocateFragment_NoMatch_0()
         {
-            LemmaLocator locator = GetLocator();
+            FragmentLocator locator = GetLocator();
             ApparatusLayerFragment fr = new ApparatusLayerFragment
             {
                 Location = "1.123"
@@ -28,15 +35,15 @@ namespace Catutil.Migration.Test.Entries
                 NormValue = "tactus"
             });
 
-            string loc = locator.Locate(fr, 1, "cui dono lepidum nouom libellum");
+            string loc = locator.LocateFragment(fr, 1, "cui dono lepidum nouom libellum");
 
             Assert.Null(loc);
         }
 
         [Fact]
-        public void Locate_FuzzyMatch_1()
+        public void LocateFragment_FuzzyMatch_1()
         {
-            LemmaLocator locator = GetLocator();
+            FragmentLocator locator = GetLocator();
             ApparatusLayerFragment fr = new ApparatusLayerFragment
             {
                 Location = "1.123"
@@ -47,15 +54,15 @@ namespace Catutil.Migration.Test.Entries
                 NormValue = "nouum"
             });
 
-            string loc = locator.Locate(fr, 1, "cui dono lepidum nouom libellum");
+            string loc = locator.LocateFragment(fr, 1, "cui dono lepidum nouom libellum");
 
             Assert.Equal("1.4", loc);
         }
 
         [Fact]
-        public void Locate_ExactMatch_2()
+        public void LocateFragment_ExactMatch_2()
         {
-            LemmaLocator locator = GetLocator();
+            FragmentLocator locator = GetLocator();
             ApparatusLayerFragment fr = new ApparatusLayerFragment
             {
                 Location = "1.123"
@@ -66,7 +73,7 @@ namespace Catutil.Migration.Test.Entries
                 NormValue = "cui"
             });
 
-            string loc = locator.Locate(fr, 1, "cui dono lepidum nouom libellum");
+            string loc = locator.LocateFragment(fr, 1, "cui dono lepidum nouom libellum");
 
             Assert.Equal("1.1", loc);
         }

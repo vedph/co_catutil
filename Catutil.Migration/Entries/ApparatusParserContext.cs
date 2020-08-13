@@ -6,7 +6,6 @@ using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Globalization;
@@ -29,7 +28,7 @@ namespace Catutil.Migration.Entries
         IConfigurable<CadmusParserContextOptions>
     {
         private readonly JsonSerializerSettings _jsonSettings;
-        private readonly LemmaLocator _locator;
+        private readonly FragmentLocator _locator;
         private int _fragmentId;
         private string _fidPrefix;
 
@@ -124,7 +123,7 @@ namespace Catutil.Migration.Entries
                 },
                 Formatting = Formatting.Indented
             };
-            _locator = new LemmaLocator();
+            _locator = new FragmentLocator(GetLine);
         }
 
         /// <summary>
@@ -166,40 +165,10 @@ namespace Catutil.Migration.Entries
             }
         }
 
-        private void DetectFragmentLocations()
-        {
-            if (ApparatusPart == null) return;
-
-            Dictionary<string, int> locations = new Dictionary<string, int>();
-            string normLine = null, currentLineId = null;
-
-            for (int i = 0; i < ApparatusPart.Fragments.Count; i++)
-            {
-                ApparatusLayerFragment fr = ApparatusPart.Fragments[i];
-
-                // y is in the fake location
-                int y = int.Parse(fr.Location.Substring(0, fr.Location.IndexOf('.')),
-                    CultureInfo.InvariantCulture);
-
-                // line ID is in the tag after a space
-                string lineId = fr.Tag.Substring(fr.Tag.LastIndexOf(' ') + 1);
-                if (currentLineId != lineId)
-                {
-                    normLine = LemmaFilter.Apply(GetLine(lineId));
-                    currentLineId = lineId;
-                }
-
-                string loc = _locator.Locate(fr, y, normLine);
-                if (loc != null)
-                {
-                    // TODO: check overlaps and add
-                }
-            }
-        }
-
         private void SavePart()
         {
-            DetectFragmentLocations();
+            // try locating fragments
+            _locator.LocateFragments(ApparatusPart.Fragments);
 
             // create new output file if required
             if (_writer == null
@@ -263,6 +232,18 @@ namespace Catutil.Migration.Entries
         /// entry with the same tag if any. The apparatus layer part and the
         /// container fragment will be created as needed.
         /// </summary>
+        /// <remarks>Each fragment gets as its
+        /// <see cref="ApparatusLayerFragment.Tag"/> a value built of the
+        /// fragment's numeric ID in the database plus <c>@</c> plus the ID
+        /// of the line the entry refers to. Its
+        /// <see cref="ApparatusLayerFragment.Location"/> is set to
+        /// Y=<paramref name="y"/> and X=1000 + the fragment ordinal number.
+        /// The X value is fake, and is used only to ensure that no fragment
+        /// overlaps when we are collecting them here. Later, when saving the
+        /// whole part we try to locate the fragments as a whole.
+        /// <para>Each entry gets its numeric ID in the source database in its
+        /// <see cref="ApparatusEntry.Tag"/>, too.</para>
+        /// </remarks>
         /// <param name="itemId">The item identifier.</param>
         /// <param name="lineId">The line indentifier.</param>
         /// <param name="y">The line ordinal number in the poem.</param>
@@ -301,8 +282,8 @@ namespace Catutil.Migration.Entries
                     // for each added fragment. The true location will be set
                     // by later analysis when saving the complete part
                     Location = $"{y}.{1000 + ApparatusPart.Fragments.Count + 1}",
-                    // keep the source fragment ID + spc + line ID in its tag
-                    Tag = _fidPrefix + lineId
+                    // keep the source fragment ID + @ + line ID in its tag
+                    Tag = _fragmentId + "@" + lineId
                 };
                 ApparatusPart.AddFragment(fr);
             }

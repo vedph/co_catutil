@@ -16,7 +16,7 @@ namespace Catutil.Migration.Xls
     {
         private readonly Regex _poemRegex;
         private readonly Regex _wsRegex;
-        private FileStream _stream;
+        private readonly FileStream _stream;
         private HSSFWorkbook _wbk;
         private ISheet _sheet;
         private string _currentPoem;
@@ -261,6 +261,12 @@ namespace Catutil.Migration.Xls
             } // row
         }
 
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> to release both managed and
+        /// unmanaged resources; <c>false</c> to release only unmanaged
+        /// resources.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)
@@ -277,6 +283,10 @@ namespace Catutil.Migration.Xls
             }
         }
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing,
+        /// releasing, or resetting unmanaged resources.
+        /// </summary>
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
@@ -287,7 +297,7 @@ namespace Catutil.Migration.Xls
 
     #region XslTextReaderItem
     /// <summary>
-    /// An item read by <see cref="XslxTextReader"/>.
+    /// An item read by <see cref="XlsTextReader"/>.
     /// </summary>
     public sealed class XlsTextReaderItem
     {

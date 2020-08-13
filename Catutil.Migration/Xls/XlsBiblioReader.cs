@@ -33,6 +33,11 @@ namespace Catutil.Migration.Xls
         /// </summary>
         public string SheetName { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XlsBiblioReader"/> class.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
+        /// <exception cref="ArgumentNullException">filePath</exception>
         public XlsBiblioReader(string filePath)
         {
             if (filePath is null)

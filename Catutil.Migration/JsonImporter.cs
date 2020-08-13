@@ -11,7 +11,6 @@ namespace Catutil.Migration
     /// <summary>
     /// JSON text and apparatus dumps importer.
     /// </summary>
-    /// <seealso cref="Mq.Migration.IHasLogger" />
     public sealed class JsonImporter : IHasLogger
     {
         private readonly JsonDocumentOptions _options;

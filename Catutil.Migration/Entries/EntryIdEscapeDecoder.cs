@@ -1,4 +1,5 @@
-﻿using Fusi.Tools.Config;
+﻿using Catutil.Migration.Sql;
+using Fusi.Tools.Config;
 using Microsoft.Extensions.Logging;
 using Proteus.Core.Entries;
 using Proteus.Core.Escapes;

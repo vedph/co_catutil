@@ -37,9 +37,7 @@ namespace Catutil.Migration.Entries
     /// merged into a unique fragment. This avoids overlapping fragments,
     /// which are not allowed by design. Merges are signaled by the fact that
     /// the fragment ID and line ID in the tag of each fragment get appended
-    /// to the target fragment after a dash. For instance, if fragment A with
-    /// tag <c>1@1.1</c> gets merged into fragment B with tag <c>2@1000.2</c>,
-    /// the resulting tag will be <c>1-2@1.1-1000.2</c>.</para>
+    /// to the target fragment after a dash.</para>
     /// </remarks>
     /// <seealso cref="IHasLogger" />
     public sealed class FragmentLocator : IHasLogger

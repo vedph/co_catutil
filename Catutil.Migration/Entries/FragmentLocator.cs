@@ -308,8 +308,8 @@ namespace Catutil.Migration.Entries
                     for (int i = frIndex; i < lastFrIndex; i++)
                     {
                         // location
-                        if (frLocations[i + 1] == null)
-                            fragments[i + 1].Location = fragments[i].Location;
+                        //if (frLocations[i] == null)
+                        //    fragments[i].Location = fragments[i].Location;
                         MergeFragments(fragments[i], fragments[i + 1]);
                     }
                     // remove all the fragments in range except the last one

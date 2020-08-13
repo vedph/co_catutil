@@ -1,6 +1,5 @@
 ﻿using Cadmus.Philology.Parts.Layers;
 using Catutil.Migration.Entries;
-using System;
 using System.Collections.Generic;
 using Xunit;
 
@@ -246,14 +245,60 @@ namespace Catutil.Migration.Test.Entries
             Assert.Single(fragments);
             fr = fragments[0];
             Assert.Equal("1.1", fr.Location);
-            Assert.Equal("1-2-3@1.1-1.1235-1.1", fr.Tag);
+            Assert.Equal("1-2-3@1.1-1.1-1.1", fr.Tag);
             Assert.Equal(3, fr.Entries.Count);
         }
 
         [Fact]
         public void LocateFragments_SameLocWithLoc_Ok()
         {
-            throw new NotImplementedException();
+            FragmentLocator locator = GetLocator();
+
+            var fragments = new List<ApparatusLayerFragment>();
+            // loc
+            ApparatusLayerFragment fr = new ApparatusLayerFragment
+            {
+                Location = "1.1234",
+                Tag = "1@1.1"
+            };
+            fr.Entries.Add(new ApparatusEntry
+            {
+                Value = "Cui",
+                NormValue = "cui"
+            });
+            fragments.Add(fr);
+            // different loc
+            fr = new ApparatusLayerFragment
+            {
+                Location = "1.1235",
+                Tag = "2@1.1"
+            };
+            fr.Entries.Add(new ApparatusEntry
+            {
+                Value = "dono",
+                NormValue = "dono"
+            });
+            fragments.Add(fr);
+            // same loc
+            fr = new ApparatusLayerFragment
+            {
+                Location = "1.1236",
+                Tag = "3@1.1"
+            };
+            fr.Entries.Add(new ApparatusEntry
+            {
+                Value = "cui",
+                NormValue = "cui"
+            });
+            fragments.Add(fr);
+
+            locator.LocateFragments(fragments);
+
+            Assert.Single(fragments);
+            fr = fragments[0];
+            Assert.Equal("1.1", fr.Location);
+            Assert.Equal("1-2-3@1.1-1.1-1.1", fr.Tag);
+            Assert.Equal(3, fr.Entries.Count);
         }
     }
 }

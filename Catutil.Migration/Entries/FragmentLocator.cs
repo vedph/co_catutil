@@ -12,11 +12,40 @@ namespace Catutil.Migration.Entries
     /// <summary>
     /// Apparatus fragment locator.
     /// </summary>
+    /// <remarks>This locator uses a very raw approach for locating apparatus
+    /// layer fragments with reference to their text. In the original CO data
+    /// each apparatus entry is attached to its line as a whole; in Cadmus
+    /// instead we would rather want to attach it to its exact reference in the
+    /// text. Anyway, only some entries have an explicit lemma, and it can also
+    /// be the case that it's not exactly in the form it appears in the reference
+    /// text. The wording in entries is so various that attempting to provide
+    /// an automated location procedure would be much more costly and error-prone
+    /// than letting an operator adjust it during editing. So, here the approach
+    /// is minimalist, and just wants to provide a location for those entries
+    /// which have an evident clue (e.g. the word repeated literally, or with
+    /// a few differences, from the source text, even though there might be
+    /// corner cases where that word is repeated in the line), while assigning
+    /// a fake, unique location to all the others. This location is always true
+    /// for the Y value, while it starts from 1000 for the X value, which
+    /// grants that it cannot reference any existing word in the line.
+    /// <para>Given that often entries referring to the same lemma follow each
+    /// other without an explicit text reference, the strategy is just looking
+    /// for this text reference in the first entry of each fragment. When found,
+    /// the whole fragment gets located according to that.</para>
+    /// <para>Also, if several fragments get the same location, all the fragments
+    /// included between the first and the last one having that location get
+    /// merged into a unique fragment. This avoids overlapping fragments,
+    /// which are not allowed by design. Merges are signaled by the fact that
+    /// the fragment ID and line ID in the tag of each fragment get appended
+    /// to the target fragment after a dash. For instance, if fragment A with
+    /// tag <c>1@1.1</c> gets merged into fragment B with tag <c>2@1000.2</c>,
+    /// the resulting tag will be <c>1-2@1.1-1000.2</c>.</para>
+    /// </remarks>
     /// <seealso cref="IHasLogger" />
     public sealed class FragmentLocator : IHasLogger
     {
+        private readonly Func<string, string> _getLine;
         private double _treshold;
-        private readonly Func<string,string> _getLine;
 
         /// <summary>
         /// Gets or sets the logger.
@@ -132,6 +161,9 @@ namespace Catutil.Migration.Entries
             if (fragment == null) throw new ArgumentNullException(nameof(fragment));
             if (line == null) throw new ArgumentNullException(nameof(line));
 
+            if (fragment.Entries == null || fragment.Entries.Count == 0)
+                return null;
+
             string loc = null;
             foreach (ApparatusEntry entry in fragment.Entries.Where(
                 e => !string.IsNullOrEmpty(e.NormValue)))
@@ -162,6 +194,9 @@ namespace Catutil.Migration.Entries
         {
             if (fragment == null) throw new ArgumentNullException(nameof(fragment));
             if (line == null) throw new ArgumentNullException(nameof(line));
+
+            if (fragment.Entries == null || fragment.Entries.Count == 0)
+                return null;
 
             // consider only the head entry with a value
             ApparatusEntry entry = fragment.Entries[0];
@@ -197,13 +232,13 @@ namespace Catutil.Migration.Entries
             for (int i = 0; i < dstTagSepIndex; i++) sb.Append(target.Tag[i]);
 
             // separator
-            sb.Append(' ');
+            sb.Append('@');
             // source line ID
-            for (int i = srcTagSepIndex; i < source.Tag.Length; i++)
+            for (int i = srcTagSepIndex + 1; i < source.Tag.Length; i++)
                 sb.Append(source.Tag[i]);
             // -target line ID
             sb.Append('-');
-            for (int i = dstTagSepIndex; i < target.Tag.Length; i++)
+            for (int i = dstTagSepIndex + 1; i < target.Tag.Length; i++)
                 sb.Append(target.Tag[i]);
 
             target.Tag = sb.ToString();
@@ -220,7 +255,7 @@ namespace Catutil.Migration.Entries
         }
 
         /// <summary>
-        /// Locates all the fragments specified.
+        /// Locates all the fragments specified, merging them as required.
         /// </summary>
         /// <param name="fragments">The fragments to locate.</param>
         /// <exception cref="ArgumentNullException">fragments</exception>
@@ -238,12 +273,12 @@ namespace Catutil.Migration.Entries
             {
                 ApparatusLayerFragment fr = fragments[i];
 
-                // y is in the fake location
+                // true y is in the fake location
                 int y = int.Parse(fr.Location.Substring(0, fr.Location.IndexOf('.')),
                     CultureInfo.InvariantCulture);
 
-                // line ID is in the tag after a space
-                string lineId = fr.Tag.Substring(fr.Tag.LastIndexOf(' ') + 1);
+                // line ID is in the tag after @
+                string lineId = fr.Tag.Substring(fr.Tag.LastIndexOf('@') + 1);
                 if (currentLineId != lineId)
                 {
                     normLine = LemmaFilter.Apply(_getLine(lineId));
@@ -255,19 +290,31 @@ namespace Catutil.Migration.Entries
 
             // assign locations merging those fragments with the same location,
             // or those fragments between two fragments with the same location
-            for (int frIndex = 0; frIndex < frLocations.Count; frIndex++)
+            for (int frIndex = 0; frIndex < fragments.Count; frIndex++)
             {
+                // if located
                 if (frLocations[frIndex] != null)
                 {
+                    // assign location to it
+                    fragments[frIndex].Location = frLocations[frIndex];
+
+                    // find the last fragment with the same location
                     int lastFrIndex =
                         frLocations.FindLastIndex(l => l == frLocations[frIndex]);
-                    fragments[lastFrIndex].Location = frLocations[frIndex];
+                    if (lastFrIndex != frIndex)
+                        fragments[lastFrIndex].Location = frLocations[frIndex];
 
+                    // merge all the fragments in range into the last one
                     for (int i = frIndex; i < lastFrIndex; i++)
                     {
+                        // location
+                        if (frLocations[i + 1] == null)
+                            fragments[i + 1].Location = fragments[i].Location;
                         MergeFragments(fragments[i], fragments[i + 1]);
                     }
-                    fragments.RemoveRange(frIndex, lastFrIndex - frIndex);
+                    // remove all the fragments in range except the last one
+                    if (lastFrIndex > frIndex)
+                        fragments.RemoveRange(frIndex, lastFrIndex - frIndex);
                 }
             }
         }

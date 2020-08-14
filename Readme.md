@@ -28,7 +28,7 @@ where:
 Example:
 
 ```ps1
-parse-xls-text catullus c:\users\dfusi\desktop\co\Dump.json
+.\Catutil.exe import-text c:\users\dfusi\desktop\co\ 1_*.xls catullus -d
 ```
 
 The target database has 3 tables:

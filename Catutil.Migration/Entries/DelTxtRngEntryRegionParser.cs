@@ -70,8 +70,10 @@ namespace Catutil.Migration.Entries
                     Match m = _lemRangeRegex.Match(txt.Value);
                     if (m.Success)
                     {
-                        context.CurrentEntry.Value = txt.Value;
-                        context.CurrentEntry.Value =
+                        // deletion: set null for value but keep it normalized
+                        // for later detection
+                        context.CurrentEntry.Value = null;
+                        context.CurrentEntry.NormValue =
                             LemmaFilter.Apply(m.Groups[1].Value)
                             + " - "
                             + LemmaFilter.Apply(m.Groups[2].Value);

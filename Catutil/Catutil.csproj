@@ -21,16 +21,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cadmus.Mongo" Version="2.2.51" />
-    <PackageReference Include="Cadmus.Philology.Parts" Version="2.2.55" />
+    <PackageReference Include="Cadmus.Mongo" Version="2.2.52" />
+    <PackageReference Include="Cadmus.Philology.Parts" Version="2.2.56" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.6" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.6" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.6" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.1.6" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.6" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.6" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.6" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.7" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.7" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.7" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="3.1.7" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.7" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.1.7" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1" />
     <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
     <PackageReference Include="ShellProgressBar" Version="5.0.0" />

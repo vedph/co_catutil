@@ -91,6 +91,12 @@ namespace Catutil.Migration.Entries
             if (set is null) throw new ArgumentNullException(nameof(set));
             if (regions is null) throw new ArgumentNullException(nameof(regions));
 
+            // avoid dumping partial regions, as they are already included
+            // in the dump of a full region
+            if (regions[regionIndex].IsPartial(set.Entries))
+                return regionIndex + 1;
+
+            // create a new file if required
             if (_package == null ||
                 (_options.MaxEntriesPerDumpFile > 0
                  && _entryCount >= _options.MaxEntriesPerDumpFile))

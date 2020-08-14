@@ -4,8 +4,8 @@ using Proteus.Core;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Catutil.Migration.Entries
 {
@@ -43,6 +43,7 @@ namespace Catutil.Migration.Entries
     public sealed class FragmentLocator : IHasLogger
     {
         private readonly Func<string, string> _getLine;
+        private readonly Regex _txtRangeRegex;
         private double _treshold;
 
         /// <summary>
@@ -76,6 +77,7 @@ namespace Catutil.Migration.Entries
         public FragmentLocator(Func<string,string> getLine)
         {
             _getLine = getLine ?? throw new ArgumentNullException(nameof(getLine));
+            _txtRangeRegex = new Regex(@"^([^-]+)\s+-\s+(.+)$");
             _treshold = 0.8;
         }
 
@@ -90,89 +92,63 @@ namespace Catutil.Migration.Entries
             return x;
         }
 
-        private string LocateExact(ApparatusLayerFragment fr, int y,
-            string normLine)
+        private string LocateExact(int y, string normValue, string normLine)
         {
-            foreach (ApparatusEntry entry in fr.Entries.Where(
-                e => !string.IsNullOrEmpty(e.NormValue)))
+            int i = normLine.IndexOf(normValue);
+            if (i > -1)
             {
-                int i = normLine.IndexOf(entry.NormValue);
-                if (i > -1)
-                {
-                    int x = GetX(normLine, i);
-                    Logger?.LogInformation(
-                        $"Location {fr.Location} got from entry {entry} on {normLine}");
-                    return $"{y}.{x}";
-                }
+                int x = GetX(normLine, i);
+                return $"{y}.{x}";
             }
             return null;
         }
 
-        private string LocateFuzzy(ApparatusLayerFragment fr, int y,
-            string normLine)
+        private string LocateFuzzy(int y, string normValue, string normLine)
         {
             // brute force fuzzy matching, no special need to optimize,
             // that's run-once stuff
             int bestIndex = -1;
             double bestScore = 0;
-            ApparatusEntry matchedEntry = null;
 
-            foreach (ApparatusEntry entry in fr.Entries.Where(
-                e => !string.IsNullOrEmpty(e.NormValue)))
+            for (int i = 0; i < normLine.Length - normValue.Length; i++)
             {
-                // we assume that the length of the compared forms is the same
-                for (int i = 0; i < normLine.Length - entry.NormValue.Length; i++)
+                // compare whole words only, assuming that the length of
+                // the forms being compared is equal
+                if (i > 0 && normLine[i - 1] != ' ') continue;
+                if (i + normValue.Length < normLine.Length
+                   && normLine[i + normValue.Length] != ' ')
                 {
-                    string b = normLine.Substring(i, entry.NormValue.Length);
-                    double p = JaroWinkler.Proximity(entry.NormValue, b);
-                    if (p >= _treshold && p > bestScore)
-                    {
-                        matchedEntry = entry;
-                        bestIndex = i;
-                        bestScore = p;
-                        break;
-                    }
+                    continue;
+                }
+
+                string textToCompare = normLine.Substring(i, normValue.Length);
+
+                double p = JaroWinkler.Proximity(normValue, textToCompare);
+                if (p >= _treshold && p > bestScore)
+                {
+                    bestIndex = i;
+                    bestScore = p;
                 }
             }
 
             if (bestIndex > -1)
             {
                 int x = GetX(normLine, bestIndex);
-                Logger?.LogInformation(
-                    $"Location {fr.Location} got from entry {matchedEntry} on {normLine}");
                 return $"{y}.{x}";
             }
             return null;
         }
 
-        /// <summary>
-        /// Get the location of <paramref name="fragment"/> in the specified
-        /// normalized line.
-        /// </summary>
-        /// <param name="fragment">The fragment to locate.</param>
-        /// <param name="y">The Y value for <paramref name="line"/>.</param>
-        /// <param name="line">The normalized line.</param>
-        /// <returns>The fragment's location or null.</returns>
-        /// <exception cref="ArgumentNullException">fragments or line</exception>
-        public string LocateFragment(ApparatusLayerFragment fragment, int y, string line)
+        private string LocateExactOrFuzzy(
+            int y, string normValue, string normLine)
         {
-            if (fragment == null) throw new ArgumentNullException(nameof(fragment));
-            if (line == null) throw new ArgumentNullException(nameof(line));
+            string loc = LocateExact(y, normValue, normLine);
+            if (loc != null) return loc;
 
-            if (fragment.Entries == null || fragment.Entries.Count == 0)
-                return null;
-
-            string loc = null;
-            foreach (ApparatusEntry entry in fragment.Entries.Where(
-                e => !string.IsNullOrEmpty(e.NormValue)))
+            if ((loc = LocateFuzzy(y, normValue, normLine)) == null)
             {
-                loc = LocateExact(fragment, y, line);
-                if (loc != null) return loc;
-            }
-
-            if ((loc = LocateFuzzy(fragment, y, line)) == null)
-            {
-                Logger?.LogWarning($"Unable to locate fragment at line {y}");
+                Logger?.LogWarning(
+                    $"Unable to locate fragment from head entry at line {y}");
                 return null;
             }
             return loc;
@@ -183,15 +159,15 @@ namespace Catutil.Migration.Entries
         /// normalized line, using only the head entry with a value.
         /// </summary>
         /// <param name="fragment">The fragment to locate.</param>
-        /// <param name="y">The Y value for <paramref name="line"/>.</param>
-        /// <param name="line">The normalized line.</param>
+        /// <param name="y">The Y value for <paramref name="normLine"/>.</param>
+        /// <param name="normLine">The normalized line.</param>
         /// <returns>The fragment's location or null.</returns>
         /// <exception cref="ArgumentNullException">fragments or line</exception>
         public string LocateFragmentFromHead(ApparatusLayerFragment fragment,
-            int y, string line)
+            int y, string normLine)
         {
             if (fragment == null) throw new ArgumentNullException(nameof(fragment));
-            if (line == null) throw new ArgumentNullException(nameof(line));
+            if (normLine == null) throw new ArgumentNullException(nameof(normLine));
 
             if (fragment.Entries == null || fragment.Entries.Count == 0)
                 return null;
@@ -200,20 +176,28 @@ namespace Catutil.Migration.Entries
             ApparatusEntry entry = fragment.Entries[0];
             if (string.IsNullOrEmpty(entry.NormValue))
             {
-                Logger?.LogWarning($"No head entry for locating fragment at line {y}");
-                return null;
-            }
-
-            string loc = LocateExact(fragment, y, line);
-            if (loc != null) return loc;
-
-            if ((loc = LocateFuzzy(fragment, y, line)) == null)
-            {
                 Logger?.LogWarning(
-                    $"Unable to locate fragment from head entry at line {y}");
+                    $"No head entry for locating fragment at line {y}");
                 return null;
             }
-            return loc;
+
+            // corner case: range
+            Match m = _txtRangeRegex.Match(entry.NormValue);
+            if (m.Success)
+            {
+                string first = LocateExactOrFuzzy(y, m.Groups[1].Value, normLine);
+                string last = LocateExactOrFuzzy(y, m.Groups[2].Value, normLine);
+                if (first == null || last == null)
+                {
+                    Logger?.LogError(
+                        $"Unable to locate range fragment at line {y}: " +
+                        $"{entry.NormValue}");
+                    return null;
+                }
+                return $"{first}-{last}";
+            }
+
+            return LocateExactOrFuzzy(y, entry.NormValue, normLine);
         }
 
         private void MergeFragmentTags(ApparatusLayerFragment source,
@@ -272,7 +256,8 @@ namespace Catutil.Migration.Entries
                 ApparatusLayerFragment fr = fragments[i];
 
                 // true y is in the fake location
-                int y = int.Parse(fr.Location.Substring(0, fr.Location.IndexOf('.')),
+                int y = int.Parse(
+                    fr.Location.Substring(0, fr.Location.IndexOf('.')),
                     CultureInfo.InvariantCulture);
 
                 // line ID is in the tag after @

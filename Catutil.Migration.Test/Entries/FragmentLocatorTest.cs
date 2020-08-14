@@ -36,7 +36,8 @@ namespace Catutil.Migration.Test.Entries
                 NormValue = "tactus"
             });
 
-            string loc = locator.LocateFragment(fr, 1, "cui dono lepidum nouom libellum");
+            string loc = locator.LocateFragmentFromHead(fr, 1,
+                "cui dono lepidum nouom libellum");
 
             Assert.Null(loc);
         }
@@ -55,7 +56,8 @@ namespace Catutil.Migration.Test.Entries
                 NormValue = "nouum"
             });
 
-            string loc = locator.LocateFragment(fr, 1, "cui dono lepidum nouom libellum");
+            string loc = locator.LocateFragmentFromHead(
+                fr, 1, "cui dono lepidum nouom libellum");
 
             Assert.Equal("1.4", loc);
         }
@@ -74,7 +76,8 @@ namespace Catutil.Migration.Test.Entries
                 NormValue = "cui"
             });
 
-            string loc = locator.LocateFragment(fr, 1, "cui dono lepidum nouom libellum");
+            string loc = locator.LocateFragmentFromHead(
+                fr, 1, "cui dono lepidum nouom libellum");
 
             Assert.Equal("1.1", loc);
         }
@@ -299,6 +302,32 @@ namespace Catutil.Migration.Test.Entries
             Assert.Equal("1.1", fr.Location);
             Assert.Equal("1-2-3@1.1-1.1-1.1", fr.Tag);
             Assert.Equal(3, fr.Entries.Count);
+        }
+
+        [Theory]
+        [InlineData("cui - nouom")]
+        [InlineData("cui - nouum")]
+        public void LocateFragments_Range_Ok(string value)
+        {
+            FragmentLocator locator = GetLocator();
+
+            var fragments = new List<ApparatusLayerFragment>();
+            ApparatusLayerFragment fr = new ApparatusLayerFragment
+            {
+                Location = "1.1234",
+                Tag = "1@1.1"
+            };
+            fr.Entries.Add(new ApparatusEntry
+            {
+                Value = null,
+                NormValue = value
+            });
+            fragments.Add(fr);
+
+            locator.LocateFragments(fragments);
+
+            Assert.Single(fragments);
+            Assert.Equal("1.1-1.4", fragments[0].Location);
         }
     }
 }

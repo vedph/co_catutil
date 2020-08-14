@@ -165,10 +165,31 @@ namespace Catutil.Migration.Entries
             }
         }
 
+        private void AdjustPart()
+        {
+            foreach (ApparatusLayerFragment fr in ApparatusPart.Fragments)
+            {
+                foreach (ApparatusEntry entry in fr.Entries)
+                {
+                    // replacement with value=null is a deletion,
+                    // so remove also the normValue, which was kept
+                    // to allow detection
+                    if (entry.Type == ApparatusEntryType.Replacement
+                        && entry.Value == null)
+                    {
+                        entry.NormValue = null;
+                    }
+                }
+            }
+        }
+
         private void SavePart()
         {
             // try locating fragments
             _locator.LocateFragments(ApparatusPart.Fragments);
+
+            // adjust part
+            AdjustPart();
 
             // create new output file if required
             if (_writer == null

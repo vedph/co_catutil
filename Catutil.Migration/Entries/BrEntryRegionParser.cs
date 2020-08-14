@@ -69,14 +69,7 @@ namespace Catutil.Migration.Entries
                 throw new ArgumentNullException(nameof(context));
 
             EntryRange range = regions[regionIndex].Range;
-            DecodedTextEntry entry =
-                set.Entries[range.Start.Entry] as DecodedTextEntry;
-            if (entry == null)
-            {
-                Logger?.LogError("Expected text entry including br region at " +
-                    $"{regionIndex} not found");
-            }
-            else
+            if (set.Entries[range.Start.Entry] is DecodedTextEntry entry)
             {
                 ApparatusParserContext ctx = (ApparatusParserContext)context;
                 ctx.CurrentEntry.Authors.Add(new ApparatusAnnotatedValue
@@ -84,6 +77,11 @@ namespace Catutil.Migration.Entries
                     Value = entry.Value.Substring(range.Start.Character,
                         range.End.Character + 1 - range.Start.Character)
                 });
+            }
+            else
+            {
+                Logger?.LogError("Expected text entry including br region at " +
+                    $"{regionIndex} not found");
             }
 
             return regionIndex + 1;

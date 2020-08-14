@@ -10,12 +10,11 @@ using System.Collections.Generic;
 namespace Catutil.Migration.Entries
 {
     /// <summary>
-    /// Parser for <c>ms</c> region. This adds to the current entry the content
-    /// of the <c>ms</c> region as a witness.
+    /// Parser for the <c>del-lem</c> region.
+    /// <para>Tag: <c>entry-region-parser.co-del-lem</c>.</para>
     /// </summary>
-    /// <seealso cref="IEntryRegionParser" />
-    [Tag("entry-region-parser.co-ms")]
-    public sealed class MsEntryRegionParser : IEntryRegionParser
+    [Tag("entry-region-parser.co-del-lem")]
+    public sealed class DelLemEntryRegionParser : IEntryRegionParser
     {
         /// <summary>
         /// Gets or sets the logger.
@@ -41,7 +40,7 @@ namespace Catutil.Migration.Entries
             if (regions == null)
                 throw new ArgumentNullException(nameof(regions));
 
-            return regions[regionIndex].Tag == "ms";
+            return regions[regionIndex].Tag == "del-lem";
         }
 
         /// <summary>
@@ -68,19 +67,19 @@ namespace Catutil.Migration.Entries
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            EntryRange range = regions[regionIndex].Range;
-            if (set.Entries[range.Start.Entry] is DecodedTextEntry entry)
+            if (set.Entries[regions[regionIndex].Range.Start.Entry]
+                is DecodedTextEntry entry)
             {
                 ApparatusParserContext ctx = (ApparatusParserContext)context;
-                ctx.CurrentEntry.Witnesses.Add(new ApparatusAnnotatedValue
-                {
-                    Value = entry.Value.Substring(range.Start.Character,
-                        range.End.Character + 1 - range.Start.Character)
-                });
+                ctx.CurrentEntry.Type = ApparatusEntryType.Replacement;
+                ctx.CurrentEntry.Value = null;
+                // keep NormValue as it will be later used for locating
+                // (in ApparatusParserContext)
+                ctx.CurrentEntry.Note = entry.Value.Trim();
             }
             else
             {
-                Logger?.LogError("Expected text entry including ms region at " +
+                Logger?.LogError("Expected text entry in del-lem region at " +
                     $"{regionIndex} not found");
             }
 

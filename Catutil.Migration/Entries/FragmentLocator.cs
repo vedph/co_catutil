@@ -4,6 +4,7 @@ using Proteus.Core;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -196,6 +197,10 @@ namespace Catutil.Migration.Entries
                 }
                 return $"{first}-{last}";
             }
+
+            // corner case: whole line
+            if (entry.NormValue == "$ln")
+                return $"{y}.1-{y}.{1 + entry.NormValue.Count(c => c == ' ')}";
 
             return LocateExactOrFuzzy(y, entry.NormValue, normLine);
         }

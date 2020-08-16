@@ -96,6 +96,7 @@ namespace Catutil.Migration.Entries
                         {
                             Value = m.Value
                         });
+                        Logger?.LogInformation($">wit: Witness={m.Value}");
                     }
                 }
             }

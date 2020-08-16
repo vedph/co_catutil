@@ -110,12 +110,15 @@ namespace Catutil.Migration.Entries
             }
             if (n == 3)
             {
+                // : is a commodity conventional prefix for ancient authors
+                string value = ":" + sb.ToString();
+
                 ApparatusParserContext ctx = (ApparatusParserContext)context;
                 ctx.CurrentEntry.Authors.Add(new ApparatusAnnotatedValue
                 {
-                    // : is a commodity conventional prefix for ancient authors
-                    Value = ":"+ sb.ToString()
+                    Value = value
                 });
+                Logger?.LogInformation($">auth: Author={value}");
             }
 
             return regionIndex + 1;

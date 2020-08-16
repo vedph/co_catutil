@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using OfficeOpenXml.FormulaParsing.Utilities;
 using Proteus.Core.Entries;
 using Proteus.Core.Regions;
 using Proteus.Entries;
@@ -172,12 +173,16 @@ namespace Catutil.Migration.Entries
         {
             if (set is null) throw new ArgumentNullException(nameof(set));
 
+            _logger?.LogInformation($"--set #{set.Context.Number}");
+
             // get regions
             EntryRegionSet regionSet = GetRegionSet(set);
 
             // apply the first matching parser for each region
             for (int i = 0; i < regionSet.Regions.Count; i++)
             {
+                _logger?.LogInformation($"[{i}] {regionSet.Regions[i].Tag}");
+
                 IEntryRegionParser parser = RegionParsers.FirstOrDefault(
                     p => p.IsApplicable(set, regionSet.Regions, i));
                 if (parser != null)
@@ -187,7 +192,8 @@ namespace Catutil.Migration.Entries
                 else
                 {
                     _logger?.LogWarning(
-                        $"Unhandled region at {i}: {regionSet.Regions[i]}");
+                        $"Unhandled region at #{set.Context.Number}.{i}: " +
+                        $"{regionSet.Regions[i]}");
                 }
             }
 

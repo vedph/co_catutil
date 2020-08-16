@@ -88,6 +88,8 @@ namespace Catutil.Migration.Entries
 
                 // add a new entry
                 ctx.AddEntry(itemId, lineId, y, new ApparatusEntry());
+
+                Logger?.LogInformation($">ids: new entry from {cmd}");
             }
             else Logger?.LogError("Unexpected entry type in ids region " +
                 $"at {regionIndex}: \"{entry}\"");

@@ -78,6 +78,8 @@ namespace Catutil.Migration.Entries
                 // so that the fragment locator will calculate its coords
                 ctx.CurrentEntry.NormValue = "$ln";
                 ctx.CurrentEntry.Note = entry.Value.Trim();
+
+                Logger?.LogInformation($">del-ln: Note={ctx.CurrentEntry.Note}");
             }
             else
             {

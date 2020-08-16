@@ -68,19 +68,21 @@ namespace Catutil.Migration.Entries
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            DecodedTextEntry entry =
-                set.Entries[regions[regionIndex].Range.Start.Entry] as DecodedTextEntry;
-            if (entry == null)
-            {
-                Logger?.LogError("Expected text entry in lem region at " +
-                    $"{regionIndex} not found");
-            }
-            else
+            if ((set.Entries[regions[regionIndex].Range.Start.Entry] is
+                DecodedTextEntry entry))
             {
                 // set the current entry's value and normalized value
                 ApparatusParserContext ctx = (ApparatusParserContext)context;
                 ctx.CurrentEntry.Value = entry.Value.Trim();
                 ctx.CurrentEntry.NormValue = LemmaFilter.Apply(ctx.CurrentEntry.Value);
+
+                Logger?.LogInformation($">lem: Value={ctx.CurrentEntry.Value}" +
+                    $"NormValue={ctx.CurrentEntry.NormValue}");
+            }
+            else
+            {
+                Logger?.LogError("Expected text entry in lem region at " +
+                    $"{regionIndex} not found");
             }
 
             return regionIndex + 1;

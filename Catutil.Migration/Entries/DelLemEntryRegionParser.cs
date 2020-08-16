@@ -76,6 +76,8 @@ namespace Catutil.Migration.Entries
                 // keep NormValue as it will be later used for locating
                 // (in ApparatusParserContext)
                 ctx.CurrentEntry.Note = entry.Value.Trim();
+
+                Logger?.LogInformation($">del-lem: Note={ctx.CurrentEntry.Note}");
             }
             else
             {

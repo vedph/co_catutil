@@ -71,12 +71,16 @@ namespace Catutil.Migration.Entries
             EntryRange range = regions[regionIndex].Range;
             if (set.Entries[range.Start.Entry] is DecodedTextEntry entry)
             {
+                string value = entry.Value.Substring(range.Start.Character,
+                        range.End.Character + 1 - range.Start.Character);
+
                 ApparatusParserContext ctx = (ApparatusParserContext)context;
                 ctx.CurrentEntry.Authors.Add(new ApparatusAnnotatedValue
                 {
-                    Value = entry.Value.Substring(range.Start.Character,
-                        range.End.Character + 1 - range.Start.Character)
+                    Value = value
                 });
+
+                Logger?.LogInformation($">auth: Author={value}");
             }
             else
             {

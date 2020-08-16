@@ -117,12 +117,15 @@ namespace Catutil.Migration.Entries
                 regions[regionIndex].Range.Start.Entry,
                 regions[regionIndex].Range.End.Entry,
                 ctx);
+            Logger?.LogInformation(
+                $">del-txt-rng: NormValue={ctx.CurrentEntry.NormValue}");
 
             // note = full text of region
             ctx.CurrentEntry.Note = EntryRegionParserHelper.GetText(
                 set.Entries,
                 regions[regionIndex].Range.Start.Entry,
                 regions[regionIndex].Range.End.Entry);
+            Logger?.LogInformation($">del-txt-rng: Note={ctx.CurrentEntry.Note}");
 
             return regionIndex + 1;
         }

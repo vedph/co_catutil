@@ -220,11 +220,7 @@ namespace Catutil.Migration.Entries
 
             // separator
             sb.Append('@');
-            // source line ID
-            for (int i = srcTagSepIndex + 1; i < source.Tag.Length; i++)
-                sb.Append(source.Tag[i]);
-            // -target line ID
-            sb.Append('-');
+            // target line ID
             for (int i = dstTagSepIndex + 1; i < target.Tag.Length; i++)
                 sb.Append(target.Tag[i]);
 

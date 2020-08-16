@@ -200,7 +200,7 @@ namespace Catutil.Migration.Test.Entries
             Assert.Single(fragments);
             fr = fragments[0];
             Assert.Equal("1.1", fr.Location);
-            Assert.Equal("1-2@1.1-1.1", fr.Tag);
+            Assert.Equal("1-2@1.1", fr.Tag);
             Assert.Equal(2, fr.Entries.Count);
         }
 
@@ -248,7 +248,7 @@ namespace Catutil.Migration.Test.Entries
             Assert.Single(fragments);
             fr = fragments[0];
             Assert.Equal("1.1", fr.Location);
-            Assert.Equal("1-2-3@1.1-1.1-1.1", fr.Tag);
+            Assert.Equal("1-2-3@1.1", fr.Tag);
             Assert.Equal(3, fr.Entries.Count);
         }
 
@@ -300,7 +300,7 @@ namespace Catutil.Migration.Test.Entries
             Assert.Single(fragments);
             fr = fragments[0];
             Assert.Equal("1.1", fr.Location);
-            Assert.Equal("1-2-3@1.1-1.1-1.1", fr.Tag);
+            Assert.Equal("1-2-3@1.1", fr.Tag);
             Assert.Equal(3, fr.Entries.Count);
         }
 

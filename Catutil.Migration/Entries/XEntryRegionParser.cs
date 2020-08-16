@@ -1,6 +1,5 @@
 ﻿using Fusi.Tools.Config;
 using Microsoft.Extensions.Logging;
-using Proteus.Core.Entries;
 using Proteus.Core.Regions;
 using Proteus.Entries;
 using System;
@@ -9,13 +8,10 @@ using System.Collections.Generic;
 namespace Catutil.Migration.Entries
 {
     /// <summary>
-    /// Parser for the <c>lem</c> region. This sets the current entry value
-    /// and normalized value, drawing it from the text entry representing
-    /// that region. The value is normalized using <see cref="LemmaFilter"/>.
+    /// Region parser for unknown (x) region.
     /// </summary>
-    /// <seealso cref="IEntryRegionParser" />
-    [Tag("entry-region-parser.co-lem")]
-    public sealed class LemEntryRegionParser : IEntryRegionParser
+    [Tag("entry-region-parser.co-x")]
+    public sealed class XEntryRegionParser : IEntryRegionParser
     {
         /// <summary>
         /// Gets or sets the logger.
@@ -41,7 +37,7 @@ namespace Catutil.Migration.Entries
             if (regions == null)
                 throw new ArgumentNullException(nameof(regions));
 
-            return regions[regionIndex].Tag == "lem";
+            return regions[regionIndex].Tag == "x";
         }
 
         /// <summary>
@@ -68,22 +64,7 @@ namespace Catutil.Migration.Entries
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            if (set.Entries[regions[regionIndex].Range.Start.Entry] is
-                DecodedTextEntry entry)
-            {
-                // set the current entry's value and normalized value
-                ApparatusParserContext ctx = (ApparatusParserContext)context;
-                ctx.CurrentEntry.Value = entry.Value.Trim();
-                ctx.CurrentEntry.NormValue = LemmaFilter.Apply(ctx.CurrentEntry.Value);
-
-                Logger?.LogInformation($">lem: Value=[{ctx.CurrentEntry.Value}] " +
-                    $"NormValue=[{ctx.CurrentEntry.NormValue}]");
-            }
-            else
-            {
-                Logger?.LogError("Expected text entry in lem region at " +
-                    $"{regionIndex} not found");
-            }
+            // TODO: implement x region parser
 
             return regionIndex + 1;
         }

@@ -4,6 +4,7 @@ using Proteus.Core.Regions;
 using Proteus.Entries;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Catutil.Migration.Entries
 {
@@ -64,7 +65,16 @@ namespace Catutil.Migration.Entries
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            // TODO: implement x region parser
+            string text = EntryRegionParserHelper.CollectText(set.Entries,
+                regions[regionIndex].Range.Start.Entry,
+                regions[regionIndex].Range.End.Entry).Trim();
+            if (text.Any(c => char.IsLetterOrDigit(c)))
+            {
+                ApparatusParserContext ctx = (ApparatusParserContext)context;
+                Logger?.LogInformation($">x: Note=[{text}] " +
+                    $"(previous=[{ctx.CurrentEntry.Note}])");
+                ctx.CurrentEntry.Note = text.Trim();
+            }
 
             return regionIndex + 1;
         }

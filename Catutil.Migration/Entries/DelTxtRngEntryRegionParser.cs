@@ -121,7 +121,7 @@ namespace Catutil.Migration.Entries
                 $">del-txt-rng: NormValue={ctx.CurrentEntry.NormValue}");
 
             // note = full text of region
-            ctx.CurrentEntry.Note = EntryRegionParserHelper.GetText(
+            ctx.CurrentEntry.Note = EntryRegionParserHelper.CollectText(
                 set.Entries,
                 regions[regionIndex].Range.Start.Entry,
                 regions[regionIndex].Range.End.Entry);

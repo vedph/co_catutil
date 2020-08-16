@@ -19,7 +19,7 @@ namespace Catutil.Migration.Entries
         /// <param name="end">The end entry index (inclusive).</param>
         /// <returns>Text.</returns>
         /// <exception cref="ArgumentNullException">entries</exception>
-        static public string GetText(IList<DecodedEntry> entries,
+        static public string CollectText(IList<DecodedEntry> entries,
             int start, int end)
         {
             if (entries == null)

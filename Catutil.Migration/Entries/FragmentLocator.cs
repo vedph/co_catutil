@@ -164,7 +164,7 @@ namespace Catutil.Migration.Entries
         /// <param name="normLine">The normalized line.</param>
         /// <returns>The fragment's location or null.</returns>
         /// <exception cref="ArgumentNullException">fragments or line</exception>
-        public string LocateFragmentFromHead(ApparatusLayerFragment fragment,
+        public string LocateFragment(ApparatusLayerFragment fragment,
             int y, string normLine)
         {
             if (fragment == null) throw new ArgumentNullException(nameof(fragment));
@@ -237,19 +237,11 @@ namespace Catutil.Migration.Entries
             target.Entries.AddRange(source.Entries);
         }
 
-        /// <summary>
-        /// Locates all the fragments specified, merging them as required.
-        /// </summary>
-        /// <param name="fragments">The fragments to locate.</param>
-        /// <exception cref="ArgumentNullException">fragments</exception>
-        public void LocateFragments(List<ApparatusLayerFragment> fragments)
+        private List<string> CollectLocations(List<ApparatusLayerFragment> fragments)
         {
-            if (fragments == null)
-                throw new ArgumentNullException(nameof(fragments));
-
             // collect all the detected fragments locations in a list,
             // having a location (or null) for each fragment
-            List<string> frLocations = new List<string>();
+            List<string> locations = new List<string>();
             string normLine = null, currentLineId = null;
 
             for (int i = 0; i < fragments.Count; i++)
@@ -269,12 +261,30 @@ namespace Catutil.Migration.Entries
                     currentLineId = lineId;
                 }
 
-                frLocations.Add(LocateFragmentFromHead(fr, y, normLine));
+                locations.Add(LocateFragment(fr, y, normLine));
             }
+
+            return locations;
+        }
+
+        /// <summary>
+        /// Locates all the fragments specified, merging them as required.
+        /// </summary>
+        /// <param name="fragments">The fragments to locate.</param>
+        /// <exception cref="ArgumentNullException">fragments</exception>
+        public void LocateFragments(List<ApparatusLayerFragment> fragments)
+        {
+            if (fragments == null)
+                throw new ArgumentNullException(nameof(fragments));
+
+            // collect all the detected fragments locations in a list,
+            // having a location (or null) for each fragment
+            List<string> frLocations = CollectLocations(fragments);
 
             // assign locations merging those fragments with the same location,
             // or those fragments between two fragments with the same location
-            for (int frIndex = 0; frIndex < fragments.Count; frIndex++)
+            int frIndex = fragments.Count - 1;
+            while (frIndex > -1)
             {
                 // if located
                 if (frLocations[frIndex] != null)
@@ -282,24 +292,23 @@ namespace Catutil.Migration.Entries
                     // assign location to it
                     fragments[frIndex].Location = frLocations[frIndex];
 
-                    // find the last fragment with the same location
-                    int lastFrIndex =
-                        frLocations.FindLastIndex(l => l == frLocations[frIndex]);
-                    if (lastFrIndex != frIndex)
-                        fragments[lastFrIndex].Location = frLocations[frIndex];
+                    // find the first fragment with the same location
+                    int firstFrIndex =
+                        frLocations.FindIndex(l => l == frLocations[frIndex]);
+                    if (firstFrIndex != frIndex)
+                        fragments[firstFrIndex].Location = frLocations[frIndex];
 
                     // merge all the fragments in range into the last one
-                    for (int i = frIndex; i < lastFrIndex; i++)
+                    for (int i = firstFrIndex; i < frIndex; i++)
                     {
-                        // location
-                        //if (frLocations[i] == null)
-                        //    fragments[i].Location = fragments[i].Location;
                         MergeFragments(fragments[i], fragments[i + 1]);
                     }
                     // remove all the fragments in range except the last one
-                    if (lastFrIndex > frIndex)
-                        fragments.RemoveRange(frIndex, lastFrIndex - frIndex);
+                    if (firstFrIndex < frIndex)
+                        fragments.RemoveRange(firstFrIndex, frIndex - firstFrIndex);
+                    frIndex = firstFrIndex - 1;
                 }
+                else frIndex--;
             }
         }
     }

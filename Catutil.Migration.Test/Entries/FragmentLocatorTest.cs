@@ -36,7 +36,7 @@ namespace Catutil.Migration.Test.Entries
                 NormValue = "tactus"
             });
 
-            string loc = locator.LocateFragmentFromHead(fr, 1,
+            string loc = locator.LocateFragment(fr, 1,
                 "cui dono lepidum nouom libellum");
 
             Assert.Null(loc);
@@ -56,7 +56,7 @@ namespace Catutil.Migration.Test.Entries
                 NormValue = "nouum"
             });
 
-            string loc = locator.LocateFragmentFromHead(
+            string loc = locator.LocateFragment(
                 fr, 1, "cui dono lepidum nouom libellum");
 
             Assert.Equal("1.4", loc);
@@ -76,7 +76,7 @@ namespace Catutil.Migration.Test.Entries
                 NormValue = "cui"
             });
 
-            string loc = locator.LocateFragmentFromHead(
+            string loc = locator.LocateFragment(
                 fr, 1, "cui dono lepidum nouom libellum");
 
             Assert.Equal("1.1", loc);

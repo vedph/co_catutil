@@ -1,12 +1,14 @@
 ﻿using Catutil.Migration.Entries;
 using Microsoft.Extensions.CommandLineUtils;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Proteus.Core.Entries;
 using Proteus.Entries;
 using SimpleInjector;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace Catutil.Commands
 {
@@ -57,6 +59,10 @@ namespace Catutil.Commands
                 $"DB name: {_dbName}\n" +
                 $"Pipeline config: {_pipelineCfgPath}\n");
 
+            ILoggerFactory loggerFactory = new LoggerFactory();
+            loggerFactory.AddSerilog(Log.Logger);
+            Log.Logger.Information("PARSE APPARATUS");
+
             // get the connection string
             string csTemplate = _config.GetConnectionString("Catullus");
             string cs = string.Format(csTemplate, _dbName);
@@ -73,7 +79,8 @@ namespace Catutil.Commands
             EntryParserFactory.ConfigureServices(container);
             EntryParserFactory factory = new EntryParserFactory(container, pipelineCfg)
             {
-                ConnectionString = cs
+                ConnectionString = cs,
+                Logger = loggerFactory.CreateLogger("parse-app"),
             };
             pipeline.Configure(factory);
 

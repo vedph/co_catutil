@@ -19,13 +19,13 @@ namespace Catutil.Migration.Entries
     /// into a set of JSON files. This context accumulates the fragments and
     /// entries of an apparatus part until its item ID changes. Then, it
     /// saves the whole part in JSON format, using as output a set of files
-    /// so that no more than <see cref="CadmusParserContextOptions.MaxPartsPerFile"/>
+    /// so that no more than <see cref="ApparatusParserContextOptions.MaxPartsPerFile"/>
     /// parts are found in each file.
     /// <para>Tag: <c>parser-context.co-apparatus</c>.</para>
     /// </summary>
     [Tag("parser-context.co-apparatus")]
     public class ApparatusParserContext : IParserContext,
-        IConfigurable<CadmusParserContextOptions>
+        IConfigurable<ApparatusParserContextOptions>
     {
         private readonly JsonSerializerSettings _jsonSettings;
         private readonly FragmentLocator _locator;
@@ -131,11 +131,12 @@ namespace Catutil.Migration.Entries
         /// </summary>
         /// <param name="options">The options.</param>
         /// <exception cref="ArgumentNullException">options</exception>
-        public void Configure(CadmusParserContextOptions options)
+        public void Configure(ApparatusParserContextOptions options)
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
 
+            ConnectionString = options.ConnectionString;
             _outputDir = options.OutputDirectory;
             _maxPartsPerFile = options.MaxPartsPerFile;
 
@@ -326,8 +327,13 @@ namespace Catutil.Migration.Entries
     /// <summary>
     /// Options for <see cref="ApparatusParserContext"/>.
     /// </summary>
-    public sealed class CadmusParserContextOptions
+    public sealed class ApparatusParserContextOptions
     {
+        /// <summary>
+        /// Gets or sets the connection string to the source MySql database.
+        /// </summary>
+        public string ConnectionString { get; set; }
+
         /// <summary>
         /// Gets or sets the output directory, where all the Cadmus models
         /// will be saved in JSON files.

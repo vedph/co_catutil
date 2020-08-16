@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace Catutil
 {
@@ -31,6 +33,15 @@ namespace Catutil
         {
             try
             {
+                // logger
+                string logFilePath = Path.Combine(
+                    Directory.GetCurrentDirectory(), "catutil-log.txt");
+                Log.Logger = new LoggerConfiguration()
+                    .MinimumLevel.Debug()
+                    .Enrich.FromLogContext()
+                    .WriteTo.File(logFilePath, rollingInterval: RollingInterval.Day)
+                    .CreateLogger();
+
                 Console.OutputEncoding = Encoding.Unicode;
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();

@@ -78,16 +78,18 @@ namespace Catutil.Migration.Entries
             if (entry is DecodedCommandEntry cmd)
             {
                 ApparatusParserContext ctx = context as ApparatusParserContext;
-                ctx.FragmentId = int.Parse(cmd.GetArgument("f"),
+                int fragmentId = int.Parse(cmd.GetArgument("f"),
                     CultureInfo.InvariantCulture);
-                ctx.EntryId = int.Parse(cmd.GetArgument("e"),
-                    CultureInfo.InvariantCulture);
+                string entryId = cmd.GetArgument("e");
                 string itemId = cmd.GetArgument("i");
                 string lineId = cmd.GetArgument("l");
                 int y = int.Parse(cmd.GetArgument("y"), CultureInfo.InvariantCulture);
 
                 // add a new entry
-                ctx.AddEntry(itemId, lineId, y, new ApparatusEntry());
+                ctx.AddEntry(itemId, lineId, y, fragmentId, new ApparatusEntry
+                {
+                    Tag = entryId
+                });
 
                 Logger?.LogInformation($">ids: new entry from {cmd}");
             }

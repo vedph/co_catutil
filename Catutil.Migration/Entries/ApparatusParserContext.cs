@@ -8,7 +8,6 @@ using Newtonsoft.Json.Serialization;
 using System;
 using System.Data;
 using System.Data.Common;
-using System.Globalization;
 using System.IO;
 using System.Text;
 
@@ -29,11 +28,6 @@ namespace Catutil.Migration.Entries
     {
         private readonly JsonSerializerSettings _jsonSettings;
         private readonly FragmentLocator _locator;
-        private int _fragmentId;
-        private string _fidPrefix;
-
-        private int _entryId;
-        private string _eid;
 
         private string _outputDir;
         private int _maxPartsPerFile;
@@ -55,39 +49,6 @@ namespace Catutil.Migration.Entries
         /// locations.
         /// </summary>
         public string ConnectionString { get; set; }
-
-        /// <summary>
-        /// Gets or sets the current fragment identifier in the source database.
-        /// </summary>
-        public int FragmentId
-        {
-            get { return _fragmentId; }
-            set
-            {
-                if (_fragmentId == value) return;
-                _fragmentId = value;
-                _fidPrefix = value.ToString(CultureInfo.InvariantCulture) + " ";
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the current entry identifier in the source database.
-        /// </summary>
-        public int EntryId
-        {
-            get { return _entryId; }
-            set
-            {
-                if (_entryId == value) return;
-                _entryId = value;
-                _eid = value.ToString(CultureInfo.InvariantCulture);
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the current Y (line ordinal in poem) value.
-        /// </summary>
-        public int Y { get; set; }
 
         /// <summary>
         /// Gets or sets the user identifier to assign to parsed parts.
@@ -259,7 +220,7 @@ namespace Catutil.Migration.Entries
         /// fragment's numeric ID in the database plus <c>@</c> plus the ID
         /// of the line the entry refers to. Its
         /// <see cref="ApparatusLayerFragment.Location"/> is set to
-        /// Y=<paramref name="y"/> and X=1000 + the fragment ordinal number.
+        /// Y=<paramref name="lineOrdinal"/> and X=1000 + the fragment ordinal number.
         /// The X value is fake, and is used only to ensure that no fragment
         /// overlaps when we are collecting them here. Later, when saving the
         /// whole part we try to locate the fragments as a whole.
@@ -268,10 +229,15 @@ namespace Catutil.Migration.Entries
         /// </remarks>
         /// <param name="itemId">The item identifier.</param>
         /// <param name="lineId">The line indentifier.</param>
-        /// <param name="y">The line ordinal number in the poem.</param>
-        /// <param name="entry">The apparatus entry.</param>
+        /// <param name="lineOrdinal">The line ordinal number in the poem.</param>
+        /// <param name="fragmentId">The ID of the fragment the entry belongs
+        /// to.</param>
+        /// <param name="entry">The apparatus entry. It is assumed that its
+        /// <see cref="ApparatusEntry.Tag"/> is equal to the entry's ID in the
+        /// source database.</param>
         /// <exception cref="ArgumentNullException">itemId or entry</exception>
-        public void AddEntry(string itemId, string lineId, int y, ApparatusEntry entry)
+        public void AddEntry(string itemId, string lineId, int lineOrdinal,
+            int fragmentId, ApparatusEntry entry)
         {
             if (itemId == null) throw new ArgumentNullException(nameof(itemId));
             if (lineId == null)
@@ -294,8 +260,9 @@ namespace Catutil.Migration.Entries
             }
 
             // ensure there is the container fragment
+            string tagPrefix = fragmentId + "@";
             ApparatusLayerFragment fr =
-                ApparatusPart.Fragments.Find(f => f.Tag.StartsWith(_fidPrefix));
+                ApparatusPart.Fragments.Find(f => f.Tag.StartsWith(tagPrefix));
             if (fr == null)
             {
                 fr = new ApparatusLayerFragment
@@ -303,24 +270,27 @@ namespace Catutil.Migration.Entries
                     // just assign a fake location, ensuring it's unique
                     // for each added fragment. The true location will be set
                     // by later analysis when saving the complete part
-                    Location = $"{y}.{1000 + ApparatusPart.Fragments.Count + 1}",
+                    Location = $"{lineOrdinal}.{1000 + ApparatusPart.Fragments.Count + 1}",
                     // keep the source fragment ID + @ + line ID in its tag
-                    Tag = _fragmentId + "@" + lineId
+                    Tag = tagPrefix + lineId
                 };
                 ApparatusPart.AddFragment(fr);
             }
 
-            // entry
-            ApparatusEntry targetEntry = fr.Entries.Find(e => e.Tag == _eid);
+            // add the entry
+            ApparatusEntry targetEntry = fr.Entries.Find(e => e.Tag == entry.Tag);
             // if it exists, it will be replaced -- anyway this should never happen
-            if (targetEntry != null) fr.Entries.Remove(targetEntry);
-            // keep the source entry ID in its tag
-            entry.Tag = _eid;
+            if (targetEntry != null)
+            {
+                Logger?.LogWarning($"Entry with ID {entry.Tag} " +
+                    $"in fragment with ID {fragmentId} " +
+                    $"in line {lineId} is overwritten");
+                fr.Entries.Remove(targetEntry);
+            }
             fr.Entries.Add(entry);
 
             // update the current entry
             CurrentEntry = entry;
-            Y = y;
         }
     }
 

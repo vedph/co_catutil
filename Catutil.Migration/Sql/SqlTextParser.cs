@@ -176,7 +176,7 @@ namespace Catutil.Migration.Sql
         }
 
         private IItem CreateItem(string poem, int partition, string title,
-            string citation)
+            string description)
         {
             IItem item = new Item
             {
@@ -185,7 +185,7 @@ namespace Catutil.Migration.Sql
                 UserId = _userId,
                 GroupId = poem,
                 Title = $"{poem} {partition:00} {title}",
-                Description = citation
+                Description = description
             };
             item.SortKey = _sortKeyBuilder.BuildKey(item, null);
             return item;
@@ -333,7 +333,8 @@ namespace Catutil.Migration.Sql
                 string lastRowId = rows[start + len - 1].Data["_id"];
 
                 IItem item = CreateItem(_poems[_poemIndex], i + 1, title,
-                    $"{firstRowId}-{lastRowId}");
+                    $"{firstRowId}-{lastRowId} {title} - " +
+                    $"{FilterTitle(rows[rows.Count - 1].GetText())}");
 
                 TiledTextPart part = new TiledTextPart
                 {

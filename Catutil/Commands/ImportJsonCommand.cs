@@ -9,7 +9,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -28,6 +27,7 @@ namespace Catutil.Commands
         private readonly string _txtFileDir;
         private readonly string _txtFileMask;
         private readonly string _appFileDir;
+        private readonly string _appFileMask;
         private readonly string _profilePath;
         private readonly string _database;
         private readonly bool _dry;
@@ -38,6 +38,7 @@ namespace Catutil.Commands
             string txtFileDir,
             string txtFileMask,
             string appFileDir,
+            string appFileMask,
             string profilePath,
             string database,
             bool dry,
@@ -51,6 +52,8 @@ namespace Catutil.Commands
                 ?? throw new ArgumentNullException(nameof(txtFileMask));
             _appFileDir = appFileDir
                 ?? throw new ArgumentNullException(nameof(appFileDir));
+            _appFileMask = appFileMask
+                ?? throw new ArgumentNullException(nameof(appFileMask));
             _profilePath = profilePath
                 ?? throw new ArgumentNullException(nameof(profilePath));
             _database = database
@@ -82,7 +85,9 @@ namespace Catutil.Commands
             CommandArgument txtMaskArgument = command.Argument("[txt-mask]",
                 "The input JSON text files mask");
             CommandArgument appDirArgument = command.Argument("[app-dir]",
-                "The JSON apparatus files directory");
+                "The input JSON apparatus files directory");
+            CommandArgument appMaskArgument = command.Argument("[app-mask]",
+                "The input JSON apparatus files mask");
             CommandArgument profileArgument = command.Argument("[profile]",
                 "The JSON profile file path");
             CommandArgument databaseArgument = command.Argument("[database]",
@@ -101,6 +106,7 @@ namespace Catutil.Commands
                     txtDirArgument.Value,
                     txtMaskArgument.Value,
                     appDirArgument.Value,
+                    appMaskArgument.Value,
                     profileArgument.Value,
                     databaseArgument.Value,
                     dryOption.HasValue(),
@@ -115,10 +121,41 @@ namespace Catutil.Commands
             return reader.ReadToEnd();
         }
 
-        private static string StripFileNameNr(string name)
+        private JsonImporter GetImporter(ILoggerFactory loggerFactory)
         {
-            int i = name.LastIndexOf('_');
-            return i > -1 ? name.Substring(0, i) : name;
+            // create repository and importer
+            ICadmusRepository repository =
+                _repositoryProvider.CreateRepository(_database);
+
+            return new JsonImporter(repository)
+            {
+                Logger = loggerFactory.CreateLogger("json-importer"),
+                IsDry = _dry
+            };
+        }
+
+        private void CreateDatabase()
+        {
+            string connection = string.Format(CultureInfo.InvariantCulture,
+                _config.GetConnectionString("Default"),
+                _database);
+
+            IDatabaseManager manager = new MongoDatabaseManager();
+
+            string profileContent = LoadProfile(_profilePath);
+            IDataProfileSerializer serializer = new JsonDataProfileSerializer();
+            DataProfile profile = serializer.Read(profileContent);
+
+            if (!manager.DatabaseExists(connection))
+            {
+                Console.WriteLine("Creating database...");
+                Log.Information($"Creating database {_database}...");
+
+                manager.CreateDatabase(connection, profile);
+
+                Console.WriteLine("Database created.");
+                Log.Information("Database created.");
+            }
         }
 
         public Task Run()
@@ -130,6 +167,7 @@ namespace Catutil.Commands
                 $"Text dir:  {_txtFileDir}\n" +
                 $"Text mask: {_txtFileMask}\n" +
                 $"Apparatus dir: {_appFileDir}\n" +
+                $"Apparatus mask: {_appFileMask}\n" +
                 $"Profile file: {_profilePath}\n" +
                 $"Database: {_database}\n" +
                 $"Dry run: {_dry}\n");
@@ -141,26 +179,7 @@ namespace Catutil.Commands
             if (!_dry)
             {
                 // create database if not exists
-                string connection = string.Format(CultureInfo.InvariantCulture,
-                    _config.GetConnectionString("Default"),
-                    _database);
-
-                IDatabaseManager manager = new MongoDatabaseManager();
-
-                string profileContent = LoadProfile(_profilePath);
-                IDataProfileSerializer serializer = new JsonDataProfileSerializer();
-                DataProfile profile = serializer.Read(profileContent);
-
-                if (!manager.DatabaseExists(connection))
-                {
-                    Console.WriteLine("Creating database...");
-                    Log.Information($"Creating database {_database}...");
-
-                    manager.CreateDatabase(connection, profile);
-
-                    Console.WriteLine("Database created.");
-                    Log.Information("Database created.");
-                }
+                CreateDatabase();
             }
             else
             {
@@ -173,31 +192,16 @@ namespace Catutil.Commands
                 }
             }
 
-            ICadmusRepository repository =
-                _repositoryProvider.CreateRepository(_database);
-
-            JsonImporter importer = new JsonImporter(repository)
-            {
-                Logger = loggerFactory.CreateLogger("json-importer"),
-                IsDry = _dry
-            };
-
-            int inputFileCount = 0;
+            JsonImporter importer = GetImporter(loggerFactory);
 
             // 1) import text
             string[] files = FileEnumerator.Enumerate(
                 _txtFileDir, _txtFileMask, _regexMask).ToArray();
-            HashSet<string> fileNames = new HashSet<string>();
-
             Console.WriteLine($"Importing text from {files.Length} file(s)...");
 
             foreach (string txtFilePath in files)
             {
-                fileNames.Add(
-                    StripFileNameNr(
-                        Path.GetFileNameWithoutExtension(txtFilePath)));
                 Console.WriteLine(txtFilePath);
-                inputFileCount++;
 
                 using (Stream stream = new FileStream(txtFilePath, FileMode.Open,
                     FileAccess.Read, FileShare.Read))
@@ -207,21 +211,17 @@ namespace Catutil.Commands
             }
 
             // 2) import apparatus
-            Console.WriteLine("Importing apparatus...");
+            files = FileEnumerator.Enumerate(
+                _appFileDir, _appFileMask, _regexMask).ToArray();
+            Console.WriteLine($"Importing apparatus from {files.Length} file(s)...");
 
-            foreach (string fileName in fileNames)
+            foreach (string appFilePath in files)
             {
-                Console.WriteLine(fileName);
-
-                foreach (string appFilePath in Directory.EnumerateFiles(
-                    _appFileDir, fileName + "-app_*.json"))
+                Console.WriteLine(appFilePath);
+                using (Stream stream = new FileStream(appFilePath, FileMode.Open,
+                    FileAccess.Read, FileShare.Read))
                 {
-                    Console.WriteLine("  " + appFilePath);
-                    using (Stream stream = new FileStream(appFilePath, FileMode.Open,
-                        FileAccess.Read, FileShare.Read))
-                    {
-                        importer.ImportApparatus(stream);
-                    }
+                    importer.ImportApparatus(stream);
                 }
             }
 

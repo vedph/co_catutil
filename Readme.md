@@ -223,7 +223,7 @@ This command imports into a Cadmus database the JSON files created by parsing pr
 Syntax:
 
 ```ps1
-.\Catutil.exe import-json InputTxtFilesDirectory InputTxtFilesMask ApparatusFilesDirectory JsonProfileFilePath DatabaseName [-d] [-r]
+.\Catutil.exe import-json InputTxtFilesDirectory InputTxtFilesMask ApparatusFilesDirectory ApparatusFilesMask JsonProfileFilePath DatabaseName [-d] [-r]
 ```
 
 Where:
@@ -231,15 +231,16 @@ Where:
 - `InputTxtFilesDirectory`: the directory including the input text files.
 - `InputTxtFilesMask`: the mask to be matched for the input text files. It can be a regular expression if using `-r`.
 - `ApparatusFilesDirectory`: the directory including the apparatus parts files.
+- `ApparatusFilesMask`: the mask to be matched for the input apparatus files. It can be a regular expression if using `-r`.
 - `JsonProfileFilePath`: the full path to the JSON file with the Cadmus profile.
 - `DatabaseName`: the target database name.
 - `-d`: dry run: do not write anything to the database.
-- `-r`: use a regular expression in input text files mask.
+- `-r`: use a regular expression in input files mask.
 
 Examples:
 
 ```ps1
-.\Catutil.exe import-json C:\Users\dfusi\Desktop\co\items\ *.json C:\Users\dfusi\Desktop\co\app\ C:\Users\dfusi\Desktop\co\co-profile.json co -d
+.\Catutil.exe import-json C:\Users\dfusi\Desktop\co\items\ *.json C:\Users\dfusi\Desktop\co\app\ *.json C:\Users\dfusi\Desktop\co\co-profile.json co -d
 
-.\Catutil.exe import-json C:\Users\dfusi\Desktop\co\items\ *.json C:\Users\dfusi\Desktop\co\app\ C:\Users\dfusi\Desktop\co\co-profile.json co
+.\Catutil.exe import-json C:\Users\dfusi\Desktop\co\items\ *.json C:\Users\dfusi\Desktop\co\app\ *.json C:\Users\dfusi\Desktop\co\co-profile.json co
 ```

@@ -151,6 +151,8 @@ namespace Catutil.Commands
                 writer.WriteLine(json + ",");
             }
 
+            if (writer != null) CloseOutputFile(writer);
+
             Console.WriteLine($"Output items: {itemCount}");
             return Task.CompletedTask;
         }

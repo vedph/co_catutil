@@ -45,7 +45,7 @@
   ],
   "thesauri": [
     {
-      "id": "apparatus-witnesses",
+      "id": "apparatus-witnesses@en",
       "entries": [
         {
           "id": "T",
@@ -64,519 +64,519 @@
           "value": "Ottobonianus lat. 1829"
         },
         {
-          "id": "MS 1",
+          "id": "MS-1",
           "value": "MS 1. Austin (Tx.), Harry Ransom Humanities Research Center 32 – Italy, 1451"
         },
         {
-          "id": "MS 2",
+          "id": "MS-2",
           "value": "MS 2. Bergamo, Biblioteca Civica 2.33 (3) – Italy, ca. 1475"
         },
         {
-          "id": "MS 3",
+          "id": "MS-3",
           "value": "MS 3. Berlin, Staatsbibliothek Diez. B Sant. 36 – Italy, ca. 1455  "
         },
         {
-          "id": "MS 4",
+          "id": "MS-4",
           "value": "MS 4. Berlin, Staatsbibliothek Diez. B Sant. 37 – Italy, 1463"
         },
         {
-          "id": "MS 5",
+          "id": "MS-5",
           "value": "MS 5. Berlin, Staatsbibliothek Diez. B Sant. 40 – Italy, ca. 1465"
         },
         {
-          "id": "MS 6",
+          "id": "MS-6",
           "value": "MS 6. Berlin, Staatsbibliothek Diez. B Sant. 46 – ca. 1600"
         },
         {
-          "id": "MS 7",
+          "id": "MS-7",
           "value": "MS 7. Berlin, Staatsbibliothek Diez. B Sant. 56 – Ferrara, 1481"
         },
         {
-          "id": "MS 8",
+          "id": "MS-8",
           "value": "MS 8. Bologna, Biblioteca Universitaria 2621 – Venice, 1412"
         },
         {
-          "id": "MS 9",
+          "id": "MS-9",
           "value": "MS 9. Bologna, Biblioteca Universitaria 2744 – Italy, ca. 1465"
         },
         {
-          "id": "MS 10",
+          "id": "MS-10",
           "value": "MS 10. Brescia, Biblioteca Queriniana A vii 7 – Ferrara?, ca. 1460"
         },
         {
-          "id": "MS 10a",
+          "id": "MS-10a",
           "value": "MS 10a. Brussels, Bibliothèque Royale IV.711 – Pavia, 1465"
         },
         {
-          "id": "MS 11",
+          "id": "MS-11",
           "value": "MS 11. Budapest, Országos Széchényi Könyvtár Cod. lat. medii aevi 137 – Florence, 1465"
         },
         {
-          "id": "MS 12",
+          "id": "MS-12",
           "value": "MS 12. Carpentras, Bibliothèque Inguimbertine 361 – Northeastern Italy, ca. 1445"
         },
         {
-          "id": "MS 13",
+          "id": "MS-13",
           "value": "MS 13. Cesena, Biblioteca Malatestiana 29 sin. 19 – Romagna, 1474"
         },
         {
-          "id": "MS 14",
+          "id": "MS-14",
           "value": "MS 14. Cologny-Geneva, Biblioteca Bodmeriana MS. Bodmer 47 – Italy, 1495"
         },
         {
-          "id": "MS 15",
+          "id": "MS-15",
           "value": "MS 15. Dresden, Sächsische Landesbibliothek Dc 133 – Lombardy, before 1479"
         },
         {
-          "id": "MS 16",
+          "id": "MS-16",
           "value": "MS 16. Dublin, Trinity College Library 929 – Italy, 15th cent."
         },
         {
-          "id": "MS 16a",
+          "id": "MS-16a",
           "value": "MS 16a. Dublin, Trinity College Library 1759 – Italy, 1450-1500"
         },
         {
-          "id": "MS 17",
+          "id": "MS-17",
           "value": "MS 17. Edinburgh, National Library of Scotland Adv. 18.5.2 – Italy, 1495"
         },
         {
-          "id": "MS 18",
+          "id": "MS-18",
           "value": "MS 18. El Escorial, MS. Ç. IV. 22 (part a) – Northern Italy, ca. 1455?"
         },
         {
-          "id": "MS 19",
+          "id": "MS-19",
           "value": "MS 19. El Escorial, MS. Ç. IV. 22 (part b) – Italy, ca. 1450"
         },
         {
-          "id": "MS 19a",
+          "id": "MS-19a",
           "value": "MS 19a. Ferrara , Biblioteca Comunale Ariostea Cl. II. 156 – Italy (Ferrara?), ca. 1460-70?"
         },
         {
-          "id": "MS 20",
+          "id": "MS-20",
           "value": "MS 20. Florence, Biblioteca Medicea Laurenziana 33.11 – Florence, after 1472"
         },
         {
-          "id": "MS 21",
+          "id": "MS-21",
           "value": "MS 21. Florence, Biblioteca Medicea Laurenziana 33.12 – Florence, 1457"
         },
         {
-          "id": "MS 22",
+          "id": "MS-22",
           "value": "MS 22. Florence, Biblioteca Medicea Laurenziana 33.13 – Italy, 1400-1425"
         },
         {
-          "id": "MS 23",
+          "id": "MS-23",
           "value": "MS 23. Florence, Biblioteca Medicea Laurenziana 36.23 – Tuscany, ca. 1425"
         },
         {
-          "id": "MS 24",
+          "id": "MS-24",
           "value": "MS 24. Florence, Biblioteca Medicea Laurenziana Ashburnh. 260 – Verona?, ca. 1500"
         },
         {
-          "id": "MS 25",
+          "id": "MS-25",
           "value": "MS 25. Florence, Biblioteca Medicea Laurenziana Ashburnh. 973 – Florence?, after 1548"
         },
         {
-          "id": "MS 26",
+          "id": "MS-26",
           "value": "MS 26. Florence, Biblioteca Nazionale Magl. VII 948 – Italy, 1475"
         },
         {
-          "id": "MS 27",
+          "id": "MS-27",
           "value": "MS 27. Florence, Biblioteca Nazionale Magl. VII 1054 – Italy, ca. 1480-90"
         },
         {
-          "id": "MS 28",
+          "id": "MS-28",
           "value": "MS 28. Florence, Biblioteca Nazionale Magl. VII 1158 – Italy, 1460-70"
         },
         {
-          "id": "MS 29",
+          "id": "MS-29",
           "value": "MS 29. Florence, Biblioteca Nazionale Panciatichi 146 – Pistoia, 1475"
         },
         {
-          "id": "MS 30",
+          "id": "MS-30",
           "value": "MS 30.: see Bibliography, Pisanus, Bernardus (1522)."
         },
         {
-          "id": "MS 31",
+          "id": "MS-31",
           "value": "MS 31. Florence, Biblioteca Riccardiana 606 – Italy, 1457"
         },
         {
-          "id": "MS 32",
+          "id": "MS-32",
           "value": "MS 32. Florence, Biblioteca Riccardiana 2422 (part 25) – Italy, 17th c."
         },
         {
-          "id": "MS 33",
+          "id": "MS-33",
           "value": "MS 33. Florence, Biblioteca Riccardiana 2422 (part 25 bis) – Italy, 17th c."
         },
         {
-          "id": "MS 34",
+          "id": "MS-34",
           "value": "MS 34. Genoa, Biblioteca Civica Berio Cf. arm. 6 – Italy, 15th c. "
         },
         {
-          "id": "MS 35",
+          "id": "MS-35",
           "value": "MS 35. Göttingen, Universitätsbibliothek Philol. 111b – Bologna, 1456"
         },
         {
-          "id": "MS 36",
+          "id": "MS-36",
           "value": "MS 36. Göttingen, Universitätsbibliothek Philol. 112 – Italy?, 16th c."
         },
         {
-          "id": "MS 37",
+          "id": "MS-37",
           "value": "MS 37. Grenoble, Bibliothèque Municipale 549 – Pavia, 1472"
         },
         {
-          "id": "MS 38",
+          "id": "MS-38",
           "value": "MS 38. Hamburg, Staats- und Universitätsbibl. scrin. 139.4 – Ferrara, ca. 1465"
         },
         {
-          "id": "MS 39",
+          "id": "MS-39",
           "value": "MS 39. Leiden, Universiteitsbibliotheek Voss. lat. in oct. 13 – Italy, after 1458"
         },
         {
-          "id": "MS 40",
+          "id": "MS-40",
           "value": "MS 40. Leiden, Universiteitsbibliotheek Voss. lat. in oct. 59 – Italy, 1453"
         },
         {
-          "id": "MS 41",
+          "id": "MS-41",
           "value": "MS 41. Leiden, Universiteitsbibliotheek Voss. lat. in oct. 76 – Verona?, 1451"
         },
         {
-          "id": "MS 42",
+          "id": "MS-42",
           "value": "MS 42. Leiden, Universiteitsbibliotheek Voss. lat. in oct. 81 – Northeast Italy?, ca. 1460"
         },
         {
-          "id": "MS 43",
+          "id": "MS-43",
           "value": "MS 43. St. Petersburg, National Library of Russia cl. lat. Q 6 – Italy, 1450-1500"
         },
         {
-          "id": "MS 44",
+          "id": "MS-44",
           "value": "MS 44. London, British Library Add. 10386 – Verona, 1474"
         },
         {
-          "id": "MS 45",
+          "id": "MS-45",
           "value": "MS 45. London, British Library Add. 11674 – Siena?, ca. 1465"
         },
         {
-          "id": "MS 46",
+          "id": "MS-46",
           "value": "MS 46. London, British Library Add. 11915 – Italy, 1460"
         },
         {
-          "id": "MS 47",
+          "id": "MS-47",
           "value": "MS 47. London, British Library Add. 12005 – Italy, ca. 1465"
         },
         {
-          "id": "MS 48",
+          "id": "MS-48",
           "value": "MS 48. London, British Library Burney 133 – Naples?, ca. 1475"
         },
         {
-          "id": "MS 49",
+          "id": "MS-49",
           "value": "MS 49. London, British Library Harley 2574 – Italy, ca. 1460"
         },
         {
-          "id": "MS 50",
+          "id": "MS-50",
           "value": "MS 50. London, British Library Harley 2778 – Ferrara, ca. 1460"
         },
         {
-          "id": "MS 51",
+          "id": "MS-51",
           "value": "MS 51. London, British Library Harley 4094 – Italy, 1440-1442"
         },
         {
-          "id": "MS 52",
+          "id": "MS-52",
           "value": "MS 52. London, British Library Egerton 3027 – Perugia, 1467"
         },
         {
-          "id": "MS 53",
+          "id": "MS-53",
           "value": "MS 53. Oslo area, Schøyen Collection 586 - Padua?, 1475-ca. 1480"
         },
         {
-          "id": "MS 54",
+          "id": "MS-54",
           "value": "MS 54. Milan, Biblioteca Ambrosiana D 24 sup. – Italy, ca. 1500"
         },
         {
-          "id": "MS 55",
+          "id": "MS-55",
           "value": "MS 55. Milan, Biblioteca Ambrosiana G 10 sup. – Italy, ca. 1450"
         },
         {
-          "id": "MS 56",
+          "id": "MS-56",
           "value": "MS 56. Milan, Biblioteca Ambrosiana H 46 sup. – Italy, ca. 1465"
         },
         {
-          "id": "MS 57",
+          "id": "MS-57",
           "value": "MS 57. Milan, Biblioteca Ambrosiana I 67 sup. – Lombardy, ca. 1475"
         },
         {
-          "id": "MS 58",
+          "id": "MS-58",
           "value": "MS 58. Milan, Biblioteca Ambrosiana M 38 sup. – Italy, ca. 1430"
         },
         {
-          "id": "MS 59",
+          "id": "MS-59",
           "value": "MS 59. Milan, Biblioteca Nazionale di Brera AD xii 37 – Italy, 1450?"
         },
         {
-          "id": "MS 60",
+          "id": "MS-60",
           "value": "MS 60. Mons, Bibliothèque locale Ville de Mons – C.C.J.  218.109 – Padua or Trogir, 1450-1500"
         },
         {
-          "id": "MS 61",
+          "id": "MS-61",
           "value": "MS 61. Munich, Bayerische Staatsbibliothek C.l.m. 473 – Italy, ca. 1460-1500"
         },
         {
-          "id": "MS 62",
+          "id": "MS-62",
           "value": "MS 62. Naples, Biblioteca Brancacciana IV A. 4 – Italy, 17th cent."
         },
         {
-          "id": "MS 63",
+          "id": "MS-63",
           "value": "MS 63. Naples, Biblioteca Statale Oratoriana C.F. III. 15 – Florence, 1484"
         },
         {
-          "id": "MS 64",
+          "id": "MS-64",
           "value": "MS 64. Naples, Biblioteca Nazionale IV. F. 19 – Naples, after 1467"
         },
         {
-          "id": "MS 65",
+          "id": "MS-65",
           "value": "MS 65. Naples, Biblioteca Nazionale IV. F. 21 – Italy, ca. 1455"
         },
         {
-          "id": "MS 66",
+          "id": "MS-66",
           "value": "MS 66. Naples, Biblioteca Nazionale IV. F. 61 – Italy, 1505?"
         },
         {
-          "id": "MS 67",
+          "id": "MS-67",
           "value": "MS 67. Naples, Biblioteca Nazionale IV. F. 63 – Italy, late 15th cent."
         },
         {
-          "id": "MS 68",
+          "id": "MS-68",
           "value": "MS 68. New Haven (Ct.), Beinecke Library 186 – Italy, ca. 1470"
         },
         {
-          "id": "MS 69",
+          "id": "MS-69",
           "value": "MS 69. Oxford, Bodleian Library lat. class. e. 3 – Italy, ca. 1465"
         },
         {
-          "id": "MS 70",
+          "id": "MS-70",
           "value": "MS 70. Oxford, Bodleian Library lat. class. e. 15 – Italy, after 1459"
         },
         {
-          "id": "MS 71",
+          "id": "MS-71",
           "value": "MS 71. Oxford, Bodleian Library lat. class. e. 17 – Conegliano, 1453"
         },
         {
-          "id": "MS 73",
+          "id": "MS-73",
           "value": "MS 73. Oxford, Bodleian Library Canon. lat. class. 33 – Italy, after 1450"
         },
         {
-          "id": "MS 74",
+          "id": "MS-74",
           "value": "MS 74. Oxford, Bodleian Library Canon. lat. class. 34 – Italy, late 15th cent."
         },
         {
-          "id": "MS 75",
+          "id": "MS-75",
           "value": "MS 75. Oxford, Bodleian Library Laud. lat. 78 – Padua, ca. 1465"
         },
         {
-          "id": "MS 76",
+          "id": "MS-76",
           "value": "MS 76. Padua, Biblioteca Capitolare C 77 – Northeastern Italy, ca. 1468?  "
         },
         {
-          "id": "MS 77",
+          "id": "MS-77",
           "value": "MS 77. Palermo, Biblioteca Comunale 2. Q. q. E. 10 – Italy?, after 1459"
         },
         {
-          "id": "MS 78",
+          "id": "MS-78",
           "value": "MS 78. Paris, Bibliothèque nationale de France lat. 7989 – Florence?, 1423"
         },
         {
-          "id": "MS 79",
+          "id": "MS-79",
           "value": "MS 79. Paris, Bibliothèque nationale de France lat. 7990 – Florence, after 1475"
         },
         {
-          "id": "MS 81",
+          "id": "MS-81",
           "value": "MS 81. Paris, Bibliothèque nationale de France lat. 8231 – Italy?, 17th cent."
         },
         {
-          "id": "MS 82",
+          "id": "MS-82",
           "value": "MS 82. Paris, Bibliothèque nationale de France lat. 8232 – Italy, ca. 1465"
         },
         {
-          "id": "MS 83",
+          "id": "MS-83",
           "value": "MS 83. Paris, Bibliothèque nationale de France lat. 8233 – Florence, 1465"
         },
         {
-          "id": "MS 84",
+          "id": "MS-84",
           "value": "MS 84. Paris, Biblothèque nationale de France lat. 8234 – Italy, ca. 1450?"
         },
         {
-          "id": "MS 85",
+          "id": "MS-85",
           "value": "MS 85. Paris, Bibliothèque nationale de France lat. 8236 – Northeastern Italy?, ca. 1500"
         },
         {
-          "id": "MS 86",
+          "id": "MS-86",
           "value": "MS 86. Paris, Bibliothèque nationale de France lat. 8458 – Rome, after 1474"
         },
         {
-          "id": "MS 88",
+          "id": "MS-88",
           "value": "MS 88. Parma, Biblioteca Palatina HH 5.47 (716) – Pavia, 1471"
         },
         {
-          "id": "MS 89",
+          "id": "MS-89",
           "value": "MS 89. Parma, Biblioteca Palatina HH 3.124 (1092) – Padova, 1736"
         },
         {
-          "id": "MS 90",
+          "id": "MS-90",
           "value": "MS 90. Pesaro, Biblioteca Oliveriana 1167 – Siena, 1470"
         },
         {
-          "id": "MS 91",
+          "id": "MS-91",
           "value": "MS 91. Rome, Biblioteca Casanatense 15 – Rome, 1470-71"
         },
         {
-          "id": "MS 92",
+          "id": "MS-92",
           "value": "MS 92. Rome, Biblioteca Corsiniana 43. D. 20 – Italy, ca. 1500"
         },
         {
-          "id": "MS 93",
+          "id": "MS-93",
           "value": "MS 93. San Daniele del Friuli, Biblioteca Guarneriana 56 – Northeastern Italy, ca. 1455"
         },
         {
-          "id": "MS 94",
+          "id": "MS-94",
           "value": "MS 94 = 10a. (formerly Schlägl, Stiftsbibliothek 143 Cpl. 59)"
         },
         {
-          "id": "MS 95",
+          "id": "MS-95",
           "value": "MS 95. Siena, Biblioteca Comunale degli Intronati H. V. 41 – Italy, ca. 1425"
         },
         {
-          "id": "MS 96",
+          "id": "MS-96",
           "value": "MS 96. Tübingen, Universitätsbibliothek Mc 104 – Wiblingen, ca. 1492-1505"
         },
         {
-          "id": "MS 97",
+          "id": "MS-97",
           "value": "MS 97. Turin, Biblioteca Reale, Varia 54 – Bologna?, before 1466"
         },
         {
-          "id": "MS 98",
+          "id": "MS-98",
           "value": "MS 98. Vatican, Biblioteca Apostolica Vaticana, Barberini lat. 34 – Italy, ca. 1450"
         },
         {
-          "id": "MS 99",
+          "id": "MS-99",
           "value": "MS 99. Vatican, Biblioteca Apostolica Vaticana Ottobonianus lat. 1550 – Northeastern Italy (?), ca. 1450"
         },
         {
-          "id": "MS 100",
+          "id": "MS-100",
           "value": "MS 100. Vatican, Biblioteca Apostolica Vaticana Ottobonianus lat. 1799 – Italy, after 1460"
         },
         {
-          "id": "MS 102",
+          "id": "MS-102",
           "value": "MS 102. Vatican, Biblioteca Apostolica Vaticana Ottobonianus lat. 1982 – Rome?, 1450-1500"
         },
         {
-          "id": "MS 103",
+          "id": "MS-103",
           "value": "MS 103. Vatican, Biblioteca Apostolica Vaticana Pal. lat. 910 – Northeastern Italy?, ca. 1475 (?)  "
         },
         {
-          "id": "MS 104",
+          "id": "MS-104",
           "value": "MS 104. Vatican, Biblioteca Apostolica Vaticana Pal. lat. 1652 – Rome?, ca. 1455"
         },
         {
-          "id": "MS 105",
+          "id": "MS-105",
           "value": "MS 105. Vatican, Biblioteca Apostolica Vaticana Urb. lat. 641 – Florence, ca. 1465"
         },
         {
-          "id": "MS 106",
+          "id": "MS-106",
           "value": "MS 106. Vatican, Biblioteca Apostolica Vaticana Urb. lat. 812 – Italy, ca. 1495?"
         },
         {
-          "id": "MS 107",
+          "id": "MS-107",
           "value": "MS 107. Vatican, Biblioteca Apostolica Vaticana Chigi H. IV. 121 – Rome, ca. 1467"
         },
         {
-          "id": "MS 108",
+          "id": "MS-108",
           "value": "MS 108. Vatican, Biblioteca Apostolica Vaticana Vat. lat. 1608 – Rome, 1479"
         },
         {
-          "id": "MS 109",
+          "id": "MS-109",
           "value": "MS 109. Vatican, Biblioteca Apostolica Vaticana Vat. lat. 1630 – Italy, ca. 1430"
         },
         {
-          "id": "MS 110",
+          "id": "MS-110",
           "value": "MS 110. Vatican, Biblioteca Apostolica Vaticana Vat. lat. 3269 – Rome?, ca. 1470"
         },
         {
-          "id": "MS 111",
+          "id": "MS-111",
           "value": "MS 111. Vatican, Biblioteca Apostolica Vaticana Vat. lat. 3272 – Italy, ca. 1465"
         },
         {
-          "id": "MS 112",
+          "id": "MS-112",
           "value": "MS 112. Vatican, Biblioteca Apostolica Vaticana Vat. lat. 3291 – Italy, ca. 1475"
         },
         {
-          "id": "MS 113",
+          "id": "MS-113",
           "value": "MS 113. Vatican, Biblioteca Apostolica Vaticana Vat. lat. 7044 – Naples?, 1520"
         },
         {
-          "id": "MS 114",
+          "id": "MS-114",
           "value": "MS 114. Vatican, Biblioteca Apostolica Vaticana Vat. lat. 11425 – Italy, late 15th cent."
         },
         {
-          "id": "MS 115",
+          "id": "MS-115",
           "value": "MS 115. Venice, Biblioteca Nazionale Marciana lat. 12.80 (4167) – Florence, ca. 1400"
         },
         {
-          "id": "MS 116",
+          "id": "MS-116",
           "value": "MS 116. Venice, Biblioteca Nazionale Marciana lat. 12.81 (4649) – Italy, ca. 1465?"
         },
         {
-          "id": "MS 117",
+          "id": "MS-117",
           "value": "MS 117. Venice, Biblioteca Nazionale Marciana lat. 12.86 (4170) – Italy, ca. 1445?"
         },
         {
-          "id": "MS 118",
+          "id": "MS-118",
           "value": "MS 118. Venice, Biblioteca Nazionale Marciana lat. 12.153 (4453) – Padua?, ca. 1465"
         },
         {
-          "id": "MS 119",
+          "id": "MS-119",
           "value": "MS 119: see Bibliography, Pucci (1502v)"
         },
         {
-          "id": "MS 120",
+          "id": "MS-120",
           "value": "MS 120. Venice, Biblioteca Nazionale Marciana lat. 12.128 (marginalia in a copy of the 1502 Aldine edition) – Italy, 16th c."
         },
         {
-          "id": "MS 121",
+          "id": "MS-121",
           "value": "MS 121. Venice, Museo Correr, MS. Cicogna 549 – Italy, 15th c."
         },
         {
-          "id": "MS 122",
+          "id": "MS-122",
           "value": "MS 122. Vicenza, Biblioteca Civica Bertoliana G 2.8.12 (216) – Padua, 1460"
         },
         {
-          "id": "MS 123",
+          "id": "MS-123",
           "value": "MS 123. Vienna, Österreichische Nationalbibliothek 224 – Italy, after 1463"
         },
         {
-          "id": "MS 124",
+          "id": "MS-124",
           "value": "MS 124. Vienna, Österreichische Nationalbibliothek 3198 – Italy, ca. 1460"
         },
         {
-          "id": "MS 125",
+          "id": "MS-125",
           "value": "MS 125. Vienna, Österreichische Nationalbibliothek 3243 – Germany, 1499"
         },
         {
-          "id": "MS 126",
+          "id": "MS-126",
           "value": "MS 126. Wolfenbüttel, Herzog-August-Bibliothek 65.2 Aug. 8° – Italy, after 1486"
         },
         {
-          "id": "MS 127",
+          "id": "MS-127",
           "value": "MS 127. Wolfenbüttel, Herzog-August-Bibliothek 283 Gud. lat. – Italy?, ca. 1500"
         },
         {
-          "id": "MS 128",
+          "id": "MS-128",
           "value": "MS 128. Wolfenbüttel, Herzog-August-Bibliothek 332 Gud. lat. – Italy, ca. 1460"
         },
         {
-          "id": "MS 129",
+          "id": "MS-129",
           "value": "MS 129. The former Phillipps MS. 6433, current location unknown – Italy, 15th c.?"
         },
         {
-          "id": "MS 129a",
+          "id": "MS-129a",
           "value": "MS 129a. The “Codex Tomacellianus”, in private hands – Italy, ca. 1450"
         }
       ]

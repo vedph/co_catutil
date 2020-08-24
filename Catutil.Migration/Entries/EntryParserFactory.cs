@@ -98,7 +98,7 @@ namespace Catutil.Migration.Entries
             {
                 options = SupplyProperty(optionType, property, options, ConnectionString);
             } // conn
-
+            
             // apply options if any
             if (options != null)
             {
@@ -149,6 +149,12 @@ namespace Catutil.Migration.Entries
             container.RegisterInstance(new UniData());
         }
 
+        private void AssignLogger(object target)
+        {
+            if (target is IHasLogger targetWithLogger)
+                targetWithLogger.Logger = Logger;
+        }
+
         /// <summary>
         /// Gets the entry reader (from <c>/EntryReader</c>).
         /// </summary>
@@ -156,10 +162,12 @@ namespace Catutil.Migration.Entries
         /// <exception cref="ApplicationException">component not found</exception>
         public IEntryReader GetEntryReader()
         {
-            return GetComponent<IEntryReader>(
+            IEntryReader reader = GetComponent<IEntryReader>(
                 Configuration["EntryReader:Id"],
                 "EntryReader:Options",
                 true);
+            AssignLogger(reader);
+            return reader;
         }
 
         /// <summary>
@@ -257,10 +265,12 @@ namespace Catutil.Migration.Entries
         {
             if (Configuration["ParserContext:Id"] == null) return null;
 
-            return GetComponent<IParserContext>(
+            IParserContext context = GetComponent<IParserContext>(
                 Configuration["ParserContext:Id"],
                 "ParserContext:Options",
                 true);
+            AssignLogger(context);
+            return context;
         }
 
         /// <summary>

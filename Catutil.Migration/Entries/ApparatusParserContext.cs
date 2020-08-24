@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Proteus.Core;
 using System;
 using System.Data;
 using System.Data.Common;
@@ -23,12 +24,13 @@ namespace Catutil.Migration.Entries
     /// <para>Tag: <c>parser-context.co-apparatus</c>.</para>
     /// </summary>
     [Tag("parser-context.co-apparatus")]
-    public class ApparatusParserContext : IParserContext,
+    public class ApparatusParserContext : IParserContext, IHasLogger,
         IConfigurable<ApparatusParserContextOptions>
     {
         private readonly JsonSerializerSettings _jsonSettings;
         private readonly FragmentLocator _locator;
 
+        private ILogger _logger;
         private string _outputDir;
         private int _maxPartsPerFile;
         private int _filePartCount;
@@ -41,7 +43,15 @@ namespace Catutil.Migration.Entries
         /// <summary>
         /// Gets or sets the logger.
         /// </summary>
-        public ILogger Logger { get; set; }
+        public ILogger Logger
+        {
+            get { return _logger; }
+            set
+            {
+                _logger = value;
+                _locator.Logger = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the connection string to the source database.

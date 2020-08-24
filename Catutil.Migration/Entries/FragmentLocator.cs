@@ -1,4 +1,5 @@
 ﻿using Cadmus.Philology.Parts.Layers;
+using LevenshteinSub;
 using Microsoft.Extensions.Logging;
 using Proteus.Core;
 using System;
@@ -45,6 +46,7 @@ namespace Catutil.Migration.Entries
     {
         private readonly Func<string, string> _getLine;
         private readonly Regex _txtRangeRegex;
+        private readonly Levenshtein _levenshtein;
         private double _treshold;
 
         /// <summary>
@@ -79,6 +81,10 @@ namespace Catutil.Migration.Entries
         {
             _getLine = getLine ?? throw new ArgumentNullException(nameof(getLine));
             _txtRangeRegex = new Regex(@"^([^-]+)\s+-\s+(.+)$");
+            _levenshtein = new Levenshtein
+            {
+                IsExpansionEnabled = true
+            };
             _treshold = 0.8;
         }
 
@@ -99,46 +105,72 @@ namespace Catutil.Migration.Entries
             if (i > -1)
             {
                 int x = GetX(normLine, i);
-                return $"{y}.{x}";
+                string loc = $"{y}.{x}";
+                Logger?.LogInformation($"Located by exact match [{normValue}]={loc}");
+                return loc;
             }
             return null;
         }
 
         private string LocateFuzzy(int y, string normValue, string normLine)
         {
-            // brute force fuzzy matching, no special need to optimize,
-            // that's run-once stuff
-            int bestIndex = -1;
-            double bestScore = 0;
+            Logger?.LogInformation($"Fuzzy matching [{normValue}] in [{normLine}]");
 
-            for (int i = 0; i < normLine.Length - normValue.Length; i++)
+            LevenshteinMatch match = _levenshtein.GetDistance(
+                normValue, normLine, true);
+
+            if (match.NormalScore <= 0.2)
             {
-                // compare whole words only, assuming that the length of
-                // the forms being compared is equal
-                if (i > 0 && normLine[i - 1] != ' ') continue;
-                if (i + normValue.Length < normLine.Length
-                   && normLine[i + normValue.Length] != ' ')
+                if (match.Index < 0 || match.Index >= normLine.Length)
                 {
-                    continue;
+                    Logger?.LogError($"Fuzzy match index out of range: {match.Index}");
+                    return null;
                 }
-
-                string textToCompare = normLine.Substring(i, normValue.Length);
-
-                double p = JaroWinkler.Proximity(normValue, textToCompare);
-                if (p >= _treshold && p > bestScore)
-                {
-                    bestIndex = i;
-                    bestScore = p;
-                }
-            }
-
-            if (bestIndex > -1)
-            {
-                int x = GetX(normLine, bestIndex);
-                return $"{y}.{x}";
+                int index = normLine[match.Index] == ' '
+                    ? match.Index + 1 : match.Index;
+                int x = GetX(normLine, index);
+                string loc = $"{y}.{x}";
+                Logger?.LogInformation($"Located by fuzzy match [{normValue}]={loc}");
+                return loc;
             }
             return null;
         }
+
+        //private string LocateFuzzy(int y, string normValue, string normLine)
+        //{
+        //    // brute force fuzzy matching, no special need to optimize,
+        //    // that's run-once stuff
+        //    int bestIndex = -1;
+        //    double bestScore = 0;
+
+        //    for (int i = 0; i < normLine.Length - normValue.Length; i++)
+        //    {
+        //        // compare whole words only, assuming that the length of
+        //        // the forms being compared is equal
+        //        if (i > 0 && normLine[i - 1] != ' ') continue;
+        //        if (i + normValue.Length < normLine.Length
+        //           && normLine[i + normValue.Length] != ' ')
+        //        {
+        //            continue;
+        //        }
+
+        //        string textToCompare = normLine.Substring(i, normValue.Length);
+
+        //        double p = JaroWinkler.Proximity(normValue, textToCompare);
+        //        if (p >= _treshold && p > bestScore)
+        //        {
+        //            bestIndex = i;
+        //            bestScore = p;
+        //        }
+        //    }
+
+        //    if (bestIndex > -1)
+        //    {
+        //        int x = GetX(normLine, bestIndex);
+        //        return $"{y}.{x}";
+        //    }
+        //    return null;
+        //}
 
         private string LocateExactOrFuzzy(
             int y, string normValue, string normLine)
@@ -195,12 +227,18 @@ namespace Catutil.Migration.Entries
                         $"{entry.NormValue}");
                     return null;
                 }
+                string loc = $"{first}-{last}";
+                Logger?.LogInformation($"Located by range [{entry.NormValue}]={loc}");
                 return $"{first}-{last}";
             }
 
             // corner case: whole line
             if (entry.NormValue == "$ln")
-                return $"{y}.1-{y}.{1 + entry.NormValue.Count(c => c == ' ')}";
+            {
+                string loc = $"{y}.1-{y}.{1 + entry.NormValue.Count(c => c == ' ')}";
+                Logger?.LogInformation($"Located whole line={loc}");
+                return loc;
+            }
 
             return LocateExactOrFuzzy(y, entry.NormValue, normLine);
         }

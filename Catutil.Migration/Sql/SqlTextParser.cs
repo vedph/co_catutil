@@ -185,7 +185,8 @@ namespace Catutil.Migration.Sql
                 UserId = _userId,
                 GroupId = poem,
                 Title = $"{poem} {partition:00} {title}",
-                Description = description
+                Description = description,
+                Flags = 1   // = to revise
             };
             item.SortKey = _sortKeyBuilder.BuildKey(item, null);
             return item;

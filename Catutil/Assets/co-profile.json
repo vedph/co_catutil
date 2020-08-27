@@ -1,4 +1,4 @@
-﻿{
+{
   "facets": [
     {
       "id": "default",
@@ -15,6 +15,40 @@
           "groupKey": "text",
           "sortKey": "text"
         },
+        {
+          "typeId": "net.fusisoft.categories",
+          "name": "categories",
+          "description": "Item's categories.",
+          "required": true,
+          "colorKey": "98F8F8",
+          "groupKey": "general",
+          "sortKey": "categories"
+        },
+        {
+          "typeId": "net.fusisoft.keywords",
+          "name": "keywords",
+          "description": "Item's keywords.",
+          "colorKey": "90C0F8",
+          "groupKey": "general",
+          "sortKey": "keywords"
+        },
+        {
+          "typeId": "net.fusisoft.note",
+          "name": "note",
+          "description": "A free text note about the document.",
+          "colorKey": "B0A0F8",
+          "groupKey": "general",
+          "sortKey": "note"
+        },
+        {
+          "typeId": "net.fusisoft.tiled-text-layer",
+          "roleId": "fr.net.fusisoft.comment",
+          "name": "comments",
+          "description": "Comments on text.",
+          "colorKey": "F8D040",
+          "groupKey": "text",
+          "sortKey": "text-comments"
+        },        
         {
           "typeId": "net.fusisoft.tiled-text-layer",
           "roleId": "fr.net.fusisoft.apparatus",

@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cadmus.Mongo" Version="2.2.53" />
+    <PackageReference Include="Cadmus.Mongo" Version="2.2.54" />
     <PackageReference Include="Cadmus.Philology.Parts" Version="2.2.57" />
     <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.7" />

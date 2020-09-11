@@ -2,6 +2,12 @@
 
 Tools for Catullus data drop pattern analysis and migration. Please refer to [this project's Wiki](https://github.com/vedph/co_catutil/wiki) for the documentation.
 
+## Quick Start
+
+1. ensure you have access to MySql and MongoDB services.
+2. delete catullus database from MySql if any, and co database from MongoDB if any.
+3. run `co.ps1` (eventually change the directories to fit your environment).
+
 ## Tool Commands
 
 ### Command import-text

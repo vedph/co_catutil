@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Serilog;
@@ -35,7 +36,8 @@ namespace Catutil
             {
                 // logger
                 string logFilePath = Path.Combine(
-                    Directory.GetCurrentDirectory(), "catutil-log.txt");
+                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location),
+                    "catutil-log.txt");
                 Log.Logger = new LoggerConfiguration()
                     .MinimumLevel.Debug()
                     .Enrich.FromLogContext()

@@ -23,9 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cadmus.Core" Version="2.2.42" />
-    <PackageReference Include="Cadmus.Parts" Version="2.2.51" />
-    <PackageReference Include="Cadmus.Philology.Parts" Version="2.2.57" />
+    <PackageReference Include="Cadmus.Core" Version="2.2.45" />
+    <PackageReference Include="Cadmus.Parts" Version="2.2.55" />
+    <PackageReference Include="Cadmus.Philology.Parts" Version="2.2.60" />
     <PackageReference Include="Fusi.Tools" Version="1.1.15" />
     <PackageReference Include="Fusi.Tools.Config" Version="1.0.16" />
     <PackageReference Include="LevenshteinSub" Version="1.0.1" />

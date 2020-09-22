@@ -8,6 +8,7 @@ using Proteus.Extras;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Catutil.Migration.Entries
 {
@@ -95,6 +96,14 @@ namespace Catutil.Migration.Entries
             // in the dump of a full region
             if (regions[regionIndex].IsPartial(set.Entries))
                 return regionIndex + 1;
+
+            // also, if this region is fully contained in a preceding one,
+            // skip it, as it's already included in previous dump
+            if (regions.Take(regionIndex)
+                .Any(r => r.Range.Contains(regions[regionIndex].Range)))
+            {
+                return regionIndex + 1;
+            }
 
             // create a new file if required
             if (_package == null ||

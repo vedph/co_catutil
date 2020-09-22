@@ -23,16 +23,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cadmus.Core" Version="2.2.45" />
-    <PackageReference Include="Cadmus.Parts" Version="2.2.55" />
-    <PackageReference Include="Cadmus.Philology.Parts" Version="2.2.60" />
+    <PackageReference Include="Cadmus.Core" Version="2.3.0" />
+    <PackageReference Include="Cadmus.Parts" Version="2.3.0" />
+    <PackageReference Include="Cadmus.Philology.Parts" Version="2.3.0" />
     <PackageReference Include="Fusi.Tools" Version="1.1.15" />
-    <PackageReference Include="Fusi.Tools.Config" Version="1.0.16" />
+    <PackageReference Include="Fusi.Tools.Config" Version="1.0.17" />
     <PackageReference Include="LevenshteinSub" Version="1.0.1" />
     <PackageReference Include="MySql.Data" Version="8.0.21" />
     <PackageReference Include="NPOI" Version="2.5.1" />
-    <PackageReference Include="Proteus.Core" Version="1.2.2" />
-    <PackageReference Include="Proteus.Entries" Version="1.2.3" />
+    <PackageReference Include="Proteus.Core" Version="1.2.3" />
+    <PackageReference Include="Proteus.Entries" Version="1.2.4" />
     <PackageReference Include="System.Text.Json" Version="4.7.2" />
   </ItemGroup>
 

@@ -6,6 +6,7 @@ using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Proteus.Core;
+using Proteus.Entries;
 using System;
 using System.Data;
 using System.Data.Common;
@@ -24,7 +25,8 @@ namespace Catutil.Migration.Entries
     /// <para>Tag: <c>parser-context.co-apparatus</c>.</para>
     /// </summary>
     [Tag("parser-context.co-apparatus")]
-    public class ApparatusParserContext : IParserContext, IHasLogger,
+    public class ApparatusParserContext : EntrySetReaderContext,
+        IParserContext, IHasLogger,
         IConfigurable<ApparatusParserContextOptions>
     {
         private readonly JsonSerializerSettings _jsonSettings;

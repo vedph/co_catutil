@@ -1,0 +1,4 @@
+﻿#x-with-ms
+cmd x(open=1)
+txt MS 123, MS 124.
+cmd x(open=0)

@@ -1,10 +1,12 @@
 ﻿using Fusi.Tools.Config;
 using Microsoft.Extensions.Logging;
+using Proteus.Core.Entries;
 using Proteus.Core.Regions;
 using Proteus.Entries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Catutil.Migration.Entries
 {
@@ -65,9 +67,51 @@ namespace Catutil.Migration.Entries
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            string text = EntryRegionParserHelper.CollectText(set.Entries,
-                regions[regionIndex].Range.Start.Entry,
-                regions[regionIndex].Range.End.Entry).Trim();
+            // get all the regions overlapping the parsed region,
+            // as we must strip from it any sub-region like ms
+            EntryRegion region = regions[regionIndex];
+            List<EntryRegion> overlaps = (from r in regions
+                                          where r != region
+                                          && r.Range.Overlaps(region.Range)
+                                          select r).Reverse().ToList();
+            StringBuilder noteText = new StringBuilder();
+
+            // for each entry in region:
+            for (int i = region.Range.Start.Entry;
+                 i <= region.Range.End.Entry; i++)
+            {
+                // if it's text:
+                if (set.Entries[i] is DecodedTextEntry txt)
+                {
+                    // remove any overlap from the text
+                    StringBuilder sb = new StringBuilder(txt.Value);
+
+                    foreach (var overlap in overlaps
+                        .Where(r => r.Range.Start.Entry == i))
+                    {
+                        if (overlap.Range.End.Entry == i)
+                        {
+                            sb.Remove(overlap.Range.Start.Character,
+                                overlap.Range.End.Character + 1
+                                - overlap.Range.Start.Character);
+                        }
+                        else
+                        {
+                            sb.Remove(overlap.Range.Start.Character,
+                                sb.Length - overlap.Range.Start.Character);
+                        }
+                    }
+
+                    // append what remained after removing overlaps
+                    noteText.Append(sb);
+                }
+            }
+            string text = noteText.ToString();
+
+            //string text = EntryRegionParserHelper.CollectText(set.Entries,
+            //    regions[regionIndex].Range.Start.Entry,
+            //    regions[regionIndex].Range.End.Entry).Trim();
+
             if (text.Any(c => char.IsLetterOrDigit(c)))
             {
                 ApparatusParserContext ctx = (ApparatusParserContext)context;

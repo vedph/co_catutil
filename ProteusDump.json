@@ -60,7 +60,7 @@
         "IsWholeRegionInA": true,
         "PatternEntriesA": [
           "prp italic=1",
-          "txt$^[TOGRm12]+(,\\s*corr\\.\\s*[TOGRm12]?)?,?\\s*$",
+          "txt$^[TOGRm12]+(,\\s*corr\\.\\s*[TOGRm12]*)?,?\\s*$",
           "prp italic=0"
         ]
       }

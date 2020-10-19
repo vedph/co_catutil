@@ -144,6 +144,23 @@
     {
       "Id": "region-detector.pattern",
       "Options": {
+        "Tag": "lem-var",
+        "IsAnchoredAtStart": true,
+        "IsWholeRegionInA": true,
+        "OffsetA": 2,
+        "PatternEntriesA": [
+          "cmd set-ids",
+          "txt$^[^0-9]+$",
+          "prp italic=1",
+          "txt$^\\s*uel\\s*$",
+          "prp italic=0",
+          "txt$^[^0-9]+$"
+        ]
+      }
+    },
+    {
+      "Id": "region-detector.pattern",
+      "Options": {
         "Tag": "del-lem",
         "IsAnchoredAtStart": true,
         "IsWholeRegionInA": true,

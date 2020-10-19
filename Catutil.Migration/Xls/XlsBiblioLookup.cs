@@ -74,7 +74,7 @@ namespace Catutil.Migration.Xls
             }
 
             // dump
-            LoadIndex(jsonFilePath);
+            LoadIndex(jsonFilePath, true);
             using (StreamWriter writer = new StreamWriter(
                 new FileStream(dumpFilePath, FileMode.Create, FileAccess.Write,
                 FileShare.Read)))
@@ -111,8 +111,10 @@ namespace Catutil.Migration.Xls
         /// </summary>
         /// <param name="input">The input JSON stream.</param>
         /// <param name="noAlias">True to exclude loading alias items.</param>
+        /// <param name="expanders">The expander(s) to use if any.</param>
         /// <exception cref="ArgumentNullException">jsonFilePath</exception>
-        public void LoadIndex(Stream input, bool noAlias = true)
+        public void LoadIndex(Stream input, bool noAlias,
+            params IBiblioRefExpander[] expanders)
         {
             if (input is null)
                 throw new ArgumentNullException(nameof(input));
@@ -159,6 +161,13 @@ namespace Catutil.Migration.Xls
             // last group if any
             if (items.Count > 0) IndexItems(prevAuthors, items);
 
+            // expand if required
+            foreach (IBiblioRefExpander expander in expanders)
+            {
+                foreach (string addedKey in expander.GetExpansions(_trie))
+                    _trie.Insert(addedKey, _ => { });
+            }
+
             _loaded = true;
         }
 
@@ -167,13 +176,15 @@ namespace Catutil.Migration.Xls
         /// </summary>
         /// <param name="jsonFilePath">The JSON file path.</param>
         /// <param name="noAlias">True to exclude loading alias items.</param>
+        /// <param name="expanders">The expander(s) to use if any.</param>
         /// <exception cref="ArgumentNullException">jsonFilePath</exception>
-        public void LoadIndex(string jsonFilePath, bool noAlias = true)
+        public void LoadIndex(string jsonFilePath, bool noAlias,
+            params IBiblioRefExpander[] expanders)
         {
             using (Stream stream = new FileStream(jsonFilePath, FileMode.Open,
                 FileAccess.Read, FileShare.Read))
             {
-                LoadIndex(stream, noAlias);
+                LoadIndex(stream, noAlias, expanders);
             }
         }
 

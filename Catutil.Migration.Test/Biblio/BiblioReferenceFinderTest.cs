@@ -11,7 +11,7 @@ namespace Catutil.Migration.Test.Biblio
         private BiblioReferenceFinder GetFinder()
         {
             XlsBiblioLookup lookup = new XlsBiblioLookup();
-            lookup.LoadIndex(TestHelper.LoadResourceStream("BiblioLookup.json"));
+            lookup.LoadIndex(TestHelper.LoadResourceStream("BiblioLookup.json"), true);
             return new BiblioReferenceFinder(lookup);
         }
 

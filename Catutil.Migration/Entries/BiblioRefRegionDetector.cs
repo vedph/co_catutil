@@ -5,6 +5,7 @@ using Proteus.Core.Entries;
 using Proteus.Core.Regions;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Catutil.Migration.Entries
 {
@@ -31,7 +32,21 @@ namespace Catutil.Migration.Entries
             if (!string.IsNullOrEmpty(options.LookupFilePath))
             {
                 XlsBiblioLookup lookup = new XlsBiblioLookup();
-                lookup.LoadIndex(options.LookupFilePath);
+
+                // expanders
+                List<IBiblioRefExpander> expanders = new List<IBiblioRefExpander>();
+                if (options.IsInflectionEnabled)
+                    expanders.Add(new InflectingBiblioRefExpander());
+                if (!string.IsNullOrEmpty(options.AdditionsFilePath))
+                {
+                    using (var stream = new FileStream(options.AdditionsFilePath,
+                        FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        expanders.Add(new ImportingBiblioRefExpander(stream));
+                    }
+                }
+
+                lookup.LoadIndex(options.LookupFilePath, true, expanders.ToArray());
                 _finder = new BiblioReferenceFinder(lookup);
             }
             else _finder = null;
@@ -82,5 +97,18 @@ namespace Catutil.Migration.Entries
         /// file. This is a JSON dump produced by the build-biblio command.
         /// </summary>
         public string LookupFilePath { get; set; }
+
+        /// <summary>
+        /// Gets or sets the path to the bibliographic lookup references
+        /// additions to be imported and added to those loaded from the lookup
+        /// file.
+        /// </summary>
+        public string AdditionsFilePath { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether inflection is enabled
+        /// for Latin names in -us.
+        /// </summary>
+        public bool IsInflectionEnabled { get; set; }
     }
 }

@@ -303,7 +303,10 @@
       "Id": "entry-region-parser.co-ms"
     },
     {
-      "Id": "entry-region-parser.co-br"
+      "Id": "entry-region-parser.co-br",
+      "Options": {
+        "ReplacementsPath": "c:\\users\\dfusi\\desktop\\co\\BrReplacements.txt"
+      }
     },
     {
       "Id": "entry-region-parser.co-x"

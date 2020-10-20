@@ -6,6 +6,9 @@ using Proteus.Core.Regions;
 using Proteus.Entries;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Catutil.Migration.Entries
 {
@@ -15,12 +18,49 @@ namespace Catutil.Migration.Entries
     /// </summary>
     /// <seealso cref="IEntryRegionParser" />
     [Tag("entry-region-parser.co-br")]
-    public sealed class BrEntryRegionParser : IEntryRegionParser
+    public sealed class BrEntryRegionParser : IEntryRegionParser,
+        IConfigurable<BrEntryRegionParserOptions>
     {
+        private readonly Dictionary<string, string> _replacements;
+
         /// <summary>
         /// Gets or sets the logger.
         /// </summary>
         public ILogger Logger { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BrEntryRegionParser"/>
+        /// class.
+        /// </summary>
+        public BrEntryRegionParser()
+        {
+            _replacements = new Dictionary<string, string>();
+        }
+
+        /// <summary>
+        /// Configures the object with the specified options.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        public void Configure(BrEntryRegionParserOptions options)
+        {
+            _replacements.Clear();
+            if (!string.IsNullOrEmpty(options.ReplacementsPath))
+            {
+                Regex r = new Regex("^([^=]+)=(.*)");
+
+                using (StreamReader reader = new StreamReader(
+                    options.ReplacementsPath, Encoding.UTF8))
+                {
+                    string line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        Match m = r.Match(line);
+                        if (m.Success)
+                            _replacements[m.Groups[1].Value] = m.Groups[2].Value;
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Determines whether this parser is applicable to the specified
@@ -42,6 +82,12 @@ namespace Catutil.Migration.Entries
                 throw new ArgumentNullException(nameof(regions));
 
             return regions[regionIndex].Tag == "br";
+        }
+
+        private string GetValue(string value)
+        {
+            if (_replacements.Count == 0) return value;
+            return _replacements.ContainsKey(value) ? _replacements[value] : value;
         }
 
         /// <summary>
@@ -73,6 +119,7 @@ namespace Catutil.Migration.Entries
             {
                 string value = entry.Value.Substring(range.Start.Character,
                         range.End.Character + 1 - range.Start.Character);
+                value = GetValue(value.Trim());
 
                 ApparatusParserContext ctx = (ApparatusParserContext)context;
                 ctx.CurrentEntry.Authors.Add(new ApparatusAnnotatedValue
@@ -90,5 +137,18 @@ namespace Catutil.Migration.Entries
 
             return regionIndex + 1;
         }
+    }
+
+    /// <summary>
+    /// Options for <see cref="BrEntryRegionParser"/>.
+    /// </summary>
+    public sealed class BrEntryRegionParserOptions
+    {
+        /// <summary>
+        /// Gets or sets the path to the file with replacements to be applied
+        /// to references. Each line in the file is a string with format
+        /// source=target, e.g. <c>Mureto=Muretus</c>.
+        /// </summary>
+        public string ReplacementsPath { get; set; }
     }
 }

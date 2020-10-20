@@ -8,12 +8,14 @@
 
   <ItemGroup>
     <None Remove="Assets\BiblioLookup.json" />
+    <None Remove="Assets\BiblioRefDeathEntryFilter.txt" />
     <None Remove="Assets\Pipeline.json" />
     <None Remove="Assets\XEntryRegionParser.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Assets\BiblioLookup.json" />
+    <EmbeddedResource Include="Assets\BiblioRefDeathEntryFilter.txt" />
     <EmbeddedResource Include="Assets\Pipeline.json" />
     <EmbeddedResource Include="Assets\XEntryRegionParser.txt" />
   </ItemGroup>

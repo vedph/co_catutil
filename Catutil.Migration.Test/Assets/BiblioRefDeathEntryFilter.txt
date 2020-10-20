@@ -1,0 +1,19 @@
+﻿#no-death
+prp italic=1
+txt Parthenius 1485
+prp italic=0
+
+#death
+txt start
+prp italic=1
+txt Parthenius 1485 et Guarinus
+prp italic=0
+txt  (†
+prp italic=1
+txt 1503
+prp italic=0
+txt ) 
+prp italic=1
+txt 1521 e Seruio
+prp italic=0
+txt end

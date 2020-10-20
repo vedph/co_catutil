@@ -21,7 +21,8 @@ namespace Catutil.Migration.Entries
     public sealed class BrEntryRegionParser : IEntryRegionParser,
         IConfigurable<BrEntryRegionParserOptions>
     {
-        private readonly Dictionary<string, string> _replacements;
+        private readonly List<Tuple<Regex, string>> _replacements;
+        private readonly Regex _nameAndSuffixesRegex;
 
         /// <summary>
         /// Gets or sets the logger.
@@ -34,7 +35,9 @@ namespace Catutil.Migration.Entries
         /// </summary>
         public BrEntryRegionParser()
         {
-            _replacements = new Dictionary<string, string>();
+            _replacements = new List<Tuple<Regex, string>>();
+            _nameAndSuffixesRegex = new Regex(
+                @"^(?<n>[^0-9]+)(?:\s*(?<s>[0-9]+[^\s]*))+");
         }
 
         /// <summary>
@@ -56,7 +59,11 @@ namespace Catutil.Migration.Entries
                     {
                         Match m = r.Match(line);
                         if (m.Success)
-                            _replacements[m.Groups[1].Value] = m.Groups[2].Value;
+                        {
+                            _replacements.Add(Tuple.Create(
+                                new Regex(m.Groups[1].Value),
+                                m.Groups[2].Value));
+                        }
                     }
                 }
             }
@@ -84,10 +91,44 @@ namespace Catutil.Migration.Entries
             return regions[regionIndex].Tag == "br";
         }
 
-        private string GetValue(string value)
+        private string GetReplacedValue(string value)
         {
             if (_replacements.Count == 0) return value;
-            return _replacements.ContainsKey(value) ? _replacements[value] : value;
+            foreach (var replacement in _replacements)
+            {
+                if (replacement.Item1.IsMatch(value))
+                {
+                    return replacement.Item1.Replace(value, replacement.Item2);
+                }
+            }
+            return value;
+        }
+
+        private IList<string> ExpandValue(string value)
+        {
+            List<string> values = new List<string>();
+            Match m = _nameAndSuffixesRegex.Match(value);
+
+            // type "Fruterius"
+            if (!m.Success) values.Add(GetReplacedValue(value));
+            else
+            {
+                // type "Fruterius 1701 1702"
+                if (m.Groups["s"].Captures.Count > 1)
+                {
+                    string name = GetReplacedValue(m.Groups["n"].Value);
+                    for (int i = 0; i < m.Groups["s"].Captures.Count; i++)
+                    {
+                        values.Add(name + " " + m.Groups["s"].Captures[i].Value);
+                    }
+                }
+                // type "Fruterius 1701"
+                else
+                {
+                    values.Add(GetReplacedValue(value));
+                }
+            }
+            return values;
         }
 
         /// <summary>
@@ -117,15 +158,18 @@ namespace Catutil.Migration.Entries
             EntryRange range = regions[regionIndex].Range;
             if (set.Entries[range.Start.Entry] is DecodedTextEntry entry)
             {
+                ApparatusParserContext ctx = (ApparatusParserContext)context;
+
                 string value = entry.Value.Substring(range.Start.Character,
                         range.End.Character + 1 - range.Start.Character);
-                value = GetValue(value.Trim());
 
-                ApparatusParserContext ctx = (ApparatusParserContext)context;
-                ctx.CurrentEntry.Authors.Add(new ApparatusAnnotatedValue
+                foreach (string author in ExpandValue(value))
                 {
-                    Value = value
-                });
+                    ctx.CurrentEntry.Authors.Add(new ApparatusAnnotatedValue
+                    {
+                        Value = author
+                    });
+                }
 
                 Logger?.LogInformation($">auth: Author={value}");
             }

@@ -17,6 +17,9 @@
       }
     },
     {
+      "Id": "entry-filter.co.biblio-ref-death"
+    },
+    {
       "Id": "entry-filter.txt-splitter",
       "Options": {
         "ContextPattern": [

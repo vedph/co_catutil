@@ -84,25 +84,12 @@ namespace Catutil.Migration.Xls
             }
         }
 
-        private void IndexItems(string authorRef, IList<BiblioItem> items)
+        private void IndexItems(IList<BiblioItem> items)
         {
-            // process the items group: if it's a single item we
-            // want a reference without the date; else we want one
-            // reference for each date
-            if (items.Count == 1)
+            foreach (BiblioItem i in items)
             {
-                _trie.Insert(authorRef, existingNode =>
-                {
-                    Debug.WriteLine($"Existing trie node: {existingNode}");
-                });
-            }
-            else
-            {
-                foreach (BiblioItem i in items)
-                {
-                    string datedRef = i.GetReference(true);
-                    _trie.Insert(datedRef);
-                }
+                string datedRef = i.GetReference(true);
+                _trie.Insert(datedRef);
             }
         }
 
@@ -150,7 +137,7 @@ namespace Catutil.Migration.Xls
                 }
 
                 // add group to index
-                IndexItems(prevAuthors, items);
+                IndexItems(items);
 
                 // reset the group adding to it the newly read item
                 items.Clear();
@@ -159,7 +146,7 @@ namespace Catutil.Migration.Xls
             } //for
 
             // last group if any
-            if (items.Count > 0) IndexItems(prevAuthors, items);
+            if (items.Count > 0) IndexItems(items);
 
             // expand if required
             foreach (IBiblioRefExpander expander in expanders)

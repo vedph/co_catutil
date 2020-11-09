@@ -21,20 +21,37 @@ namespace Catutil.Migration.Entries
         /// </summary>
         public BiblioRefDeathEntryFilter()
         {
+            //_seq = new EntryPatternSequence(
+            //    "prp italic=1",
+            //    // e.g. "Parthenius 1485 et B. Guarinus"
+            //    @"txt$[^0-9]\s*$",
+            //    "prp italic=0",
+            //    // e.g. " (†"
+            //    @"txt$^\s*\(†\s*",
+            //    "prp italic=1",
+            //    // e.g. "1503"
+            //    @"txt$^\s*[0-9]+",
+            //    "prp italic=0",
+            //    // e.g. ") "
+            //    @"txt$^\s*\)\s*$",
+            //    "prp italic=1",
+            //    // e.g. "1521 e Seruio"
+            //    @"txt$^\s*[0-9]"
+            //    );
             _seq = new EntryPatternSequence(
-                "prp italic=1",
+                "prp italic",
                 // e.g. "Parthenius 1485 et B. Guarinus"
                 @"txt$[^0-9]\s*$",
-                "prp italic=0",
+                "prp italic",
                 // e.g. " (†"
                 @"txt$^\s*\(†\s*",
-                "prp italic=1",
+                "prp italic",
                 // e.g. "1503"
                 @"txt$^\s*[0-9]+",
-                "prp italic=0",
+                "prp italic",
                 // e.g. ") "
                 @"txt$^\s*\)\s*$",
-                "prp italic=1",
+                "prp italic",
                 // e.g. "1521 e Seruio"
                 @"txt$^\s*[0-9]"
                 );

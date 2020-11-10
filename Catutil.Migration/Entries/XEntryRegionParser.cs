@@ -5,6 +5,7 @@ using Proteus.Core.Regions;
 using Proteus.Entries;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -43,6 +44,31 @@ namespace Catutil.Migration.Entries
             return regions[regionIndex].Tag == "x";
         }
 
+        private static string GetNormalizedWsString(StringBuilder text)
+        {
+            bool prevWS = true;
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < text.Length; i++)
+            {
+                char c = text[i];
+                if (char.IsWhiteSpace(c))
+                {
+                    if (prevWS) continue;
+                    sb.Append(' ');
+                    prevWS = true;
+                    continue;
+                }
+                sb.Append(c);
+                prevWS = false;
+            }
+
+            // right trim
+            if (sb.Length > 0 && sb[sb.Length - 1] == ' ')
+                sb.Remove(sb.Length - 1, 1);
+            return sb.ToString();
+        }
+
         /// <summary>
         /// Parses the region of entries at <paramref name="regionIndex" />
         /// in the specified <paramref name="regions" />.
@@ -73,7 +99,7 @@ namespace Catutil.Migration.Entries
             List<EntryRegion> overlaps = (from r in regions
                                           where r != region
                                           && r.Range.Overlaps(region.Range)
-                                          select r).Reverse().ToList();
+                                          select r).ToList();
             StringBuilder noteText = new StringBuilder();
 
             // for each entry in region:
@@ -83,27 +109,37 @@ namespace Catutil.Migration.Entries
                 // if it's text:
                 if (set.Entries[i] is DecodedTextEntry txt)
                 {
-                    // remove any overlap from the text
+                    // fill with WS any overlap from the text
                     StringBuilder sb = new StringBuilder(txt.Value);
 
                     foreach (var overlap in overlaps
                         .Where(r => r.Range.Start.Entry == i))
                     {
-                        if (overlap.Range.End.Entry == i)
+                        for (int j = overlap.Range.Start.Character;
+                             j <= overlap.Range.End.Character; j++)
                         {
-                            sb.Remove(overlap.Range.Start.Character,
-                                overlap.Range.End.Character + 1
-                                - overlap.Range.Start.Character);
+                            sb[j] = ' ';
                         }
-                        else
-                        {
-                            sb.Remove(overlap.Range.Start.Character,
-                                sb.Length - overlap.Range.Start.Character);
-                        }
+                        //if (overlap.Range.End.Entry == i)
+                        //{
+                        //    sb.Remove(overlap.Range.Start.Character,
+                        //        overlap.Range.End.Character + 1
+                        //        - overlap.Range.Start.Character);
+                        //}
+                        //else
+                        //{
+                        //    sb.Remove(overlap.Range.Start.Character,
+                        //        sb.Length - overlap.Range.Start.Character);
+                        //}
                     }
 
+                    // normalize WS
+                    string s = GetNormalizedWsString(sb);
+
                     // append what remained after removing overlaps
-                    noteText.Append(sb);
+                    // if it has at least 1 letter/digit
+                    if (s.Any(char.IsLetterOrDigit))
+                        noteText.Append(s);
                 }
             }
             string text = noteText.ToString();

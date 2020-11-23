@@ -265,6 +265,7 @@
       "Id": "region-detector.co-biblio-ref",
       "Options": {
         "LookupFilePath": "c:\\users\\dfusi\\desktop\\co\\biblio-lookup.json",
+        "AdditionsFilePath": "c:\\users\\dfusi\\desktop\\co\\biblio-lookup-add.txt",
         "IsInflectionEnabled": true
       }
     }

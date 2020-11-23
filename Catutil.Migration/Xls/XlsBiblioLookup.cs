@@ -247,7 +247,15 @@ namespace Catutil.Migration.Xls
             if (prefix == null) throw new ArgumentNullException(nameof(prefix));
             if (!_loaded) throw new InvalidOperationException("Index not loaded");
 
-            foreach (var node in _trie.Find(prefix)) yield return node.GetKey();
+            return InnerFindAll();
+
+            IEnumerable<string> InnerFindAll()
+            {
+                foreach (var node in _trie.Find(prefix))
+                {
+                    yield return node.GetKey();
+                }
+            }
         }
     }
 }

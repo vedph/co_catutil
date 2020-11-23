@@ -54,7 +54,7 @@ namespace Catutil.Migration.Xls
             _LastFirstRegex = new Regex(@"^(?<l>[^,(]+)(?:,\s*(?<f>[^(]+))?");
             _andRegex = new Regex(@"\s+(?:and|&)\s+");
             _dateRegex = new Regex(
-                @"\((?<d>[12][0-9]{3}[a-z]*)\)(?:\s*\[(?<e>[12][0-9]{3})\])?");
+                @"[[(](?<d>[12][0-9]{3}(?:(?:-\d+)?|(?:[a-z]+)?))[])](?:\s*\[(?<e>[12][0-9]{3})\])?");
         }
 
         private Author ParseSingleAuthor(string text)

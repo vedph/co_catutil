@@ -9,7 +9,8 @@ namespace Catutil.Migration.Biblio
     /// </summary>
     public sealed class BiblioItem
     {
-        static private readonly Regex _yrRegex = new Regex(@"[12]\d{3}[a-z]*");
+        static private readonly Regex _yrRegex =
+            new Regex(@"[12]\d{3}(?:(?:-\d+)?|(?:[a-z]+)?)");
 
         /// <summary>
         /// Gets or sets the authors.

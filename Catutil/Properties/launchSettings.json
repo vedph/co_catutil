@@ -2,7 +2,7 @@
   "profiles": {
     "Catutil": {
       "commandName": "Project",
-      "commandLineArgs": "parse-app catullus c:\\users\\dfusi\\desktop\\co\\ProteusSave.json"
+      "commandLineArgs": "build-biblio \"c:\\users\\dfusi\\desktop\\co\\4_1 Bibliography.xls\" c:\\users\\dfusi\\desktop\\co\\"
     }
   }
 }

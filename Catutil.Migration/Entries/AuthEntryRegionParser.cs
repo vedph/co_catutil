@@ -1,4 +1,5 @@
-﻿using Cadmus.Philology.Parts.Layers;
+﻿using Cadmus.Philology.Parts;
+using Cadmus.Philology.Parts.Layers;
 using Fusi.Tools.Config;
 using Microsoft.Extensions.Logging;
 using Proteus.Core.Entries;
@@ -110,12 +111,12 @@ namespace Catutil.Migration.Entries
             }
             if (n == 3)
             {
-                // : is a commodity conventional prefix for ancient authors
-                string value = ":" + sb.ToString();
-
                 ApparatusParserContext ctx = (ApparatusParserContext)context;
-                ctx.CurrentEntry.Authors.Add(new ApparatusAnnotatedValue
+                string value = sb.ToString();
+                ctx.CurrentEntry.Authors.Add(new LocAnnotatedValue
                 {
+                    // TODO: further parse value to extract location
+                    Tag = "a",  // a=ancient author
                     Value = value
                 });
                 Logger?.LogInformation($">auth: Author={value}");

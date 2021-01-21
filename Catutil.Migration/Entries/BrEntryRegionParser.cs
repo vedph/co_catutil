@@ -1,4 +1,5 @@
-﻿using Cadmus.Philology.Parts.Layers;
+﻿using Cadmus.Philology.Parts;
+using Cadmus.Philology.Parts.Layers;
 using Fusi.Tools.Config;
 using Microsoft.Extensions.Logging;
 using Proteus.Core.Entries;
@@ -165,7 +166,7 @@ namespace Catutil.Migration.Entries
 
                 foreach (string author in ExpandValue(value))
                 {
-                    ctx.CurrentEntry.Authors.Add(new ApparatusAnnotatedValue
+                    ctx.CurrentEntry.Authors.Add(new LocAnnotatedValue
                     {
                         Value = author
                     });

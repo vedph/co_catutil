@@ -1,4 +1,5 @@
-﻿using Cadmus.Philology.Parts.Layers;
+﻿using Cadmus.Philology.Parts;
+using Cadmus.Philology.Parts.Layers;
 using Fusi.Tools.Config;
 using Microsoft.Extensions.Logging;
 using Proteus.Core.Entries;
@@ -92,7 +93,7 @@ namespace Catutil.Migration.Entries
                 {
                     foreach (Match m in _msRegex.Matches(txt.Value))
                     {
-                        appEntry.Witnesses.Add(new ApparatusAnnotatedValue
+                        appEntry.Witnesses.Add(new LocAnnotatedValue
                         {
                             Value = m.Value
                         });

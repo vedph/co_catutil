@@ -1,4 +1,5 @@
-﻿using Cadmus.Philology.Parts.Layers;
+﻿using Cadmus.Philology.Parts;
+using Cadmus.Philology.Parts.Layers;
 using Fusi.Tools.Config;
 using Microsoft.Extensions.Logging;
 using Proteus.Core.Entries;
@@ -72,10 +73,15 @@ namespace Catutil.Migration.Entries
             if (set.Entries[range.Start.Entry] is DecodedTextEntry entry)
             {
                 string value = entry.Value.Substring(range.Start.Character,
-                        range.End.Character + 1 - range.Start.Character);
+                        range.End.Character + 1 - range.Start.Character).Trim();
+                // if the value starts with digits, it's a minor MS. reference
+                // lacking the "MS. " prefix because it comes from a multiple
+                // reference, like "MSS. 12 et 34". In this case just add
+                // the "MS. " prefix.
+                if (char.IsDigit(value[0])) value = "MS. " + value;
 
                 ApparatusParserContext ctx = (ApparatusParserContext)context;
-                ctx.CurrentEntry.Witnesses.Add(new ApparatusAnnotatedValue
+                ctx.CurrentEntry.Witnesses.Add(new LocAnnotatedValue
                 {
                     Value = value
                 });

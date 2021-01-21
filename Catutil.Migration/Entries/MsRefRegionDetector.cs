@@ -16,6 +16,7 @@ namespace Catutil.Migration.Entries
     public sealed class MsRefRegionDetector : EntryRegionDetectorBase
     {
         private readonly Regex _msRegex;
+        private readonly Regex _mssRegex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MsRefRegionDetector"/>
@@ -24,6 +25,9 @@ namespace Catutil.Migration.Entries
         public MsRefRegionDetector()
         {
             _msRegex = new Regex(@"\bMS\.\s*[0-9][^,]*");
+            _mssRegex = new Regex(
+                @"\bMSS\.\s*(?:[0-9]+[^\s]*\s*" +
+                @"(?:(?:post|ante)?\s*a\.\s*[0-9]+\s*(?:ca\.))?(?:\s*et\s*)?)*");
         }
 
         /// <summary>
@@ -41,6 +45,7 @@ namespace Catutil.Migration.Entries
             {
                 if (!(entries[index] is DecodedTextEntry txt)) continue;
 
+                // MS.
                 foreach (Match m in _msRegex.Matches(txt.Value))
                 {
                     set.AddNewRegion(new EntryRange
@@ -54,6 +59,33 @@ namespace Catutil.Migration.Entries
                             Entry = index,
                             Character = m.Index + m.Length - 1
                         }), "ms");
+                }
+
+                // MSS.: split at each " et "
+                // e.g. MSS. 3 et 18 et 65 et 104 post a. 1455 ca. et MS. 126 post a. 1486
+                // will get 3, 18, 65, 104 post a. 1455 ca.
+                foreach (Match m in _mssRegex.Matches(txt.Value))
+                {
+                    int start = 4, limit;
+                    do
+                    {
+                        limit = m.Value.IndexOf(" et ", start);
+                        if (limit == -1) limit = m.Value.Length;
+
+                        set.AddNewRegion(new EntryRange
+                            (new EntryPoint
+                            {
+                                Entry = index,
+                                Character = m.Index + start
+                            },
+                            new EntryPoint
+                            {
+                                Entry = index,
+                                Character = m.Index + limit - 1
+                            }), "ms");
+
+                        start = limit + 4;
+                    } while (limit < m.Value.Length);
                 }
             }
         }

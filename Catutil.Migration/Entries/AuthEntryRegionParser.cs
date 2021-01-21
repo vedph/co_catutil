@@ -1,5 +1,4 @@
 ﻿using Cadmus.Philology.Parts;
-using Cadmus.Philology.Parts.Layers;
 using Fusi.Tools.Config;
 using Microsoft.Extensions.Logging;
 using Proteus.Core.Entries;

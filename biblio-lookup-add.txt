@@ -37,3 +37,23 @@ Valckenaer ante 1786
 Valckenaer (†1785) 1799
 VanSittart (†1882) 1885
 Verburgius (†1745) 1826
+# umlaut
+Froehlich 1840
+Froehlich 1846
+Froehlich 1849
+Froehlich 1851
+Froehner 1858
+Froehner 1859
+Froehner 1892
+Loefstedt 1933
+Schroeder 1892
+Schoell 1880
+Woelfflin 1906
+# miscellanea
+Ed. 1472
+Ed. 1742
+Politianus 1472-1494
+Puccius 1502b
+Puccius 1502m
+Puccius 1502v
+Puccius 1502vi

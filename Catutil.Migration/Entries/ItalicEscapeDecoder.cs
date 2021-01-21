@@ -7,15 +7,13 @@ using System;
 namespace Catutil.Migration.Entries
 {
     /// <summary>
-    /// Italic escape decoder for CO apparatus text. The italic escape is just
-    /// an underscore, which toggles italic.
+    /// Italic escape decoder for CO apparatus text. The italic escapes are
+    /// <c>{</c>=italic on and <c>}</c>=italic off.
     /// </summary>
     /// <seealso cref="IEscapeDecoder" />
     [Tag("escape-decoder.co-italic")]
     public sealed class ItalicEscapeDecoder : IEscapeDecoder
     {
-        private bool _italic;
-
         /// <summary>
         /// Gets or sets the logger.
         /// </summary>
@@ -27,7 +25,6 @@ namespace Catutil.Migration.Entries
         /// </summary>
         public void Reset()
         {
-            _italic = false;
         }
 
         /// <summary>
@@ -49,16 +46,22 @@ namespace Catutil.Migration.Entries
         {
             if (text is null) throw new ArgumentNullException(nameof(text));
 
-            if (text[index] == '_')
+            switch (text[index])
             {
-                _italic = !_italic;
-                return Tuple.Create(
-                    new DecodedEntry[]
-                    {
-                        new DecodedPropertyEntry(index, 1, CommonProps.ITALIC,
-                            _italic ? "1" : "0")
-                    }, 1);
+                case '{':
+                    return Tuple.Create(
+                        new DecodedEntry[]
+                        {
+                            new DecodedPropertyEntry(index, 1, CommonProps.ITALIC, "1")
+                        }, 1);
+                case '}':
+                    return Tuple.Create(
+                        new DecodedEntry[]
+                        {
+                            new DecodedPropertyEntry(index, 1, CommonProps.ITALIC, "0")
+                        }, 1);
             }
+
             return null;
         }
     }

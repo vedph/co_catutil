@@ -18,6 +18,8 @@ The source files have a single sheet each, including 3 columns for each line's I
 
 The importer also behaves with a certain degree of tolerance with reference to occasional mistakes (e.g. comma instead of the usual dot in verse IDs) and Excel's editing artifacts (e.g. different cell types, either numeric or textual; or formatting artifacts like an italic word where also the preceding or following spaces are italicized).
 
+__Note__: after importing text, you must parse it into JSON if you plan to parse the apparatus, as the import process assigns item IDs in the MySql database. See the ps1 batch for the order of operations.
+
 Syntax:
 
 ```ps1

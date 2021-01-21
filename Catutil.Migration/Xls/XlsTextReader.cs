@@ -78,17 +78,6 @@ namespace Catutil.Migration.Xls
             return runs;
         }
 
-        private static void AppendAndEscape(string text,
-            int start, int length, StringBuilder target)
-        {
-            for (int i = 0; i < length; i++)
-            {
-                char c = text[start + i];
-                if (c == '_') target.Append('\\');
-                target.Append(c);
-            }
-        }
-
         private string BuildItalicizedText(HSSFWorkbook wbk,
             string text, IList<FormattingRun> runs)
         {
@@ -98,30 +87,33 @@ namespace Catutil.Migration.Xls
             foreach (FormattingRun run in runs)
             {
                 if (index < run.Start)
-                    AppendAndEscape(text, index, run.Start - index, sb);
+                {
+                    AppTextItalicHelper.AppendAndSanitize(
+                        text, index, run.Start - index, sb);
+                }
 
                 IFont font = wbk.GetFontAt(run.FontIndex);
-                if (font.IsItalic) sb.Append('_');
+                if (font.IsItalic) sb.Append('{');
 
-                AppendAndEscape(text, run.Start, run.Length, sb);
+                AppTextItalicHelper.AppendAndSanitize(
+                    text, run.Start, run.Length, sb);
 
-                if (font.IsItalic) sb.Append('_');
+                if (font.IsItalic) sb.Append('}');
                 index = run.Start + run.Length;
             }
 
             if (index < text.Length) sb.Append(text, index, text.Length - index);
 
-            // merge eventual adjacent italic runs (these should never happen
-            // as far as italic is the only formatting allowed; but should
-            // any other formatting co-occur -by mistake-, it might happen)
-            sb.Replace("__", "");
+            // remove eventual redundancies
+            AppTextItalicHelper.ReduceSequencesOf('{', sb);
+            AppTextItalicHelper.ReduceSequencesOf('}', sb);
 
             // normalize whitespaces and trim
             string result = sb.ToString();
             result = _wsRegex.Replace(result, " ").Trim();
 
             // adjust italicized spaces
-            return AppTextMdHelper.AdjustItalicSpaces(result);
+            return AppTextItalicHelper.AdjustItalicSpaces(result);
         }
 
         private static IEnumerable<string> GetAppFragments(string text)

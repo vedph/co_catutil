@@ -1,5 +1,5 @@
-﻿$CATUTIL='D:\Projects\Core20\Vedph\Catutil\Catutil\bin\Debug\netcoreapp3.1\Catutil.exe'
-$LOG='D:\Projects\Core20\Vedph\Catutil\Catutil\bin\Debug\netcoreapp3.1\catutil-log*.txt'
+﻿$CATUTIL='D:\Projects\Core20\Vedph\Catutil\Catutil\bin\Debug\net5.0\Catutil.exe'
+$LOG='D:\Projects\Core20\Vedph\Catutil\Catutil\bin\Debug\net5.0\catutil-log*.txt'
 $CODIR='c:\users\dfusi\desktop\co'
 
 del $LOG

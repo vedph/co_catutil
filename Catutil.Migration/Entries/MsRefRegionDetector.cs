@@ -17,6 +17,7 @@ namespace Catutil.Migration.Entries
     {
         private readonly Regex _msRegex;
         private readonly Regex _mssRegex;
+        private readonly Regex _pleriqueRegex;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MsRefRegionDetector"/>
@@ -28,6 +29,7 @@ namespace Catutil.Migration.Entries
             _mssRegex = new Regex(
                 @"\bMSS\.\s*(?:[0-9]+[^\s]*\s*" +
                 @"(?:(?:post|ante)?\s*a\.\s*[0-9]+\s*(?:ca\.))?(?:\s*et\s*)?)*");
+            _pleriqueRegex = new Regex(@"\bcodd\.\s*plerique\b");
         }
 
         /// <summary>
@@ -86,6 +88,22 @@ namespace Catutil.Migration.Entries
 
                         start = limit + 4;
                     } while (limit < m.Value.Length);
+                }
+
+                // codd. plerique
+                foreach (Match m in _pleriqueRegex.Matches(txt.Value))
+                {
+                    set.AddNewRegion(new EntryRange
+                        (new EntryPoint
+                        {
+                            Entry = index,
+                            Character = m.Index
+                        },
+                        new EntryPoint
+                        {
+                            Entry = index,
+                            Character = m.Index + m.Length - 1
+                        }), "ms-x");
                 }
             }
         }

@@ -10,12 +10,12 @@ using System.Collections.Generic;
 namespace Catutil.Migration.Entries
 {
     /// <summary>
-    /// Parser for <c>ms</c> region. This adds to the current entry the content
-    /// of the <c>ms</c> region as a witness.
+    /// Parser for <c>ms-x</c> region. This adds to the current entry the content
+    /// of the <c>ms-x</c> region as a witness.
     /// </summary>
     /// <seealso cref="IEntryRegionParser" />
-    [Tag("entry-region-parser.co-ms")]
-    public sealed class MsEntryRegionParser : IEntryRegionParser
+    [Tag("entry-region-parser.co-ms-x")]
+    public sealed class MsxEntryRegionParser : IEntryRegionParser
     {
         /// <summary>
         /// Gets or sets the logger.
@@ -41,7 +41,7 @@ namespace Catutil.Migration.Entries
             if (regions == null)
                 throw new ArgumentNullException(nameof(regions));
 
-            return regions[regionIndex].Tag == "ms";
+            return regions[regionIndex].Tag == "ms-x";
         }
 
         /// <summary>
@@ -73,11 +73,6 @@ namespace Catutil.Migration.Entries
             {
                 string value = entry.Value.Substring(range.Start.Character,
                         range.End.Character + 1 - range.Start.Character).Trim();
-                // if the value starts with digits, it's a minor MS. reference
-                // lacking the "MS. " prefix because it comes from a multiple
-                // reference, like "MSS. 12 et 34". In this case just add
-                // the "MS. " prefix.
-                if (char.IsDigit(value[0])) value = "MS. " + value;
 
                 ApparatusParserContext ctx = (ApparatusParserContext)context;
                 ctx.CurrentEntry.Witnesses.Add(new LocAnnotatedValue
@@ -85,11 +80,11 @@ namespace Catutil.Migration.Entries
                     Value = value
                 });
 
-                Logger?.LogInformation($">ms: Witness={value}");
+                Logger?.LogInformation($">ms-x: Witness={value}");
             }
             else
             {
-                Logger?.LogError("Expected text entry including ms region at " +
+                Logger?.LogError("Expected text entry including ms-x region at " +
                     $"{regionIndex} not found");
             }
 

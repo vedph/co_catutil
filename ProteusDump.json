@@ -63,7 +63,7 @@
         "IsWholeRegionInA": true,
         "PatternEntriesA": [
           "prp italic=1",
-          "txt$^[TOGRm12?]+(,\\s*corr\\.\\s*[TOGRm12?]*)?,?\\s*$",
+          "txt$^[TOGRm][TOGRm12?]*(,\\s*corr\\.\\s*[TOGRm12?]*)?,?\\s*$",
           "prp italic=0"
         ]
       }
@@ -158,6 +158,25 @@
           "txt$^\\s*uel\\s*$",
           "prp italic=0",
           "txt$^[^0-9]+$"
+        ]
+      }
+    },
+    {
+      "Id": "region-detector.pattern",
+      "Options": {
+        "Tag": "lem-var-p",
+        "IsWholeRegionInA": true,
+        "PatternEntriesA": [
+          "prp italic=0",
+          "txt$^\\s*\\(\\s*$",
+          "prp italic=1",
+          "txt$^\\s*sed\\s*$",
+          "prp italic=0",
+          "txt",
+          "prp italic=1",
+          "txt",
+          "prp italic=0",
+          "txt$\\s*\\)\\s*$"
         ]
       }
     },
